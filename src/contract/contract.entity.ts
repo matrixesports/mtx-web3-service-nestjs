@@ -6,9 +6,9 @@ export type CtrType =
   | 'Pass'
   | 'Lootbox'
   | 'Redeemable'
-  | 'ERC20'
-  | 'ERC721'
-  | 'ERC1155';
+  | 'MERC20'
+  | 'MERC721'
+  | 'MERC1155';
 
 @Entity()
 export class Contract {
@@ -32,9 +32,9 @@ export class Contract {
       'Pass',
       'Lootbox',
       'Redeemable',
-      'ERC20',
-      'ERC721',
-      'ERC1155',
+      'MERC20',
+      'MERC721',
+      'MERC1155',
     ],
   })
   ctr_type: CtrType;

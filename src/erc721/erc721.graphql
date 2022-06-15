@@ -1,0 +1,7 @@
+# type ERC721 {
+#   contractDB: ContractDB!
+#   name: String!
+#   symbol: String!
+#   id: BigNumber!
+#   metadata: TokenMetadata
+# }

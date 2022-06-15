@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
-import { ScalarController } from './scalar.controller';
-import { ScalarResolver } from './scalar.resolver';
+// import { Module } from '@nestjs/common';
+// import { ScalarResolver } from './scalar.resolver';
 
-@Module({
-  controllers: [ScalarController],
-  providers: [ScalarResolver]
-})
-export class ScalarModule {}
+// @Module({
+//   controllers: [],
+//   providers: [ScalarResolver],
+// })
+// export class ScalarModule {}

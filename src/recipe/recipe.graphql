@@ -1,8 +1,8 @@
-type Query {
-  getRecipe(creatorId: Int!, recipeId: Int!): Recipe
-}
+# type Query {
+#   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
+# }
 
-type Recipe {
-  inputIngredients: String
-  outputIngredients: String
-}
+# type Recipe {
+#   inputIngredients: String
+#   outputIngredients: String
+# }

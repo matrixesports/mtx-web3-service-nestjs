@@ -1,0 +1,6 @@
+type TokenBundle {
+  qty: BigNumber!
+  bundles20: [ERC20]!
+  bundles721: [ERC721]!
+  bundles1155: [ERC1155]!
+}

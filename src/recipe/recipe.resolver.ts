@@ -7,22 +7,22 @@ import { RecipeService } from './recipe.service';
 export class RecipeResolver {
   constructor(private recipeService: RecipeService) {}
 
-  @Query()
-  async getRecipe(@Args() args) {
-    return {
-      contract: await this.recipeService.getRecipeContract(args.creatorId),
-      recipeId: args.recipeId,
-    };
-  }
+  //   @Query()
+  //   async getRecipe(@Args() args) {
+  //     return {
+  //       contract: await this.recipeService.getRecipeContract(args.creatorId),
+  //       recipeId: args.recipeId,
+  //     };
+  //   }
 
-  @ResolveField()
-  async inputIngredients(@Parent() parent) {
-    console.log(parent);
-    return 'x';
-  }
+  //   @ResolveField()
+  //   async inputIngredients(@Parent() parent) {
+  //     console.log(parent);
+  //     return 'x';
+  //   }
 
-  @ResolveField()
-  async outputIngredients(@Parent() parent) {
-    return 'xx';
-  }
+  //   @ResolveField()
+  //   async outputIngredients(@Parent() parent) {
+  //     return 'xx';
+  //   }
 }
