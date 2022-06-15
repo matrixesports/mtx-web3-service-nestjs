@@ -7,6 +7,13 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export class ContractDb {
+    address: string;
+    network: string;
+    creator_id: number;
+    ctr_type: string;
+}
+
 export abstract class IQuery {
     abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
 }

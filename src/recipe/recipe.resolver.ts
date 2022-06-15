@@ -1,5 +1,5 @@
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { Recipe } from './recipe.entity';
+import { ethers } from 'ethers';
 import { RecipeService } from './recipe.service';
 
 // only show active recipes
@@ -8,20 +8,21 @@ export class RecipeResolver {
   constructor(private recipeService: RecipeService) {}
 
   @Query()
-  getRecipe(@Args() args) {
-    const recipe = new Recipe();
-    recipe.created_at = args.creatorId;
-    recipe.recipe_id = args.recipeId;
-    return this.recipeService.getRecipe(recipe);
+  async getRecipe(@Args() args) {
+    return {
+      contract: await this.recipeService.getRecipeContract(args.creatorId),
+      recipeId: args.recipeId,
+    };
   }
 
   @ResolveField()
-  inputIngredients(@Parent() parent) {
+  async inputIngredients(@Parent() parent) {
+    console.log(parent);
     return 'x';
   }
 
   @ResolveField()
-  outputIngredients(@Parent() parent) {
+  async outputIngredients(@Parent() parent) {
     return 'xx';
   }
 }

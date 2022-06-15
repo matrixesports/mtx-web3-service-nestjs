@@ -6,6 +6,8 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RecipeModule } from './recipe/recipe.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ContractModule } from './contract/contract.module';
+import { IpfsModule } from './ipfs/ipfs.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       },
     }),
     RecipeModule,
+    ContractModule,
+    IpfsModule,
   ],
   controllers: [],
   providers: [],

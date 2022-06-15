@@ -2,6 +2,9 @@
 /dist
 /node_modules
 
+#for abi
+out/
+
 # Logs
 logs
 *.log
