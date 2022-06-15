@@ -4,6 +4,7 @@
 
 #for abi
 out/
+.env
 
 # Logs
 logs
