@@ -1,0 +1,12 @@
+"""
+status is a array coz u can have multiple qtys and front end needs to display multiple items with same id with different statuses
+"""
+type Redeemable {
+  unredeemed: [ERC1155]!
+  redeemed: [Redeemed]!
+}
+
+type Redeemed {
+  status: [String]!
+  token: ERC1155!
+}
