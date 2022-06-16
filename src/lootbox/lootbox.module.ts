@@ -5,6 +5,6 @@ import { LootboxResolver } from './lootbox.resolver';
 
 @Module({
   controllers: [LootboxController],
-  providers: [LootboxService, LootboxResolver]
+  providers: [LootboxService, LootboxResolver],
 })
 export class LootboxModule {}

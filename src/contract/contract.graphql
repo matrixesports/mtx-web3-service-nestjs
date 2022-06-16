@@ -1,6 +1,6 @@
-# type ContractDb {
-#   address: String!
-#   network: String!
-#   creator_id: Int!
-#   ctr_type: String!
-# }
+type ContractDB {
+  address: String!
+  network: String!
+  creator_id: Int!
+  ctr_type: String!
+}

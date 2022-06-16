@@ -1,7 +1,7 @@
-# type ERC20 {
-#   contractDB: ContractDB!
-#   decimals: BigNumber!
-#   name: String!
-#   symbol: String!
-#   qty: BigNumber!
-# }
+type ERC20 {
+  name: String!
+  symbol: String!
+  decimals: BigInt!
+  qty: BigInt!
+  contractDB: ContractDB!
+}

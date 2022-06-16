@@ -35,6 +35,7 @@ TODO:
 - send msg to phone when error , add webhook for discord
 - give option to redeem in 1 click or naw
 - better copy for out
+  -prep checklist for fe to prep for be
 
 db:
 contract: read, update, deploy, emergency

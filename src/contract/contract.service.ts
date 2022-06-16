@@ -43,6 +43,12 @@ export class ContractService {
     return await this.contractRepo.findOneByOrFail(by);
   }
 
+  async find(by: {
+    [key: string]: string | number | CtrType;
+  }): Promise<Contract[]> {
+    return await this.contractRepo.find(by);
+  }
+
   //TODO: test with dto
   //dont allow multiple ctrs for creator
   async add(addContractDto: AddContractDto) {

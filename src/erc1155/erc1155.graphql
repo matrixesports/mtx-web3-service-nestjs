@@ -1,6 +1,6 @@
-# type ERC1155 {
-#   contractDB: ContractDB!
-#   id: BigNumber
-#   qty: BigNumber
-#   metadata: TokenMetadata
-# }
+type ERC1155 {
+  id: BigInt
+  qty: BigInt
+  contractDB: ContractDB!
+  metadata: TokenMetadata
+}

@@ -1,34 +1,34 @@
-# type Pass {
-#   token: ERC1155!
-#   userInfo(userAddress: Address): PassUser!
-#   state: PassState!
-# }
+type Query {
+  getPass(creatorId: Int!): Pass
+}
+type Pass {
+  token: ERC1155!
+  userInfo(userAddress: String): PassUser!
+  state: PassState!
+}
+type PassUser {
+  xp: BigInt!
+  level: BigInt!
+  "only shows free unclaimed rewards for levels < level(user)"
+  unclaimedFreeRewards: [PassReward]!
+  premium: PremiumPassUser
+}
 
-# type PassUser {
-#   xp: BigNumber!
-#   level: BigNumber!
-#   "only shows free unclaimed rewards for levels < level(user)"
-#   unclaimedFreeRewards: [PassReward]!
-#   premium: PremiumPassUser
-# }
-
-# "only shown for users with a premium pass"
-# type PremiumPassUser {
-#   owned: BigNumber!
-#   "only shows rewards for levels < level(user)"
-#   unclaimedPremiumRewards: [PassReward]!
-# }
-
-# "for active pass id of creator"
-# type PassState {
-#   xp: [BigNumber]!
-#   maxLevel: BigNumber!
-#   "All available rewards at current active pass Id for that creator"
-#   freeRewards: [PassReward]!
-#   premiumRewards: [PassReward]!
-# }
-
-# type PassReward {
-#   level: Int!
-#   bundle: TokenBundle!
-# }
+"only shown for users with a premium pass"
+type PremiumPassUser {
+  owned: BigInt!
+  "only shows rewards for levels < level(user)"
+  unclaimedPremiumRewards: [PassReward]!
+}
+"for active pass id of creator"
+type PassState {
+  xp: [BigInt]!
+  maxLevel: BigInt!
+  "All available rewards at current active pass Id for that creator"
+  freeRewards: [PassReward]!
+  premiumRewards: [PassReward]!
+}
+type PassReward {
+  level: Int!
+  bundle: TokenBundle!
+}
