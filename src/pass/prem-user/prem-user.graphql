@@ -1,0 +1,6 @@
+"only shown for users with a premium pass"
+type PremiumPassUser {
+  owned: BigInt!
+  "only shows rewards for levels < level(user)"
+  unclaimedPremiumRewards: [PassReward]!
+}

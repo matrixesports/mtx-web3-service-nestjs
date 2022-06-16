@@ -1,0 +1,8 @@
+"for active pass id of creator"
+type PassState {
+  xp: [BigInt]!
+  maxLevel: BigInt!
+  "All available rewards at current active pass Id for that creator"
+  freeRewards: [PassReward]!
+  premiumRewards: [PassReward]!
+}

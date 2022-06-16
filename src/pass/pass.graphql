@@ -6,29 +6,3 @@ type Pass {
   userInfo(userAddress: String): PassUser!
   state: PassState!
 }
-type PassUser {
-  xp: BigInt!
-  level: BigInt!
-  "only shows free unclaimed rewards for levels < level(user)"
-  unclaimedFreeRewards: [PassReward]!
-  premium: PremiumPassUser
-}
-
-"only shown for users with a premium pass"
-type PremiumPassUser {
-  owned: BigInt!
-  "only shows rewards for levels < level(user)"
-  unclaimedPremiumRewards: [PassReward]!
-}
-"for active pass id of creator"
-type PassState {
-  xp: [BigInt]!
-  maxLevel: BigInt!
-  "All available rewards at current active pass Id for that creator"
-  freeRewards: [PassReward]!
-  premiumRewards: [PassReward]!
-}
-type PassReward {
-  level: Int!
-  bundle: TokenBundle!
-}

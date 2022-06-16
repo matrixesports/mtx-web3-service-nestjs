@@ -1,0 +1,4 @@
+type PassReward {
+  level: Int!
+  bundle: TokenBundle!
+}

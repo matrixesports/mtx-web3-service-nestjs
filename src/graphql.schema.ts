@@ -74,16 +74,16 @@ export class PremiumPassUser {
     unclaimedPremiumRewards: Nullable<PassReward>[];
 }
 
+export class PassReward {
+    level: number;
+    bundle: TokenBundle;
+}
+
 export class PassState {
     xp: Nullable<BigInt>[];
     maxLevel: BigInt;
     freeRewards: Nullable<PassReward>[];
     premiumRewards: Nullable<PassReward>[];
-}
-
-export class PassReward {
-    level: number;
-    bundle: TokenBundle;
 }
 
 export class PassUser {
