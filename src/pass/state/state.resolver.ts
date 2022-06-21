@@ -1,52 +1,71 @@
-// import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
-// import { PassReward } from 'src/graphql.schema';
-// import { GetPassDto } from '../dto/get-pass.dto';
+import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { ethers } from 'ethers';
+import { ContractService } from 'src/contract/contract.service';
+import { PassReward } from 'src/graphql.schema';
+import { GetPassDto } from '../dto/GetPass.dto';
 
-// @Resolver('PassState')
-// export class StateResolver {
-//   @ResolveField()
-//   async xp(@Parent() parent: GetPassDto): Promise<BigInt[]> {
-//     let maxLv = await parent.contract.maxLevelInPass(parent.activeSeasonId);
-//     let xp = [];
-//     for (let x = 1; x <= maxLv; x++) {
-//       let levelInfo = await parent.contract.passInfo(parent.activeSeasonId, x);
-//       xp.push(levelInfo.xpToCompleteLevel);
-//     }
-//     return xp;
-//   }
+@Resolver('PassState')
+export class StateResolver {
+  constructor(private contractService: ContractService) {}
+  @ResolveField()
+  async xp(@Parent() parent: GetPassDto): Promise<BigInt[]> {
+    let xp = [];
+    let maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
+    for (let x = 0; x <= maxLevel; x++) {
+      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      xp.push(seasonInfo.xpToCompleteLevel);
+    }
+    return xp;
+  }
 
-//   @ResolveField()
-//   async maxLevel(@Parent() parent: GetPassDto): Promise<BigInt> {
-//     return await parent.contract.maxLevelInPass(parent.activeSeasonId);
-//   }
+  @ResolveField()
+  async maxLevel(@Parent() parent: GetPassDto): Promise<BigInt> {
+    return await parent.contract.maxLevelInSeason(parent.seasonId);
+  }
 
-//   @ResolveField()
-//   async freeRewards(@Parent() parent: GetPassDto): Promise<PassReward[]> {
-//     return await this.listAllRewards(parent, false);
-//   }
+  @ResolveField()
+  async freeRewards(@Parent() parent: GetPassDto): Promise<PassReward[]> {
+    let freeRewards = [];
+    let maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
+    for (let x = 0; x <= maxLevel; x++) {
+      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      if (seasonInfo.freeReward.token == ethers.constants.AddressZero) continue;
+      let contractDB = await this.contractService.findByAddress(
+        seasonInfo.freeReward.token,
+      );
 
-//   @ResolveField()
-//   async premiumRewards(@Parent() parent: GetPassDto): Promise<PassReward[]> {
-//     return await this.listAllRewards(parent, true);
-//   }
+      freeRewards.push({
+        level: x,
+        reward: {
+          id: seasonInfo.freeReward.id,
+          qty: seasonInfo.freeReward.qty,
+          contractDB,
+        },
+      });
+    }
+    return freeRewards;
+  }
 
-//   async listAllRewards(info: GetPassDto, prem: boolean): Promise<PassReward[]> {
-//     let maxLv = await info.contract.maxLevels(info.activeSeasonId);
-//     let rewards = [];
-//     for (let x = 1; x <= maxLv; x++) {
-//       let bundle = await info.contract.passInfo(info.activeSeasonId, x);
-//       if (prem) {
-//         rewards.push({
-//           level: x,
-//           bundle: bundle.premiumReward,
-//         });
-//       } else {
-//         rewards.push({
-//           level: x,
-//           bundle: bundle.freeReward,
-//         });
-//       }
-//     }
-//     return rewards;
-//   }
-// }
+  @ResolveField()
+  async premiumRewards(@Parent() parent: GetPassDto): Promise<PassReward[]> {
+    let premiumRewards = [];
+    let maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
+    for (let x = 0; x <= maxLevel; x++) {
+      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      if (seasonInfo.premiumReward.token == ethers.constants.AddressZero)
+        continue;
+      let contractDB = await this.contractService.findByAddress(
+        seasonInfo.premiumReward.token,
+      );
+      premiumRewards.push({
+        level: x,
+        reward: {
+          id: seasonInfo.premiumReward.id,
+          qty: seasonInfo.premiumReward.qty,
+          contractDB,
+        },
+      });
+    }
+    return premiumRewards;
+  }
+}

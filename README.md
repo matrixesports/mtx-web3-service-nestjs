@@ -54,6 +54,11 @@ admin:
 changelog:
 
 - will refer to getPass as getSeason now
-- user starts at level 0 now
+
 - make everytihing readable to send to otyhers
 - runs at port 3000 now
+- gotta change pass->season
+- user starts at level 0 now
+- removed tokenbundle and added erc1155
+  -in PassReward bundle->reward, tokenBundle->ERC1155
+- in pass, state, freerewards, if there is no reward then its left empty

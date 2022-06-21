@@ -31,7 +31,12 @@ export class ContractService {
   async find(by: {
     [key: string]: string | number | CtrType;
   }): Promise<Contract[]> {
-    return await this.contractRepo.find(by);
+    return await this.contractRepo.findBy(by);
+  }
+
+  async findByAddress(address): Promise<Contract> {
+    let res = await this.find({ address: ethers.utils.getAddress(address) });
+    return res[0];
   }
 
   getProvider(network: string): ethers.providers.Provider {

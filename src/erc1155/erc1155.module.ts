@@ -1,10 +1,10 @@
-// import { Module } from '@nestjs/common';
-// import { Erc1155Controller } from './erc1155.controller';
-// import { Erc1155Service } from './erc1155.service';
-// import { Erc1155Resolver } from './erc1155.resolver';
+import { Module } from '@nestjs/common';
+import { MetadataModule } from 'src/metadata/metadata.module';
+import { Erc1155Resolver } from './erc1155.resolver';
+import { Erc1155Service } from './erc1155.service';
 
-// @Module({
-//   controllers: [Erc1155Controller],
-//   providers: [Erc1155Service, Erc1155Resolver]
-// })
-// export class Erc1155Module {}
+@Module({
+  providers: [Erc1155Resolver, Erc1155Service],
+  imports: [MetadataModule],
+})
+export class Erc1155Module {}

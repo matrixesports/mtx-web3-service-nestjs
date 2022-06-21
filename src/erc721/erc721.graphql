@@ -1,7 +1,0 @@
-type ERC721 {
-  name: String!
-  symbol: String!
-  id: BigInt!
-  contractDB: ContractDB!
-  metadata: TokenMetadata
-}

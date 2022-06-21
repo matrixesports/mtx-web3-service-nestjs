@@ -1,8 +1,18 @@
 type Query {
-  getSeason(creatorId: Int!): Pass
+  getPass(creatorId: Int!): Pass
 }
+
 type Pass {
   token: ERC1155!
-  userInfo(userAddress: String): PassUser!
   state: PassState!
+  userInfo(userAddress: String): PassUser!
+}
+
+"for active season id of creator"
+type PassState {
+  xp: [BigInt]!
+  maxLevel: BigInt!
+  "All available rewards at current active pass Id for that creator"
+  freeRewards: [PassReward]!
+  premiumRewards: [PassReward]!
 }

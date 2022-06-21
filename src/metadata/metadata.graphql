@@ -1,0 +1,5 @@
+type TokenMetadata {
+  name: String
+  description: String
+  image: String
+}

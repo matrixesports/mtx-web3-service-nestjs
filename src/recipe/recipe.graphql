@@ -1,9 +1,0 @@
-type Query {
-  getRecipes(creatorId: Int!): [Recipe]!
-  getRecipe(creatorId: Int!, recipeId: Int!): Recipe
-}
-
-type Recipe {
-  inputIngredients: String
-  outputIngredients: String
-}

@@ -1,53 +1,51 @@
-// import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
-// import { PassReward } from 'src/graphql.schema';
-// import { GetPassUserInfoDto } from '../user/dto/get-pass-user-info.dto';
+import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { ethers } from 'ethers';
+import { ContractService } from 'src/contract/contract.service';
+import { PassReward } from 'src/graphql.schema';
+import { GetPassUserInfoDto } from '../dto/GetPassUserInfo.dto';
 
-// @Resolver('PremiumPassUser')
-// export class PremUserResolver {
-//   @ResolveField()
-//   async owned(@Parent() parent: GetPassUserInfoDto): Promise<BigInt> {
-//     return await parent.contract.balanceOf(
-//       parent.userAddress,
-//       parent.activeSeasonId,
-//     );
-//   }
+@Resolver('PremiumUser')
+export class PremUserResolver {
+  constructor(private contractService: ContractService) {}
+  @ResolveField()
+  async owned(@Parent() parent: GetPassUserInfoDto): Promise<BigInt> {
+    return await parent.contract.balanceOf(parent.userAddress, parent.seasonId);
+  }
 
-//   @ResolveField()
-//   async unclaimedPremiumRewards(
-//     @Parent() parent: GetPassUserInfoDto,
-//   ): Promise<PassReward[]> {
-//     let currentLevel = await parent.contract.level(
-//       parent.userAddress,
-//       parent.activeSeasonId,
-//     );
-//     let unclaimedRewards = [];
-//     //current level of 3 means, u are eligible for rewards at level 3
-//     for (let x = 1; x <= currentLevel; x++) {
-//       let res = await parent.contract.getUserInfo(
-//         parent.userAddress,
-//         parent.activeSeasonId,
-//         x,
-//         true,
-//       );
-//       // res is xp, prem, claimed
-//       if (res[2]) {
-//         //nothin;
-//       } else {
-//         let reward = await parent.contract.passInfo(parent.activeSeasonId, x);
-//         let bundle = reward.premiumReward;
-//         if (
-//           bundle.erc20s.addresses.length == 0 &&
-//           bundle.erc721s.addresses.length == 0 &&
-//           bundle.erc1155s.addresses.length == 0
-//         ) {
-//           continue;
-//         }
-//         unclaimedRewards.push({
-//           level: x,
-//           bundle: bundle,
-//         });
-//       }
-//     }
-//     return unclaimedRewards;
-//   }
-// }
+  @ResolveField()
+  async unclaimedPremiumRewards(
+    @Parent() parent: GetPassUserInfoDto,
+  ): Promise<PassReward[]> {
+    let rewards = [];
+    let level = await parent.contract.level(
+      parent.userAddress,
+      parent.seasonId,
+    );
+    for (let x = 0; x <= level; x++) {
+      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      let claimed = await parent.contract.isRewardClaimed(
+        parent.userAddress,
+        parent.seasonId,
+        x,
+        true,
+      );
+      if (
+        claimed ||
+        seasonInfo.premiumReward.token == ethers.constants.AddressZero
+      )
+        continue;
+      let contractDB = await this.contractService.findByAddress(
+        seasonInfo.premiumReward.token,
+      );
+      rewards.push({
+        level: x,
+        reward: {
+          id: seasonInfo.premiumReward.id,
+          qty: seasonInfo.premiumReward.qty,
+          contractDB,
+        },
+      });
+    }
+    return rewards;
+  }
+}

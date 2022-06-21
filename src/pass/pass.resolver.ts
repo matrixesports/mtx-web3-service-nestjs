@@ -1,99 +1,38 @@
-// import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-// import { ethers } from 'ethers';
-// import { ContractService } from 'src/contract/contract.service';
-// import { getSeasonArgsDto } from './dto/get-pass-args.dto';
-// import { getSeasonDto } from './dto/get-pass.dto';
-// import { getSeasonUserInfoArgsDto } from './user/dto/get-pass-user-info-args.dto';
-// import { GetPassUserInfoDto } from './user/dto/get-pass-user-info.dto';
+import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { ERC1155 } from 'src/graphql.schema';
+import { GetPassDto } from './dto/GetPass.dto';
+import { GetPassArgsDto } from './dto/GetPassArgs.dto';
+import { GetPassUserInfoDto } from './dto/GetPassUserInfo.dto';
+import { GetPassUserInfoArgsDto } from './dto/GetPassUserInfoArgs.dto';
+import { PassService } from './pass.service';
 
-// @Resolver('Pass')
-// export class PassResolver {
-//   constructor(private contractService: ContractService) {}
+@Resolver('Pass')
+export class PassResolver {
+  constructor(private passService: PassService) {}
 
-//   @Query()
-//   async getSeason(@Args() args: GetPassArgsDto): Promise<GetPassDto> {
-//     let contractDB = await this.contractService.findOneBy({
-//       creator_id: args.creatorId,
-//       ctr_type: 'Pass',
-//     });
-//     let contract = await this.contractService.create(contractDB);
-//     let seasonId: ethers.BigNumber = await contract.seasonId();
-//     let activeSeasonId = seasonId.toNumber();
-//     return { contract, contractDB, activeSeasonId };
-//   }
+  @Query()
+  async getPass(@Args() args: GetPassArgsDto): Promise<GetPassDto> {
+    let contractDB = await this.passService.getPassDB(args.creatorId);
+    let contract = await this.passService.getPassCtr(contractDB);
+    let seasonId = await contract.seasonId();
+    return { contractDB, contract, seasonId };
+  }
 
-//   @ResolveField()
-//   token(@Parent() parent: GetPassDto): GetPassDto {
-//     return parent;
-//   }
+  @ResolveField()
+  state(@Parent() parent: GetPassDto): GetPassDto {
+    return parent;
+  }
 
-//   @ResolveField()
-//   userInfo(
-//     @Parent() parent: GetPassDto,
-//     @Args() args: GetPassUserInfoArgsDto,
-//   ): GetPassUserInfoDto {
-//     return { ...parent, userAddress: args.userAddress };
-//   }
+  @ResolveField()
+  token(@Parent() parent: GetPassDto): ERC1155 {
+    return { id: parent.seasonId, contractDB: parent.contractDB };
+  }
 
-//   @ResolveField()
-//   state(@Parent() parent: GetPassDto): GetPassDto {
-//     return parent;
-//   }
-
-//   // async claimReward(
-//   //             parent: any,
-//   //             args: ClaimReward,
-//   //             context: ContextObj
-//   //         ): Promise<MutationResponse> {
-//   //             try {
-//   //                 let creatorInfo = await getCreatorInfo(args.input.creatorId);
-//   //                 if (creatorInfo == null) {
-//   //                     return {
-//   //                         success: false,
-//   //                         description: `Error getting creator Info, id: ${args.input.creatorId}, contact matrix on discord`,
-//   //                     };
-//   //                 }
-//   //                 let contractInfo = await getContractInfo(creatorInfo.pass);
-//   //                 if (contractInfo == null) {
-//   //                     return {
-//   //                         success: false,
-//   //                         description: `Error getting contract Info, ${creatorInfo.pass}, contact matrix on discord`,
-//   //                     };
-//   //                 }
-//   //                 let provider = await getProvider(contractInfo.network);
-//   //                 let ctr = await getSignerContract(
-//   //                     creatorInfo.pass,
-//   //                     contractInfo.abi,
-//   //                     contractInfo.network
-//   //                 );
-
-//   //                 let fee = await getMaticFeeData();
-//   //                 let tx = await ctr.claimReward(
-//   //                     creatorInfo.active_pass_id,
-//   //                     context.user,
-//   //                     args.input.level,
-//   //                     args.input.premium,
-//   //                     fee
-//   //                 );
-//   //                 await provider.waitForTransaction(tx.hash, MATIC_NUMBER_OF_BLOCKS_TO_WAIT);
-//   //                 console.log("CLAIMED", args.input);
-
-//   //                 let reward = await ctr.reward(
-//   //                     creatorInfo.active_pass_id,
-//   //                     args.input.level,
-//   //                     args.input.premium
-//   //                 );
-//   //                 for (let x = 0; )
-//   //                 return {
-//   //                     success: true,
-//   //                     description: "nice",
-//   //                 };
-//   //             } catch (e) {
-//   //                 console.log("CANNOT CLAIM REWARD", args.input, e);
-//   //                 return {
-//   //                     success: false,
-//   //                     description: "error, contact matrix on discord",
-//   //                 };
-//   //             }
-//   //         }
-// }
+  @ResolveField()
+  userInfo(
+    @Parent() parent: GetPassDto,
+    @Args() args: GetPassUserInfoArgsDto,
+  ): GetPassUserInfoDto {
+    return { ...parent, userAddress: args.userAddress };
+  }
+}

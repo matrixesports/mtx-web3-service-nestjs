@@ -1,15 +1,12 @@
-// import { Module } from '@nestjs/common';
-// import { PassController } from './pass.controller';
-// import { PassResolver } from './pass.resolver';
-// import { PremUserModule } from './prem-user/prem-user.module';
-// import { StateModule } from './state/state.module';
-// import { UserResolver } from './user/user.resolver';
-// import { UserModule } from './user/user.module';
-// import { PassService } from './pass.service';
+import { Module } from '@nestjs/common';
+import { PassService } from './pass.service';
+import { PassResolver } from './pass.resolver';
+import { StateModule } from './state/state.module';
+import { UserModule } from './user/user.module';
+import { PremUserModule } from './prem-user/prem-user.module';
 
-// @Module({
-//   controllers: [PassController],
-//   providers: [PassService, PassResolver, UserResolver],
-//   imports: [PremUserModule, StateModule, UserModule],
-// })
-// export class PassModule {}
+@Module({
+  providers: [PassService, PassResolver],
+  imports: [StateModule, UserModule, PremUserModule],
+})
+export class PassModule {}

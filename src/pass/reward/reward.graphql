@@ -1,4 +1,4 @@
 type PassReward {
   level: Int!
-  bundle: TokenBundle!
+  reward: ERC1155!
 }

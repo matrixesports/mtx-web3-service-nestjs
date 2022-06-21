@@ -3,7 +3,3 @@ type ContractDB {
   network: String!
   creator_id: Int!
 }
-
-type Query {
-    getContract():ContractDB
-}
