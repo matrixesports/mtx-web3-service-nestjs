@@ -1,7 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { ContractService } from 'src/contract/contract.service';
+// import { Injectable } from '@nestjs/common';
 
-@Injectable()
-export class PassService {
-  constructor(private contractService: ContractService) {}
-}
+// @Injectable()
+// export class PassService {}

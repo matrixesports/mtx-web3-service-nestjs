@@ -4,3 +4,9 @@ type TokenBundle {
   erc721s: [ERC721]!
   erc1155s: [ERC1155]!
 }
+
+type TokenMetadata {
+  name: String
+  description: String
+  image: String
+}

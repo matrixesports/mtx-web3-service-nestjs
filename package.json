@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@alch/alchemy-web3": "^1.4.2",
+    "@apollo/federation": "^0.36.1",
     "@apollo/subgraph": "^2.0.5",
     "@nestjs/apollo": "^10.0.14",
     "@nestjs/common": "^8.0.0",

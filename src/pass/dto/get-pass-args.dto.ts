@@ -1,3 +1,3 @@
-export class GetPassArgsDto {
-  creatorId: number;
-}
+// export class GetSeasonArgsDto {
+//   creatorId: number;
+// }

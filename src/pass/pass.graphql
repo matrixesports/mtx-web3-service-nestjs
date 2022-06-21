@@ -1,5 +1,5 @@
 type Query {
-  getPass(creatorId: Int!): Pass
+  getSeason(creatorId: Int!): Pass
 }
 type Pass {
   token: ERC1155!

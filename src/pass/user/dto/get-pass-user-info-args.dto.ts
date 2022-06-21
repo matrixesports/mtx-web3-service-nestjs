@@ -1,3 +1,3 @@
-export class GetPassUserInfoArgsDto {
-  userAddress: string;
-}
+// export class GetSeasonUserInfoArgsDto {
+//   userAddress: string;
+// }

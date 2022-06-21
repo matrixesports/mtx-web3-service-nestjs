@@ -1,5 +1,5 @@
-import { GetPassDto } from '../../dto/get-pass.dto';
+// import { GetPassDto } from '../../dto/get-pass.dto';
 
-export class GetPassUserInfoDto extends GetPassDto {
-  userAddress: string;
-}
+// export class GetSeasonUserInfoDto extends GetPassDto {
+//   userAddress: string;
+// }

@@ -1,9 +1,14 @@
-import { Resolver } from '@nestjs/graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 import { ContractService } from './contract.service';
 
-// only show active recipes
-// should resolve on its own
-@Resolver('ContractDb')
-export class RecipeResolver {
+@Resolver('ContractDB')
+export class ContractResolver {
   constructor(private contractService: ContractService) {}
+
+  @Query()
+  async getContract(@Args() args) {
+    let res = await this.contractService.find({ address: args.address });
+    console.log(res);
+    return res;
+  }
 }

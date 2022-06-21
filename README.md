@@ -30,49 +30,30 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-TODO:
+admin:
 
+- emergency: revoke access, change oracle,
+- pass: new pass, addreward, setxp, changeOracle,
+- oracle: givexp
+
+# TODO:
+
+- endpoint for what info we need for redeemable item, store it in directory metadata
+- give fe option to redeem in 1 tx
+  changelog:
 - send msg to phone when error , add webhook for discord
 - give option to redeem in 1 click or naw
 - better copy for out
-  -prep checklist for fe to prep for be
+- prep checklist for fe to prep for be
+- user starts at level 0 now
 
-db:
-contract: read, update, deploy, emergency
-emergency: revoke access, change oracle,
+- validation,logging, security, auth, caching
+- twilio
+-
 
-admin:
+changelog:
 
-- emergency:
-- pass: new pass, addreward, setxp, changeOracle,
-- lootbox:
-- dist:
-- redeemable:
-- erc20:
-- erc721:
-- erc1155:
-- workshop:
-
-oracle: givexp
-
-mutation:
-
-- pass: claimreward,
-- lootbox:
-- dist:
-- redeemable:
-- erc20:
-- erc721:
-- erc1155:
-- workshop:
-
-query:
-
-- pass: deploy, new pass, addreward, setxp, givexp, changeOracle,
-- lootbox:
-- dist:
-- redeemable:
-- erc20:
-- erc721:
-- erc1155:
-- workshop:
+- will refer to getPass as getSeason now
+- user starts at level 0 now
+- make everytihing readable to send to otyhers
+- runs at port 3000 now

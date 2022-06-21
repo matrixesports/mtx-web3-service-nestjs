@@ -1,8 +1,7 @@
 import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 export type CtrType =
-  | 'Workshop'
-  | 'Distributor'
+  | 'Recipe'
   | 'Pass'
   | 'Lootbox'
   | 'Redeemable'
@@ -27,8 +26,7 @@ export class Contract {
   @Column({
     type: 'enum',
     enum: [
-      'Workshop',
-      'Distributor',
+      'Recipe',
       'Pass',
       'Lootbox',
       'Redeemable',
