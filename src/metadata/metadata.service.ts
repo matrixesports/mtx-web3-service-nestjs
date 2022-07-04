@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import pinataSDK, { PinataClient } from '@pinata/sdk';
 import axios from 'axios';
 import { TokenMetadata } from 'src/graphql.schema';
+import IPFSGatewayTools from '@pinata/ipfs-gateway-tools/dist/browser';
 
 @Injectable()
 export class MetadataService {
@@ -11,11 +12,11 @@ export class MetadataService {
   gatewayTools;
 
   constructor(private configService: ConfigService) {
-    const IPFSGatewayTools = require('@pinata/ipfs-gateway-tools/dist/node');
+    // const IPFSGatewayTools = require('@pinata/ipfs-gateway-tools/dist/node');
     this.gatewayTools = new IPFSGatewayTools();
     this.pinata = pinataSDK(
       this.configService.get('PINATA_API_KEY'),
-      this.configService.get('PINATA_API_SECRET'),
+      this.configService.get('PINATA_API_SECRET')
     );
     this.gateway = this.configService.get('PINATA_GATEWAY');
   }
@@ -25,11 +26,11 @@ export class MetadataService {
    * @returns data from uri
    */
   async readFromIPFS(uri: string): Promise<TokenMetadata> {
-    let convertedGatewayUrl = await this.changeToGateway(uri);
+    const convertedGatewayUrl = await this.changeToGateway(uri);
     if (convertedGatewayUrl == null) {
       console.log(
         'Cannot convert uri to gateway url coz it doesnt have cid',
-        uri,
+        uri
       );
       return null;
     }
@@ -41,7 +42,7 @@ export class MetadataService {
       return null;
     }
     //convert image for our gateway
-    let imageUri = await this.changeToGateway(res.data.image);
+    const imageUri = await this.changeToGateway(res.data.image);
     if (imageUri != null) {
       res.data.image = imageUri;
     }
@@ -52,11 +53,11 @@ export class MetadataService {
   // ipfs://QmWwjrXyFBY3WSRuMmxsV6CLtttLi73JrfMnBGYsDa1FE5/1.json becomes
   // https://matrix.mypinata.cloud/ipfs/QmWwjrXyFBY3WSRuMmxsV6CLtttLi73JrfMnBGYsDa1FE5/1.json
   async changeToGateway(uri: string): Promise<string | null> {
-    let cidInfo = this.gatewayTools.containsCID(uri);
+    const cidInfo = this.gatewayTools.containsCID(uri);
     if (cidInfo.containsCid) {
-      let convertedGatewayUrl = this.gatewayTools.convertToDesiredGateway(
+      const convertedGatewayUrl = this.gatewayTools.convertToDesiredGateway(
         uri,
-        this.gateway,
+        this.gateway
       );
       return convertedGatewayUrl;
     }

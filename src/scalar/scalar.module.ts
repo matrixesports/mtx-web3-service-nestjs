@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 import { ScalarResolver } from './scalar.resolver';
 
 @Module({
-  providers: [ScalarResolver]
+  providers: [ScalarResolver],
 })
 export class ScalarModule {}
