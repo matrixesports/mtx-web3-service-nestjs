@@ -9,7 +9,7 @@ export class PassService {
   constructor(private contractService: ContractService) {}
 
   async getPassDB(creator_id: number): Promise<ContractDB> {
-    let res = await this.contractService.find({
+    const res = await this.contractService.find({
       creator_id: creator_id,
       ctr_type: 'Pass',
     });

@@ -12,9 +12,9 @@ export class PassResolver {
 
   @Query()
   async getPass(@Args() args: GetPassArgsDto): Promise<GetPassDto> {
-    let contractDB = await this.passService.getPassDB(args.creatorId);
-    let contract = await this.passService.getPassCtr(contractDB);
-    let seasonId = await contract.seasonId();
+    const contractDB = await this.passService.getPassDB(args.creatorId);
+    const contract = await this.passService.getPassCtr(contractDB);
+    const seasonId = await contract.seasonId();
     return { contractDB, contract, seasonId };
   }
 
@@ -31,7 +31,7 @@ export class PassResolver {
   @ResolveField()
   userInfo(
     @Parent() parent: GetPassDto,
-    @Args() args: GetPassUserInfoArgsDto,
+    @Args() args: GetPassUserInfoArgsDto
   ): GetPassUserInfoDto {
     return { ...parent, userAddress: args.userAddress };
   }

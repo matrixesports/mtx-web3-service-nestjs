@@ -10,44 +10,44 @@ export class UserResolver {
   constructor(private contractService: ContractService) {}
 
   @ResolveField()
-  async xp(@Parent() parent: GetPassUserInfoDto): Promise<BigInt> {
-    let userInfo = await parent.contract.userInfo(
+  async xp(@Parent() parent: GetPassUserInfoDto): Promise<bigint> {
+    const userInfo = await parent.contract.userInfo(
       parent.userAddress,
-      parent.seasonId,
+      parent.seasonId
     );
 
     return userInfo.xp;
   }
 
   @ResolveField()
-  async level(@Parent() parent: GetPassUserInfoDto): Promise<BigInt> {
+  async level(@Parent() parent: GetPassUserInfoDto): Promise<bigint> {
     return await parent.contract.level(parent.userAddress, parent.seasonId);
   }
 
   @ResolveField()
   async unclaimedFreeRewards(
-    @Parent() parent: GetPassUserInfoDto,
+    @Parent() parent: GetPassUserInfoDto
   ): Promise<PassReward[]> {
-    let rewards = [];
-    let level = await parent.contract.level(
+    const rewards = [];
+    const level = await parent.contract.level(
       parent.userAddress,
-      parent.seasonId,
+      parent.seasonId
     );
     for (let x = 0; x <= level; x++) {
-      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
-      let claimed = await parent.contract.isRewardClaimed(
+      const seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      const claimed = await parent.contract.isRewardClaimed(
         parent.userAddress,
         parent.seasonId,
         x,
-        false,
+        false
       );
       if (
         claimed ||
         seasonInfo.freeReward.token == ethers.constants.AddressZero
       )
         continue;
-      let contractDB = await this.contractService.findByAddress(
-        seasonInfo.freeReward.token,
+      const contractDB = await this.contractService.findByAddress(
+        seasonInfo.freeReward.token
       );
       rewards.push({
         level: x,
@@ -63,7 +63,7 @@ export class UserResolver {
 
   @ResolveField()
   async premium(
-    @Parent() parent: GetPassUserInfoDto,
+    @Parent() parent: GetPassUserInfoDto
   ): Promise<GetPassUserInfoDto> {
     if (
       await parent.contract.isUserPremium(parent.userAddress, parent.seasonId)

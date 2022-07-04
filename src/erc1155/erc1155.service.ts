@@ -12,7 +12,7 @@ export class Erc1155Service {
   ) {}
 
   async getCtr(address: string): Promise<Contract> {
-    let fullContractDB = await this.contractService.find({
+    const fullContractDB = await this.contractService.find({
       address: address,
     });
     return await this.contractService.create(fullContractDB[0]);

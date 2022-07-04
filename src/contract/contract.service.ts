@@ -19,12 +19,12 @@ export class ContractService {
   constructor(
     @InjectRepository(Contract)
     private contractRepo: Repository<Contract>,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {
     this.web3 = createAlchemyWeb3(
       `https://polygon-mainnet.g.alchemy.com/v2/${this.configService.get(
-        'ALCHEMY_API_KEY',
-      )}`,
+        'ALCHEMY_API_KEY'
+      )}`
     );
   }
 
@@ -35,30 +35,33 @@ export class ContractService {
   }
 
   async findByAddress(address): Promise<Contract> {
-    let res = await this.find({ address: ethers.utils.getAddress(address) });
+    const res = await this.find({ address: ethers.utils.getAddress(address) });
     return res[0];
   }
 
   getProvider(network: string): ethers.providers.Provider {
     return new ethers.providers.AlchemyProvider(
       network,
-      this.configService.get('ALCHEMY_API_KEY'),
+      this.configService.get('ALCHEMY_API_KEY')
     );
   }
 
   getSigner(network: string): ethers.Signer {
-    let provider = this.getProvider(network);
+    const provider = this.getProvider(network);
     return new ethers.Wallet(this.configService.get('PVT_KEY'), provider);
   }
 
   async create(contract: Contract) {
-    let provider = await this.getProvider(contract.network);
+    const provider = await this.getProvider(contract.network);
     return new ethers.Contract(contract.address, contract.abi, provider);
   }
 
   async createWSigner(contract: Contract): Promise<ethers.Contract> {
-    let provider = this.getProvider(contract.network);
-    let signer = new ethers.Wallet(this.configService.get('PVT_KEY'), provider);
+    const provider = this.getProvider(contract.network);
+    const signer = new ethers.Wallet(
+      this.configService.get('PVT_KEY'),
+      provider
+    );
     return new ethers.Contract(contract.address, contract.abi, signer);
   }
 
@@ -74,7 +77,7 @@ export class ContractService {
 
   async getNFTSOwnedForUser(
     token_contracts: Array<string>,
-    user: string,
+    user: string
   ): Promise<BaseNft[]> {
     let res: GetNftsResponseWithoutMetadata;
     try {
@@ -89,7 +92,7 @@ export class ContractService {
     }
     for (let x = 0; x < res.ownedNfts.length; x++) {
       res.ownedNfts[x].contract.address = ethers.utils.getAddress(
-        res.ownedNfts[x].contract.address,
+        res.ownedNfts[x].contract.address
       );
     }
     return res.ownedNfts;

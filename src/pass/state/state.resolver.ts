@@ -8,30 +8,30 @@ import { GetPassDto } from '../dto/GetPass.dto';
 export class StateResolver {
   constructor(private contractService: ContractService) {}
   @ResolveField()
-  async xp(@Parent() parent: GetPassDto): Promise<BigInt[]> {
-    let xp = [];
-    let maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
+  async xp(@Parent() parent: GetPassDto): Promise<bigint[]> {
+    const xp = [];
+    const maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
     for (let x = 0; x <= maxLevel; x++) {
-      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      const seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
       xp.push(seasonInfo.xpToCompleteLevel);
     }
     return xp;
   }
 
   @ResolveField()
-  async maxLevel(@Parent() parent: GetPassDto): Promise<BigInt> {
+  async maxLevel(@Parent() parent: GetPassDto): Promise<bigint> {
     return await parent.contract.maxLevelInSeason(parent.seasonId);
   }
 
   @ResolveField()
   async freeRewards(@Parent() parent: GetPassDto): Promise<PassReward[]> {
-    let freeRewards = [];
-    let maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
+    const freeRewards = [];
+    const maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
     for (let x = 0; x <= maxLevel; x++) {
-      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      const seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
       if (seasonInfo.freeReward.token == ethers.constants.AddressZero) continue;
-      let contractDB = await this.contractService.findByAddress(
-        seasonInfo.freeReward.token,
+      const contractDB = await this.contractService.findByAddress(
+        seasonInfo.freeReward.token
       );
 
       freeRewards.push({
@@ -48,14 +48,14 @@ export class StateResolver {
 
   @ResolveField()
   async premiumRewards(@Parent() parent: GetPassDto): Promise<PassReward[]> {
-    let premiumRewards = [];
-    let maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
+    const premiumRewards = [];
+    const maxLevel = await parent.contract.maxLevelInSeason(parent.seasonId);
     for (let x = 0; x <= maxLevel; x++) {
-      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      const seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
       if (seasonInfo.premiumReward.token == ethers.constants.AddressZero)
         continue;
-      let contractDB = await this.contractService.findByAddress(
-        seasonInfo.premiumReward.token,
+      const contractDB = await this.contractService.findByAddress(
+        seasonInfo.premiumReward.token
       );
       premiumRewards.push({
         level: x,
