@@ -9,7 +9,10 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ethers } from 'ethers';
 import { Repository } from 'typeorm';
-import { Contract, CtrType } from './contract.entity';
+import {
+  Contract,
+  CtrType,
+} from 'src/modules/contract/entities/contract.entity';
 
 @Injectable()
 export class ContractService {

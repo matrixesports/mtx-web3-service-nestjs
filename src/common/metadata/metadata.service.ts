@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import pinataSDK, { PinataClient } from '@pinata/sdk';
 import axios from 'axios';
-import { TokenMetadata } from 'src/graphql.schema';
-import IPFSGatewayTools from '@pinata/ipfs-gateway-tools/dist/browser';
+import { TokenMetadata } from 'src/common/directives/web3.service.directive';
+import IPFSGatewayTools = require('@pinata/ipfs-gateway-tools/dist/node');
 
 @Injectable()
 export class MetadataService {
@@ -12,7 +12,6 @@ export class MetadataService {
   gatewayTools;
 
   constructor(private configService: ConfigService) {
-    // const IPFSGatewayTools = require('@pinata/ipfs-gateway-tools/dist/node');
     this.gatewayTools = new IPFSGatewayTools();
     this.pinata = pinataSDK(
       this.configService.get('PINATA_API_KEY'),

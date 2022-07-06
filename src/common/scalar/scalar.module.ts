@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ScalarResolver } from './scalar.resolver';
+import { ScalarResolver } from 'src/common/scalar/scalar.resolver';
 
 @Module({
   providers: [ScalarResolver],

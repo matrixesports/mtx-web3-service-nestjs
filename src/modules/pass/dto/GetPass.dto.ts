@@ -1,5 +1,5 @@
 import { Contract } from 'ethers';
-import { ContractDB } from 'src/graphql.schema';
+import { ContractDB } from 'src/common/directives/web3.service.directive';
 
 export class GetPassDto {
   seasonId: number;
