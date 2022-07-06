@@ -5,11 +5,11 @@ import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ContractModule } from './contract/contract.module';
-import { PassModule } from './pass/pass.module';
-import { ScalarModule } from './scalar/scalar.module';
-import { Erc1155Module } from './erc1155/erc1155.module';
-import { MetadataModule } from './metadata/metadata.module';
+import { ContractModule } from 'src/modules/contract/contract.module';
+import { PassModule } from 'src/modules/pass/pass.module';
+import { ScalarModule } from 'src/common/scalar/scalar.module';
+import { Erc1155Module } from 'src/common/erc1155/erc1155.module';
+import { MetadataModule } from 'src/common/metadata/metadata.module';
 
 @Module({
   imports: [
