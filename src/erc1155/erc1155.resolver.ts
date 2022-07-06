@@ -10,7 +10,6 @@ export class Erc1155Resolver {
 
   @ResolveField()
   async metadata(@Parent() parent: ERC1155): Promise<TokenMetadata> {
-    console.log(parent);
     if (parent.id == null) return null;
     const ctr = await this.erc1155Service.getCtr(parent.contractDB.address);
     const uri = await ctr.uri(parent.id);
@@ -19,6 +18,6 @@ export class Erc1155Resolver {
 
   @ResolveField()
   async id(@Parent() parent) {
-    console.log(parent);
+    return parent.id;
   }
 }

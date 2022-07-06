@@ -1,6 +1,6 @@
 import { Scalar, CustomScalar } from '@nestjs/graphql';
 import { Kind, ValueNode } from 'graphql';
-import { BigNumber, constants } from 'ethers';
+import { BigNumber, constants, ethers } from 'ethers';
 
 @Scalar('BigInt')
 export class ScalarResolver implements CustomScalar<number, BigNumber> {
@@ -12,10 +12,10 @@ export class ScalarResolver implements CustomScalar<number, BigNumber> {
 
   // value sent to the client
   serialize(value: BigNumber): number {
-    if (value.eq(constants.MaxUint256)) {
+    if (BigNumber.from(value).eq(constants.MaxUint256)) {
       return Number.MAX_SAFE_INTEGER;
     } else {
-      return value.toNumber();
+      return BigNumber.from(value).toNumber();
     }
   }
 

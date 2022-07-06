@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import pinataSDK, { PinataClient } from '@pinata/sdk';
 import axios from 'axios';
 import { TokenMetadata } from 'src/graphql.schema';
-import IPFSGatewayTools from '@pinata/ipfs-gateway-tools/dist/browser';
+import IPFSGatewayTools from '@pinata/ipfs-gateway-tools/dist/node';
 
 @Injectable()
 export class MetadataService {
@@ -12,7 +12,6 @@ export class MetadataService {
   gatewayTools;
 
   constructor(private configService: ConfigService) {
-    // const IPFSGatewayTools = require('@pinata/ipfs-gateway-tools/dist/node');
     this.gatewayTools = new IPFSGatewayTools();
     this.pinata = pinataSDK(
       this.configService.get('PINATA_API_KEY'),
@@ -53,10 +52,11 @@ export class MetadataService {
   // ipfs://QmWwjrXyFBY3WSRuMmxsV6CLtttLi73JrfMnBGYsDa1FE5/1.json becomes
   // https://matrix.mypinata.cloud/ipfs/QmWwjrXyFBY3WSRuMmxsV6CLtttLi73JrfMnBGYsDa1FE5/1.json
   async changeToGateway(uri: string): Promise<string | null> {
-    const cidInfo = this.gatewayTools.containsCID(uri);
+    let urii = "ipfs:/ipfs/" + uri
+    const cidInfo = this.gatewayTools.containsCID(urii);
     if (cidInfo.containsCid) {
       const convertedGatewayUrl = this.gatewayTools.convertToDesiredGateway(
-        uri,
+        urii,
         this.gateway
       );
       return convertedGatewayUrl;
