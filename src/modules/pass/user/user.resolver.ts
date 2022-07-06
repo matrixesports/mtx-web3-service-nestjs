@@ -1,7 +1,7 @@
 import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { ethers } from 'ethers';
 import { ContractService } from 'src/modules/contract/contract.service';
-import { PassReward } from 'src/common/directives/web3.service.directive';
+import { PassReward } from 'src/graphql.schema';
 import { GetPassUserInfoDto } from '../dto/GetPassUserInfo.dto';
 import { PassService } from '../pass.service';
 

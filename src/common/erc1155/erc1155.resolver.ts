@@ -3,7 +3,7 @@ import { ContractService } from 'src/modules/contract/contract.service';
 import {
   ERC1155,
   TokenMetadata,
-} from 'src/common/directives/web3.service.directive';
+} from 'src/graphql.schema';
 import { MetadataService } from 'src/common/metadata/metadata.service';
 import { Erc1155Service } from './erc1155.service';
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Contract, ethers } from 'ethers';
+import { Contract } from 'ethers';
 import { ContractService } from 'src/modules/contract/contract.service';
-import { PassReward } from 'src/common/directives/web3.service.directive';
+import { PassReward } from 'src/graphql.schema';
 import { Contract as ContractDB } from 'src/modules/contract/entities/contract.entity';
 
 @Injectable()

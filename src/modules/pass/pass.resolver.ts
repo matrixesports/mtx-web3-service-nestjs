@@ -1,5 +1,5 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
-import { ERC1155 } from 'src/common/directives/web3.service.directive';
+import { ERC1155 } from 'src/graphql.schema';
 import { GetPassDto } from './dto/GetPass.dto';
 import { GetPassArgsDto } from './dto/GetPassArgs.dto';
 import { GetPassUserInfoDto } from './dto/GetPassUserInfo.dto';
