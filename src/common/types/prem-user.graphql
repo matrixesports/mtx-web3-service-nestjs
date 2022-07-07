@@ -1,5 +1,0 @@
-"only shown for users with a premium pass"
-type PremiumUser {
-  owned: BigInt!
-  unclaimedPremiumRewards: [PassReward]!
-}

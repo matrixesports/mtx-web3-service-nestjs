@@ -1,12 +1,11 @@
 {
   "name": "mtx-web3-service",
   "version": "0.0.1",
-  "description": "graphql+admin",
+  "description": "Graphql service for talking to the contracts",
   "author": "",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
-    "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

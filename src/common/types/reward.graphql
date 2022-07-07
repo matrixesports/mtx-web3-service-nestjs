@@ -1,4 +1,0 @@
-type PassReward {
-  level: Int!
-  reward: ERC1155!
-}

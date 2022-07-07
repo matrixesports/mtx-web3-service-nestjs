@@ -1,7 +1,0 @@
-type PassUser {
-  xp: BigInt!
-  level: BigInt!
-  "only shows free unclaimed rewards for levels < level(user)"
-  unclaimedFreeRewards: [PassReward]!
-  premium: PremiumUser
-}

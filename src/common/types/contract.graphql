@@ -1,5 +1,0 @@
-type ContractDB {
-  address: String!
-  network: String!
-  creator_id: Int!
-}

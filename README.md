@@ -1,3 +1,5 @@
+# Graphql service for talking to the contracts
+
 ## Installation
 
 ```bash
