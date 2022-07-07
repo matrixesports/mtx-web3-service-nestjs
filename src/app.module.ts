@@ -5,6 +5,13 @@ import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassModule } from './pass/pass.module';
+import { PassService } from './pass/pass.service';
+import { AppService } from './app/app.service';
+import { AppController } from './app/app.controller';
+import { AppResolver } from './app/app.resolver';
+import { AppModule } from './app/app.module';
+import { CoService } from './r/co/co.service';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
@@ -30,8 +37,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
       playground: false,
     }),
+    PassModule,
+    AppModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [PassService, AppService, AppResolver, CoService],
 })
 export class AppModule {}
