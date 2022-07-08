@@ -1,0 +1,113 @@
+scalar Date
+scalar BigInt
+
+type BattlePass {
+  name: String!
+  description: String!
+  price: String!
+  currency: String!
+  endDate: Date!
+  seasonId: BigInt!
+  levelInfo: [LevelInfo]!
+  #   userInfo(userAddress: String!): BattlePassUser!
+}
+
+type LevelInfo {
+  level: BigInt!
+  xpToCompleteLevel: BigInt!
+  freeReward: Reward!
+  premiumReward: Reward!
+}
+
+# type BattlePassUser {
+#   xp: BigInt!
+#   level: BigInt!
+#   unclaimedFreeRewards: [LevelInfo]!
+#   premium: PremiumBattlePassUser
+# }
+
+# type PremiumBattlePassUser {
+#   owned: BigInt!
+#   unclaimedPremiumRewards: [LevelInfo]!
+# }
+
+type Reward {
+  id: BigInt!
+  qty: BigInt!
+  rewardType: RewardType!
+  metadata: RewardMetadata!
+}
+
+enum RewardType {
+  PREMIUM_PASS
+  CREATOR_TOKEN
+  LOOTBOX
+  REDEEMABLE
+  SPECIAL
+}
+
+type RewardMetadata {
+  name: String!
+  description: String!
+  image: String!
+}
+
+# type Recipe {
+#   recipeId: BigInt!
+#   isActive: Boolean!
+#   inputIngredients: [Reward]!
+#   outputIngredients: [Reward]!
+# }
+
+# # handle each reward type separately
+# type Inventory {
+#   #PREMIUM_PASS,SPECIAL, CREATOR_TOKEN, UNREDEEMED REDEEMABLE, LOOTBOX just check balance
+#   default: [Reward]!
+#   redeemed: [RedeemStatus]!
+# }
+
+# enum RedeemStatus {
+#   REDEEMED
+#   PROCESSING
+#   REJECTED
+# }
+
+# type Redeemed {
+#   id: BigInt!
+#   status: [RedeemStatus]!
+# }
+
+# type LootboxOption {
+#   probability: Int!
+#   reward: [Reward]!
+# }
+
+type Query {
+  getBattlePass(creatorId: Int!): BattlePass
+  #   getInventory: Inventory
+  #   getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
+  #   getRecipes(creatorId: Int!): [Recipe]
+  #   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
+}
+
+# type Mutation {
+#   claimReward(input: ClaimRewardInput): MutationResponse!
+#   redeemReward(input: RedeemRewardInput): RedeemRewardResponse!
+# }
+
+# input ClaimRewardInput {
+#   creatorId: Int!
+#   level: Int!
+#   premium: Boolean!
+#   autoRedeem: Boolean!
+# }
+
+# input RedeemRewardInput {
+#   creatorId: Int!
+#   id: Int!
+# }
+
+# type MutationResponse {
+#   success: Boolean!
+#   description: String!
+# }
