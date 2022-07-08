@@ -35,7 +35,7 @@ type PremiumBattlePassUser {
 type Reward {
   id: BigInt!
   qty: BigInt!
-  metadata: RewardMetadata!
+  metadata: RewardMetadata
 }
 
 type RewardMetadata {

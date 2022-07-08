@@ -7,7 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScalarModule } from './scalar/scalar.module';
 import { BattlepassModule } from './battlepass/battlepass.module';
-import { RewardModule } from './reward/reward.module';
+import { MetadataModule } from './metadata/metadata.module';
 import { ContractModule } from './contract/contract.module';
 import configuration from './configuration';
 import * as Joi from 'joi';
@@ -61,7 +61,7 @@ import * as Joi from 'joi';
     }),
     ScalarModule,
     BattlepassModule,
-    RewardModule,
+    MetadataModule,
     ContractModule,
   ],
   controllers: [],

@@ -2,11 +2,15 @@ import { ConfigService } from '@nestjs/config';
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
+import { MetadataService } from 'src/metadata/metadata.service';
 import { GetBattlePassChildDto } from './dto/GetBattlePassChild.dto';
 
 @Resolver('BattlePass')
 export class BattlepassResolver {
-  constructor(private contractService: ContractService) {}
+  constructor(
+    private contractService: ContractService,
+    private metadataService: MetadataService
+  ) {}
 
   @ResolveField()
   name(@Parent() parent: GetBattlePassChildDto) {
@@ -49,19 +53,22 @@ export class BattlepassResolver {
     let levelInfo = [];
     for (let x = 0; x <= maxLevel; x++) {
       let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
-      console.log(await parent.contract.checkType(seasonInfo.freeRewardId));
       levelInfo.push({
         level: x,
         xpToCompleteLevel: seasonInfo.xpToCompleteLevel,
         freeReward: {
           id: seasonInfo.freeRewardId,
           qty: seasonInfo.freeRewardQty,
-          metadata: await parent.contract.uri(seasonInfo.freeRewardId),
+          metadata: await this.metadataService.readFromIPFS(
+            await parent.contract.uri(seasonInfo.freeRewardId)
+          ),
         },
         premiumReward: {
           id: seasonInfo.premiumRewardId,
           qty: seasonInfo.premiumRewardQty,
-          metadata: await parent.contract.uri(seasonInfo.premiumRewardId),
+          metadata: await this.metadataService.readFromIPFS(
+            await parent.contract.uri(seasonInfo.premiumRewardId)
+          ),
         },
       });
     }
