@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import axios from 'axios';
 import { Contract as ContractDB, CtrType } from './contract.entity';
 import { BigNumber, Contract, ethers } from 'ethers';
+import { ConfigService } from '@nestjs/config';
 
 export const MATIC_NUMBER_OF_BLOCKS_TO_WAIT = 1;
 
@@ -11,7 +12,8 @@ export const MATIC_NUMBER_OF_BLOCKS_TO_WAIT = 1;
 export class ContractService {
   constructor(
     @InjectRepository(ContractDB)
-    private contractRepository: Repository<ContractDB>
+    private contractRepository: Repository<ContractDB>,
+    private configService: ConfigService
   ) {}
 
   // will return empty array if it cant find matching address
@@ -29,19 +31,23 @@ export class ContractService {
     });
   }
 
-  //   getProvider(network: string): ethers.providers.Provider {
-  //     return new ethers.providers.AlchemyProvider(network, ALCHEMY_API_KEY);
-  //   }
+  getProvider(network: string): ethers.providers.Provider {
+    return new ethers.providers.AlchemyProvider(
+      network,
+      this.configService.get('ALCHEMY_API_KEY')
+    );
+  }
+
+  async getProviderContract(contractDB: ContractDB): Promise<Contract> {
+    return new ethers.Contract(
+      contractDB.address,
+      contractDB.abi,
+      await this.getProvider(contractDB.network)
+    );
+  }
 
   //   getSigner(network: string): ethers.Signer {
   //     return new ethers.Wallet(PVT_KEY!, this.getProvider(network));
-  //   }
-  //   async getProviderContract(
-  //     address: string,
-  //     abi: string,
-  //     network: string
-  //   ): Promise<Contract> {
-  //     return new ethers.Contract(address, abi, await this.getProvider(network));
   //   }
 
   //   async getSignerContract(

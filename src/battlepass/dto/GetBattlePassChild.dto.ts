@@ -1,3 +1,5 @@
+import { Contract } from 'ethers';
+
 export class GetBattlePassChildDto {
-  creatorId: number;
+  contract: Contract;
 }

@@ -9,7 +9,7 @@ export class BattlepassResolver {
   constructor(private contractService: ContractService) {}
 
   @ResolveField()
-  async name(@Parent() parent: GetBattlePassChildDto) {
+  name(@Parent() parent: GetBattlePassChildDto) {
     return 'a';
   }
 
@@ -35,7 +35,7 @@ export class BattlepassResolver {
 
   @ResolveField()
   seasonId(@Parent() parent: GetBattlePassChildDto) {
-    return ethers.BigNumber.from(1);
+    return parent.contract.seasonId();
   }
 
   @ResolveField()
@@ -52,7 +52,20 @@ export class BattlepassResolver {
   }
 
   @Query()
-  getBattlePass(@Args('creatorId') creatorId: number): GetBattlePassChildDto {
-    return { creatorId };
+  /**
+   * return null if cannot find pass contract for creator
+   */
+  async getBattlePass(
+    @Args('creatorId') creatorId: number
+  ): Promise<GetBattlePassChildDto> {
+    let contractDBEntries = await this.contractService.findForCreator(
+      creatorId,
+      'BattlePass'
+    );
+    if (contractDBEntries.length == 0) return null;
+    let contract = await this.contractService.getProviderContract(
+      contractDBEntries[0]
+    );
+    return { contract };
   }
 }
