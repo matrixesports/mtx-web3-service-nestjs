@@ -1,9 +1,17 @@
 import { ConfigService } from '@nestjs/config';
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Context,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { GetBattlePassChildDto } from './dto/GetBattlePassChild.dto';
+import { GetBattlePassUserInfoChildDto } from './dto/GetBattlePassUserInfoChild.dto';
 
 @Resolver('BattlePass')
 export class BattlepassResolver {
@@ -78,9 +86,17 @@ export class BattlepassResolver {
   @ResolveField()
   userInfo(
     @Parent() parent: GetBattlePassChildDto,
-    @Args('userAddress') userAddress: string
-  ) {
-    return {};
+    @Context() context
+  ): GetBattlePassUserInfoChildDto {
+    let userAddress: string = context.req.headers['user-address'];
+    if (userAddress == undefined || userAddress == null) return null;
+    // check if the address is valid
+    try {
+      userAddress = ethers.utils.getIcapAddress(userAddress);
+    } catch (e) {
+      return null;
+    }
+    return { ...parent, userAddress };
   }
 
   @Query()

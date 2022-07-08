@@ -10,7 +10,7 @@ type BattlePass {
   seasonId: BigInt!
   maxLevel: BigInt!
   levelInfo: [LevelInfo]!
-  userInfo(userAddress: String!): BattlePassUser!
+  userInfo: BattlePassUser
 }
 
 type LevelInfo {
@@ -23,13 +23,13 @@ type LevelInfo {
 type BattlePassUser {
   xp: BigInt!
   level: BigInt!
-  unclaimedFreeRewards: [LevelInfo]!
+  unclaimedFreeRewards: [Int]!
   premium: PremiumBattlePassUser
 }
 
 type PremiumBattlePassUser {
   owned: BigInt!
-  unclaimedPremiumRewards: [LevelInfo]!
+  unclaimedPremiumRewards: [Int]!
 }
 
 type Reward {

@@ -109,7 +109,6 @@ export async function getMaticFeeData(): Promise<{
       maxFeePerGas,
     };
   } catch (e) {
-    console.log(e);
     return {
       maxPriorityFeePerGas: ethers.utils.parseUnits(Math.ceil(40) + '', 'gwei'),
     };

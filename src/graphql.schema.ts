@@ -16,7 +16,7 @@ export class BattlePass {
     seasonId: BigInt;
     maxLevel: BigInt;
     levelInfo: Nullable<LevelInfo>[];
-    userInfo: BattlePassUser;
+    userInfo?: Nullable<BattlePassUser>;
 }
 
 export class LevelInfo {
@@ -29,13 +29,13 @@ export class LevelInfo {
 export class BattlePassUser {
     xp: BigInt;
     level: BigInt;
-    unclaimedFreeRewards: Nullable<LevelInfo>[];
+    unclaimedFreeRewards: Nullable<number>[];
     premium?: Nullable<PremiumBattlePassUser>;
 }
 
 export class PremiumBattlePassUser {
     owned: BigInt;
-    unclaimedPremiumRewards: Nullable<LevelInfo>[];
+    unclaimedPremiumRewards: Nullable<number>[];
 }
 
 export class Reward {
