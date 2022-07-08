@@ -35,12 +35,37 @@ export class BattlepassResolver {
 
   @ResolveField()
   seasonId(@Parent() parent: GetBattlePassChildDto) {
-    return parent.contract.seasonId();
+    return parent.seasonId;
   }
 
   @ResolveField()
-  levelInfo(@Parent() parent: GetBattlePassChildDto) {
-    return [];
+  async maxLevel(@Parent() parent: GetBattlePassChildDto) {
+    return await parent.contract.getMaxLevel(parent.seasonId);
+  }
+
+  @ResolveField()
+  async levelInfo(@Parent() parent: GetBattlePassChildDto) {
+    let maxLevel = await parent.contract.getMaxLevel(parent.seasonId);
+    let levelInfo = [];
+    for (let x = 0; x <= maxLevel; x++) {
+      let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
+      console.log(await parent.contract.checkType(seasonInfo.freeRewardId));
+      levelInfo.push({
+        level: x,
+        xpToCompleteLevel: seasonInfo.xpToCompleteLevel,
+        freeReward: {
+          id: seasonInfo.freeRewardId,
+          qty: seasonInfo.freeRewardQty,
+          metadata: await parent.contract.uri(seasonInfo.freeRewardId),
+        },
+        premiumReward: {
+          id: seasonInfo.premiumRewardId,
+          qty: seasonInfo.premiumRewardQty,
+          metadata: await parent.contract.uri(seasonInfo.premiumRewardId),
+        },
+      });
+    }
+    return levelInfo;
   }
 
   @ResolveField()
@@ -66,6 +91,7 @@ export class BattlepassResolver {
     let contract = await this.contractService.getProviderContract(
       contractDBEntries[0]
     );
-    return { contract };
+    let seasonId = await contract.seasonId();
+    return { contract, seasonId };
   }
 }

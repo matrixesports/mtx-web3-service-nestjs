@@ -1,22 +1,11 @@
-import { ResolveField, Resolver } from '@nestjs/graphql';
+import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { ethers } from 'ethers';
+import { LevelInfo, Reward } from 'src/graphql.schema';
 
 @Resolver('Reward')
 export class RewardResolver {
   @ResolveField()
-  id() {
-    return ethers.BigNumber.from(1);
-  }
-  @ResolveField()
-  qty() {
-    return ethers.BigNumber.from(1);
-  }
-  @ResolveField()
-  rewardType() {
-    return {};
-  }
-  @ResolveField()
-  metadata() {
+  metadata(@Parent() parent: Reward) {
     return {};
   }
 }

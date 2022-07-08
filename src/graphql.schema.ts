@@ -7,14 +7,6 @@
 
 /* tslint:disable */
 /* eslint-disable */
-export enum RewardType {
-    PREMIUM_PASS = "PREMIUM_PASS",
-    CREATOR_TOKEN = "CREATOR_TOKEN",
-    LOOTBOX = "LOOTBOX",
-    REDEEMABLE = "REDEEMABLE",
-    SPECIAL = "SPECIAL"
-}
-
 export class BattlePass {
     name: string;
     description: string;
@@ -22,12 +14,13 @@ export class BattlePass {
     currency: string;
     endDate: Date;
     seasonId: BigInt;
+    maxLevel: BigInt;
     levelInfo: Nullable<LevelInfo>[];
     userInfo: BattlePassUser;
 }
 
 export class LevelInfo {
-    level: BigInt;
+    level: number;
     xpToCompleteLevel: BigInt;
     freeReward: Reward;
     premiumReward: Reward;
@@ -48,7 +41,6 @@ export class PremiumBattlePassUser {
 export class Reward {
     id: BigInt;
     qty: BigInt;
-    rewardType: RewardType;
     metadata: RewardMetadata;
 }
 
