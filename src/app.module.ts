@@ -9,6 +9,7 @@ import { ScalarModule } from './scalar/scalar.module';
 import { BattlepassModule } from './battlepass/battlepass.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { ContractModule } from './contract/contract.module';
+import { RecipeModule } from './recipe/recipe.module';
 import configuration from './configuration';
 import * as Joi from 'joi';
 @Module({
@@ -63,6 +64,7 @@ import * as Joi from 'joi';
     BattlepassModule,
     MetadataModule,
     ContractModule,
+    RecipeModule,
   ],
   controllers: [],
   providers: [],

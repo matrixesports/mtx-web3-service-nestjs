@@ -31,6 +31,14 @@ export class ContractService {
     });
   }
 
+  // will return empty array if it cant find matching address
+  //get recipe contract info from db isnce only 1 recipe ctr is deployed
+  async findRecipe(): Promise<ContractDB[]> {
+    return this.contractRepository.find({
+      where: { ctr_type: 'Recipe' },
+    });
+  }
+
   getProvider(network: string): ethers.providers.Provider {
     return new ethers.providers.AlchemyProvider(
       network,

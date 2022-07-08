@@ -44,12 +44,12 @@ type RewardMetadata {
   image: String!
 }
 
-# type Recipe {
-#   recipeId: BigInt!
-#   isActive: Boolean!
-#   inputIngredients: [Reward]!
-#   outputIngredients: [Reward]!
-# }
+type Recipe {
+  recipeId: BigInt!
+  isActive: Boolean!
+  inputIngredients: [Reward]!
+  outputIngredients: [Reward]!
+}
 
 # # handle each reward type separately
 # type Inventory {
@@ -78,8 +78,8 @@ type Query {
   getBattlePass(creatorId: Int!): BattlePass
   #   getInventory: Inventory
   #   getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
-  #   getRecipes(creatorId: Int!): [Recipe]
-  #   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
+  getRecipes(creatorId: Int!): [Recipe]
+  getRecipe(creatorId: Int!, recipeId: Int!): Recipe
 }
 
 # type Mutation {

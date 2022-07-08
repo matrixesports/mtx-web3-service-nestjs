@@ -50,8 +50,19 @@ export class RewardMetadata {
     image: string;
 }
 
+export class Recipe {
+    recipeId: BigInt;
+    isActive: boolean;
+    inputIngredients: Nullable<Reward>[];
+    outputIngredients: Nullable<Reward>[];
+}
+
 export abstract class IQuery {
     abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
+
+    abstract getRecipes(creatorId: number): Nullable<Nullable<Recipe>[]> | Promise<Nullable<Nullable<Recipe>[]>>;
+
+    abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
 }
 
 export type BigInt = unknown;
