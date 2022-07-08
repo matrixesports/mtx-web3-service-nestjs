@@ -10,7 +10,6 @@ export class BattlepassResolver {
 
   @ResolveField()
   async name(@Parent() parent: GetBattlePassChildDto) {
-    console.log(await this.contractService.findAll());
     return 'a';
   }
 

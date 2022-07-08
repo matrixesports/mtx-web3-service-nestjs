@@ -9,7 +9,7 @@ import { ScalarModule } from './scalar/scalar.module';
 import { BattlepassModule } from './battlepass/battlepass.module';
 import { RewardModule } from './reward/reward.module';
 import { ContractModule } from './contract/contract.module';
-import configuration from './config/configuration';
+import configuration from './configuration';
 import * as Joi from 'joi';
 @Module({
   imports: [
