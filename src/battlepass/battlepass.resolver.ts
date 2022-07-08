@@ -1,38 +1,59 @@
-import { Args, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { ConfigService } from '@nestjs/config';
+import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { ethers } from 'ethers';
+import { ContractService } from 'src/contract/contract.service';
+import { GetBattlePassChildDto } from './dto/GetBattlePassChild.dto';
 
 @Resolver('BattlePass')
 export class BattlepassResolver {
+  constructor(private contractService: ContractService) {}
+
   @ResolveField()
-  name() {
+  async name(@Parent() parent: GetBattlePassChildDto) {
+    console.log(await this.contractService.findAll());
     return 'a';
   }
+
   @ResolveField()
-  description() {
+  description(@Parent() parent: GetBattlePassChildDto) {
     return 'a';
   }
+
   @ResolveField()
-  price() {
+  price(@Parent() parent: GetBattlePassChildDto) {
     return 'a';
   }
+
   @ResolveField()
-  currency() {
+  currency(@Parent() parent: GetBattlePassChildDto) {
     return 'a';
   }
+
   @ResolveField()
-  endDate() {
+  endDate(@Parent() parent: GetBattlePassChildDto) {
     return new Date();
   }
+
   @ResolveField()
-  seasonId() {
+  seasonId(@Parent() parent: GetBattlePassChildDto) {
     return ethers.BigNumber.from(1);
   }
+
   @ResolveField()
-  levelInfo() {
+  levelInfo(@Parent() parent: GetBattlePassChildDto) {
     return [];
   }
-  @Query()
-  getBattlePass(@Args('creatorId') creatorId: number) {
+
+  @ResolveField()
+  userInfo(
+    @Parent() parent: GetBattlePassChildDto,
+    @Args('userAddress') userAddress: string
+  ) {
     return {};
+  }
+
+  @Query()
+  getBattlePass(@Args('creatorId') creatorId: number): GetBattlePassChildDto {
+    return { creatorId };
   }
 }

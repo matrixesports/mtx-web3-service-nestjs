@@ -9,7 +9,7 @@ type BattlePass {
   endDate: Date!
   seasonId: BigInt!
   levelInfo: [LevelInfo]!
-  #   userInfo(userAddress: String!): BattlePassUser!
+  userInfo(userAddress: String!): BattlePassUser!
 }
 
 type LevelInfo {
@@ -19,17 +19,17 @@ type LevelInfo {
   premiumReward: Reward!
 }
 
-# type BattlePassUser {
-#   xp: BigInt!
-#   level: BigInt!
-#   unclaimedFreeRewards: [LevelInfo]!
-#   premium: PremiumBattlePassUser
-# }
+type BattlePassUser {
+  xp: BigInt!
+  level: BigInt!
+  unclaimedFreeRewards: [LevelInfo]!
+  premium: PremiumBattlePassUser
+}
 
-# type PremiumBattlePassUser {
-#   owned: BigInt!
-#   unclaimedPremiumRewards: [LevelInfo]!
-# }
+type PremiumBattlePassUser {
+  owned: BigInt!
+  unclaimedPremiumRewards: [LevelInfo]!
+}
 
 type Reward {
   id: BigInt!

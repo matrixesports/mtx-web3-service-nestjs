@@ -23,6 +23,7 @@ export class BattlePass {
     endDate: Date;
     seasonId: BigInt;
     levelInfo: Nullable<LevelInfo>[];
+    userInfo: BattlePassUser;
 }
 
 export class LevelInfo {
@@ -30,6 +31,18 @@ export class LevelInfo {
     xpToCompleteLevel: BigInt;
     freeReward: Reward;
     premiumReward: Reward;
+}
+
+export class BattlePassUser {
+    xp: BigInt;
+    level: BigInt;
+    unclaimedFreeRewards: Nullable<LevelInfo>[];
+    premium?: Nullable<PremiumBattlePassUser>;
+}
+
+export class PremiumBattlePassUser {
+    owned: BigInt;
+    unclaimedPremiumRewards: Nullable<LevelInfo>[];
 }
 
 export class Reward {
