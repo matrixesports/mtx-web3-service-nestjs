@@ -33,7 +33,7 @@ type PremiumBattlePassUser {
 }
 
 type Reward {
-  id: BigInt!
+  id: BigInt
   qty: BigInt!
   metadata: RewardMetadata
 }
@@ -51,33 +51,33 @@ type Recipe {
   outputIngredients: [Reward]!
 }
 
-# # handle each reward type separately
-# type Inventory {
-#   #PREMIUM_PASS,SPECIAL, CREATOR_TOKEN, UNREDEEMED REDEEMABLE, LOOTBOX just check balance
-#   default: [Reward]!
-#   redeemed: [RedeemStatus]!
-# }
+# handle each reward type separately
+type Inventory {
+  #PREMIUM_PASS,SPECIAL, CREATOR_TOKEN, UNREDEEMED REDEEMABLE, LOOTBOX just check balance
+  default: [Reward]!
+  redeemed: [Redeemed]!
+}
 
-# enum RedeemStatus {
-#   REDEEMED
-#   PROCESSING
-#   REJECTED
-# }
+type Redeemed {
+  id: BigInt!
+  status: [RedeemStatus]!
+}
 
-# type Redeemed {
-#   id: BigInt!
-#   status: [RedeemStatus]!
-# }
+enum RedeemStatus {
+  REDEEMED
+  PROCESSING
+  REJECTED
+}
 
-# type LootboxOption {
-#   probability: Int!
-#   reward: [Reward]!
-# }
+type LootboxOption {
+  probability: Int!
+  reward: [Reward]!
+}
 
 type Query {
   getBattlePass(creatorId: Int!): BattlePass
-  #   getInventory: Inventory
-  #   getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
+  getInventory: Inventory
+  getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
   getRecipes(creatorId: Int!): [Recipe]
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
 }

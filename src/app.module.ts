@@ -10,6 +10,9 @@ import { BattlepassModule } from './battlepass/battlepass.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { ContractModule } from './contract/contract.module';
 import { RecipeModule } from './recipe/recipe.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { RedeemableModule } from './reward/redeemable/redeemable.module';
+import { LootboxModule } from './reward/lootbox/lootbox.module';
 import configuration from './configuration';
 import * as Joi from 'joi';
 @Module({
@@ -65,6 +68,9 @@ import * as Joi from 'joi';
     MetadataModule,
     ContractModule,
     RecipeModule,
+    InventoryModule,
+    RedeemableModule,
+    LootboxModule,
   ],
   controllers: [],
   providers: [],

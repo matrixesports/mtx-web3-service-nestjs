@@ -7,6 +7,12 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum RedeemStatus {
+    REDEEMED = "REDEEMED",
+    PROCESSING = "PROCESSING",
+    REJECTED = "REJECTED"
+}
+
 export class BattlePass {
     name: string;
     description: string;
@@ -39,7 +45,7 @@ export class PremiumBattlePassUser {
 }
 
 export class Reward {
-    id: BigInt;
+    id?: Nullable<BigInt>;
     qty: BigInt;
     metadata?: Nullable<RewardMetadata>;
 }
@@ -57,8 +63,27 @@ export class Recipe {
     outputIngredients: Nullable<Reward>[];
 }
 
+export class Inventory {
+    default: Nullable<Reward>[];
+    redeemed: Nullable<Redeemed>[];
+}
+
+export class Redeemed {
+    id: BigInt;
+    status: Nullable<RedeemStatus>[];
+}
+
+export class LootboxOption {
+    probability: number;
+    reward: Nullable<Reward>[];
+}
+
 export abstract class IQuery {
     abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
+
+    abstract getInventory(): Nullable<Inventory> | Promise<Nullable<Inventory>>;
+
+    abstract getLootboxOptions(creatorId: number, lootboxId: number): Nullable<Nullable<LootboxOption>[]> | Promise<Nullable<Nullable<LootboxOption>[]>>;
 
     abstract getRecipes(creatorId: number): Nullable<Nullable<Recipe>[]> | Promise<Nullable<Nullable<Recipe>[]>>;
 

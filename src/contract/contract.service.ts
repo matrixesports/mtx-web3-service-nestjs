@@ -31,11 +31,9 @@ export class ContractService {
     });
   }
 
-  // will return empty array if it cant find matching address
-  //get recipe contract info from db isnce only 1 recipe ctr is deployed
-  async findRecipe(): Promise<ContractDB[]> {
+  async findByType(ctrType: CtrType): Promise<ContractDB[]> {
     return this.contractRepository.find({
-      where: { ctr_type: 'Recipe' },
+      where: { ctr_type: ctrType },
     });
   }
 
