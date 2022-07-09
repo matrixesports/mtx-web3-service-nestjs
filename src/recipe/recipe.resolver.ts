@@ -89,7 +89,7 @@ export class RecipeResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number
   ): Promise<GetRecipeChildDto> {
-    let contractDBEntries = await this.contractService.findByType('Recipe');
+    let contractDBEntries = await this.contractService.findByType('Crafting');
     if (contractDBEntries.length == 0) return null;
     let contract = await this.contractService.getProviderContract(
       contractDBEntries[0]

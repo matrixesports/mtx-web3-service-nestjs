@@ -19,9 +19,9 @@ export class Contract {
 
   @Column({
     type: 'enum',
-    enum: ['Recipe', 'BattlePass', 'CreatorToken', 'Game'],
+    enum: ['Crafting', 'BattlePass', 'CreatorToken', 'Game'],
   })
   ctr_type: CtrType;
 }
 
-export type CtrType = 'Recipe' | 'BattlePass' | 'CreatorToken' | 'Game';
+export type CtrType = 'Crafting' | 'BattlePass' | 'CreatorToken' | 'Game';

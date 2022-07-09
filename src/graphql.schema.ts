@@ -7,6 +7,14 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum RewardType {
+    PREMIUM_PASS = "PREMIUM_PASS",
+    CREATOR_TOKEN = "CREATOR_TOKEN",
+    LOOTBOX = "LOOTBOX",
+    REDEEMABLE = "REDEEMABLE",
+    SPECIAL = "SPECIAL"
+}
+
 export enum RedeemStatus {
     REDEEMED = "REDEEMED",
     PROCESSING = "PROCESSING",
@@ -48,6 +56,7 @@ export class Reward {
     id?: Nullable<BigInt>;
     qty: BigInt;
     metadata?: Nullable<RewardMetadata>;
+    rewardType: RewardType;
 }
 
 export class RewardMetadata {
@@ -81,7 +90,7 @@ export class LootboxOption {
 export abstract class IQuery {
     abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
 
-    abstract getInventory(): Nullable<Inventory> | Promise<Nullable<Inventory>>;
+    abstract getInventory(creatorId: number): Nullable<Inventory> | Promise<Nullable<Inventory>>;
 
     abstract getLootboxOptions(creatorId: number, lootboxId: number): Nullable<Nullable<LootboxOption>[]> | Promise<Nullable<Nullable<LootboxOption>[]>>;
 

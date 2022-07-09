@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Contract } from './contract.entity';
 import { ContractService } from './contract.service';
@@ -8,4 +8,5 @@ import { ContractService } from './contract.service';
   providers: [ContractService],
   exports: [ContractService],
 })
+@Global()
 export class ContractModule {}

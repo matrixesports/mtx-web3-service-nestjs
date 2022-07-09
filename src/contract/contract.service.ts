@@ -44,79 +44,62 @@ export class ContractService {
     );
   }
 
-  async getProviderContract(contractDB: ContractDB): Promise<Contract> {
+  getProviderContract(contractDB: ContractDB): Contract {
     return new ethers.Contract(
       contractDB.address,
       contractDB.abi,
-      await this.getProvider(contractDB.network)
+      this.getProvider(contractDB.network)
     );
   }
 
-  //   getSigner(network: string): ethers.Signer {
-  //     return new ethers.Wallet(PVT_KEY!, this.getProvider(network));
-  //   }
-
-  //   async getSignerContract(
-  //     address: string,
-  //     abi: string,
-  //     network: string
-  //   ): Promise<Contract> {
-  //     return new ethers.Contract(address, abi, await this.getSigner(network));
-  //   }
-}
-
-// export async function getContractFromAddress(
-//   address: string,
-//   useSigner: boolean,
-//   oracle: boolean
-// ): Promise<Contract | null> {
-//   let info = await getContractInfo(address);
-//   if (info == null) {
-//     return null;
-//   }
-
-//   let signer;
-//   if (useSigner) {
-//     if (oracle) {
-//       signer = await getOracleSigner(info.network);
-//     } else {
-//       signer = await getSigner(info.network);
-//     }
-//   } else {
-//     signer = await getProvider(info.network);
-//   }
-//   return new ethers.Contract(address, info.abi, signer);
-// }
-
-/**
- *
- * @returns fallback value is 40 coz minimum is 30
- */
-export async function getMaticFeeData(): Promise<{
-  maxPriorityFeePerGas: BigNumber;
-  maxFeePerGas?: BigNumber;
-} | null> {
-  try {
-    const { data } = await axios({
-      method: 'get',
-      url: 'https://gasstation-mainnet.matic.network/v2',
-    });
-    let maxFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.maxFee) + '',
-      'gwei'
+  getSigner(network: string): ethers.Signer {
+    return new ethers.Wallet(
+      this.configService.get('PVT_KEY'),
+      this.getProvider(network)
     );
-    let maxPriorityFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.maxPriorityFee) + '',
-      'gwei'
-    );
+  }
 
-    return {
-      maxPriorityFeePerGas,
-      maxFeePerGas,
-    };
-  } catch (e) {
-    return {
-      maxPriorityFeePerGas: ethers.utils.parseUnits(Math.ceil(40) + '', 'gwei'),
-    };
+  getSignerContract(contractDB: ContractDB): Contract {
+    return new ethers.Contract(
+      contractDB.address,
+      contractDB.abi,
+      this.getSigner(contractDB.network)
+    );
+  }
+
+  /**
+   *
+   * @returns fallback value is 40 coz minimum is 30
+   */
+  async getMaticFeeData(): Promise<{
+    maxPriorityFeePerGas: BigNumber;
+    maxFeePerGas?: BigNumber;
+  } | null> {
+    try {
+      const { data } = await axios({
+        method: 'get',
+        url: 'https://gasstation-mainnet.matic.network/v2',
+      });
+      let maxFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(data.fast.maxFee) + '',
+        'gwei'
+      );
+      let maxPriorityFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(data.fast.maxPriorityFee) + '',
+        'gwei'
+      );
+
+      return {
+        maxPriorityFeePerGas,
+        maxFeePerGas,
+      };
+    } catch (e) {
+      return {
+        maxPriorityFeePerGas: ethers.utils.parseUnits(
+          Math.ceil(40) + '',
+          'gwei'
+        ),
+      };
+    }
   }
 }

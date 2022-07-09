@@ -1,4 +1,4 @@
-import { Context, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Context, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
 import { MetadataService } from 'src/metadata/metadata.service';
@@ -65,7 +65,7 @@ export class InventoryResolver {
   redeemed() {}
 
   @Query()
-  async getInventory() {
-    return {};
+  async getInventory(@Args('creatorId') creatorId: number) {
+    return creatorId;
   }
 }

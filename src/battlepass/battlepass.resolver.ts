@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import {
   Args,
   Context,
@@ -70,6 +69,7 @@ export class BattlepassResolver {
           metadata: await this.metadataService.readFromIPFS(
             await parent.contract.uri(seasonInfo.freeRewardId)
           ),
+          rewardType: await parent.contract.checkType(seasonInfo.freeRewardId),
         },
         premiumReward: {
           id: seasonInfo.premiumRewardId,

@@ -36,6 +36,16 @@ type Reward {
   id: BigInt
   qty: BigInt!
   metadata: RewardMetadata
+  rewardType: RewardType!
+}
+
+# do not change order
+enum RewardType {
+  PREMIUM_PASS
+  CREATOR_TOKEN
+  LOOTBOX
+  REDEEMABLE
+  SPECIAL
 }
 
 type RewardMetadata {
@@ -76,7 +86,7 @@ type LootboxOption {
 
 type Query {
   getBattlePass(creatorId: Int!): BattlePass
-  getInventory: Inventory
+  getInventory(creatorId: Int!): Inventory
   getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
   getRecipes(creatorId: Int!): [Recipe]
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
