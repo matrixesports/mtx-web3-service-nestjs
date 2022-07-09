@@ -34,9 +34,7 @@ export class InventoryResolver {
       let contractDb = await this.contractService.findByAddress(
         owned[x].contract.address
       );
-      let contract = await this.contractService.getProviderContract(
-        contractDb[0]
-      );
+      let contract = this.contractService.getProviderContract(contractDb[0]);
       let uri = await contract.uri(owned[x].id.tokenId);
       defaultReward.push({
         id: owned[x].id.tokenId,
@@ -49,7 +47,7 @@ export class InventoryResolver {
       'CreatorToken'
     );
     for (let x = 0; x < creatorTokenAddys.length; x++) {
-      let contract = await this.contractService.getProviderContract(
+      let contract = this.contractService.getProviderContract(
         creatorTokenAddys[x]
       );
       let qty = await contract.balanceOf(userAddress);

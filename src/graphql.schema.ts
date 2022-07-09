@@ -36,8 +36,8 @@ export class BattlePass {
 export class LevelInfo {
     level: number;
     xpToCompleteLevel: BigInt;
-    freeReward: Reward;
-    premiumReward: Reward;
+    freeReward?: Nullable<Reward>;
+    premiumReward?: Nullable<Reward>;
 }
 
 export class BattlePassUser {
@@ -56,7 +56,7 @@ export class Reward {
     id?: Nullable<BigInt>;
     qty: BigInt;
     metadata?: Nullable<RewardMetadata>;
-    rewardType: RewardType;
+    rewardType?: Nullable<RewardType>;
 }
 
 export class RewardMetadata {

@@ -16,8 +16,8 @@ type BattlePass {
 type LevelInfo {
   level: Int!
   xpToCompleteLevel: BigInt!
-  freeReward: Reward!
-  premiumReward: Reward!
+  freeReward: Reward
+  premiumReward: Reward
 }
 
 type BattlePassUser {
@@ -36,7 +36,7 @@ type Reward {
   id: BigInt
   qty: BigInt!
   metadata: RewardMetadata
-  rewardType: RewardType!
+  rewardType: RewardType
 }
 
 # do not change order

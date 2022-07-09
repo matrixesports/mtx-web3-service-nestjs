@@ -29,9 +29,7 @@ export class RecipeResolver {
         inputIngredients.tokens[x]
       );
       if (contractDB.length == 0) continue;
-      let contract = await this.contractService.getProviderContract(
-        contractDB[0]
-      );
+      let contract = this.contractService.getProviderContract(contractDB[0]);
       let uri = await contract.uri(id);
       let metadata = await this.metadataService.readFromIPFS(uri);
       ingredients.push({
@@ -57,9 +55,7 @@ export class RecipeResolver {
         outputIngredients.tokens[x]
       );
       if (contractDB.length == 0) continue;
-      let contract = await this.contractService.getProviderContract(
-        contractDB[0]
-      );
+      let contract = this.contractService.getProviderContract(contractDB[0]);
       let uri = await contract.uri(id);
       let metadata = await this.metadataService.readFromIPFS(uri);
       ingredients.push({
@@ -91,7 +87,7 @@ export class RecipeResolver {
   ): Promise<GetRecipeChildDto> {
     let contractDBEntries = await this.contractService.findByType('Crafting');
     if (contractDBEntries.length == 0) return null;
-    let contract = await this.contractService.getProviderContract(
+    let contract = this.contractService.getProviderContract(
       contractDBEntries[0]
     );
     return { contract, recipeId, creatorId };

@@ -43,10 +43,22 @@ $ npm run test:cov
 - moralis
 - dpd
 
-  For level info: i return 0 id 0 qty for levels with no rewards OR skip those levels
+  For level info: i return 0 id 0 qty for levels with no rewards OR skip those levels i return null
   userINfo will juuts use context user address now
   Userinfo unclaimed will just return array of levels where rewards are unclaimed
 
 TODO:
 
+BO:
+
+- add middleware to context to automatically convert incoming into nice checksum addresses in the context
+- add logging middleware
+- datadog, talk to jay
+- exception handlers, proper error handling and how would we look at errors that happen once they have happened?
+- pipes for api calls?
+- caching
+
+BATTLE_PASS:
+
 1. chaman endpoint for name,description in pass
+2. user service url for .env

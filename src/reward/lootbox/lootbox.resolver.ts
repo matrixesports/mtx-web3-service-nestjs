@@ -25,9 +25,7 @@ export class LootboxResolver {
       'BattlePass'
     );
     if (contractDB.length == 0) return null;
-    let contract = await this.contractService.getProviderContract(
-      contractDB[0]
-    );
+    let contract = this.contractService.getProviderContract(contractDB[0]);
     let lengthOfOptions = await contract.getLootboxOptionsLength(lootboxId);
     let allOptions = [];
     for (let x = 0; x < lengthOfOptions; x++) {
