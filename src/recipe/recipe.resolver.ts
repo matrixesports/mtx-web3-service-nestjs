@@ -17,7 +17,6 @@ export class RecipeResolver {
   }
 
   @ResolveField()
-  // TODO: throw error if contract doesnt exist for recipe
   async inputIngredients(@Parent() parent: GetRecipeChildDto) {
     let inputIngredients = await parent.contract.getInputIngredients(
       parent.recipeId
@@ -74,7 +73,6 @@ export class RecipeResolver {
   }
 
   //   @Query()
-  //   //TODO: SETUP MORALIS DB TO LISTEN FOR EVENTS
   //   async getRecipes(
   //     @Args('creatorId') creatorId: number
   //   ): Promise<{ contract: Contract }> {
@@ -87,7 +85,6 @@ export class RecipeResolver {
   //   }
 
   @Query()
-  // TODO: TEST IT
   async getRecipe(
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number

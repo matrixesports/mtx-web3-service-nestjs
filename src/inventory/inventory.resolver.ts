@@ -62,11 +62,9 @@ export class InventoryResolver {
   }
 
   @ResolveField()
-  //TODO: read from ticket db and convert to bytes32
   redeemed() {}
 
   @Query()
-  //TOD: PAGINATIION AND ALCHEMY ONLY SUPPORRS 20 contracts
   async getInventory() {
     return {};
   }

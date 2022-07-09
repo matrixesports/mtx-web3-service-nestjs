@@ -35,3 +35,8 @@ $ npm run test:cov
 - optimize
 - add reward type to reward
 - add metadata to inventrorey erc20
+- //TODO: read from ticket db and convert to bytes32
+- //TOD: PAGINATIION AND ALCHEMY ONLY SUPPORRS 20 contracts
+  // TODO: throw error if contract doesnt exist for recipe
+  // TODO: TEST IT
+  // //TODO: SETUP MORALIS DB TO LISTEN FOR EVENTS
