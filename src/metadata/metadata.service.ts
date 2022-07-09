@@ -78,32 +78,3 @@ export class MetadataService {
 //     });
 //     return pins.rows[0].metadata;
 // }
-//   /**
-//    *
-//    * REQUIREMENTS:
-//    * When uploading metadata URI, do not use our gateway as its just going to increase our usage,but when its us using it, then convert it to our gateway
-//    * deploy with 'ipfs://cid'
-//    * uri in contracts will take care of appending /id.json
-//    * @param source fs path, process.cwd()+path
-//    * @param name name of folder, for easy lookups
-//    * @param metadata an object with key val pairs to indicate any metadata associated with the folder
-//    * @returns cid of folder pinned to pinata
-//    */
-//   async pinToIPFS(source: string, name: string, metadata: any) {
-//     let res = null;
-//     try {
-//       res = await this.pinata.pinFromFS(source, {
-//         pinataMetadata: {
-//           name: name,
-//           keyvalues: metadata,
-//         },
-//         pinataOptions: {
-//           cidVersion: 0,
-//         },
-//       });
-//     } catch (e) {
-//       console.log(e);
-//       return res;
-//     }
-//     return res.IpfsHash;
-//   }
