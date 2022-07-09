@@ -99,5 +99,18 @@ export abstract class IQuery {
     abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
 }
 
+export abstract class IMutation {
+    abstract claimReward(creatorId: number, level: number, premium: boolean, autoRedeem: boolean): MutationResponse | Promise<MutationResponse>;
+
+    abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;
+
+    abstract craft(creatorId: number, recipeId: number): MutationResponse | Promise<MutationResponse>;
+}
+
+export class MutationResponse {
+    success: boolean;
+    description?: Nullable<string>;
+}
+
 export type BigInt = unknown;
 type Nullable<T> = T | null;

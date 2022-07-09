@@ -1,40 +1,24 @@
-# Graphql service for talking to the contracts
+# Graphql service for querying the contracts
 
 ## Installation
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ## Running the app
 
 ```bash
 # development
-$ npm run start
+$ yarn start
 
 # watch mode
-$ npm run start:dev
+$ yarn start:dev
 
 # production mode
-$ npm run start:prod
+$ yarn start:prod
 ```
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-- optimize
-- add reward type to reward
-- add metadata to inventrorey erc20
 - //TODO: read from ticket db and convert to bytes32
 - //TOD: PAGINATIION AND ALCHEMY ONLY SUPPORRS 20 contracts
   // TODO: throw error if contract doesnt exist for recipe; return null can be made better
@@ -57,8 +41,17 @@ BO:
 - exception handlers, proper error handling and how would we look at errors that happen once they have happened?
 - pipes for api calls?
 - caching
+- adjust for page keys in alchemy api
 
 BATTLE_PASS:
 
 1. chaman endpoint for name,description in pass
 2. user service url for .env
+3. better eror handline that returning null and shit
+4. inventory read from ticket db
+
+- pass contract add info for creator token and betterhanling of IDS
+- document everythng
+- FINAL. THINK
+- add reward check type
+  contarcts should not allow for mistakes and FE shouldnt have to worry

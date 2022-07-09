@@ -92,24 +92,18 @@ type Query {
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
 }
 
-# type Mutation {
-#   claimReward(input: ClaimRewardInput): MutationResponse!
-#   redeemReward(input: RedeemRewardInput): RedeemRewardResponse!
-# }
+type Mutation {
+  claimReward(
+    creatorId: Int!
+    level: Int!
+    premium: Boolean!
+    autoRedeem: Boolean!
+  ): MutationResponse!
+  redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
+  craft(creatorId: Int!, recipeId: Int!): MutationResponse!
+}
 
-# input ClaimRewardInput {
-#   creatorId: Int!
-#   level: Int!
-#   premium: Boolean!
-#   autoRedeem: Boolean!
-# }
-
-# input RedeemRewardInput {
-#   creatorId: Int!
-#   id: Int!
-# }
-
-# type MutationResponse {
-#   success: Boolean!
-#   description: String!
-# }
+type MutationResponse {
+  success: Boolean!
+  description: String
+}

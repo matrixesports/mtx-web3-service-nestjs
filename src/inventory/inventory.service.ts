@@ -18,7 +18,7 @@ export class InventoryService {
   async getNFTSOwnedForUser(
     token_contracts: Array<string>,
     user: string
-  ): Promise<BaseNft[]> {
+  ): Promise<GetNftsResponseWithoutMetadata> {
     let res: GetNftsResponseWithoutMetadata;
     try {
       res = await this.web3.alchemy.getNfts({
@@ -27,13 +27,13 @@ export class InventoryService {
         withMetadata: false,
       });
     } catch (e) {
-      return [];
+      return null;
     }
     for (let x = 0; x < res.ownedNfts.length; x++) {
       res.ownedNfts[x].contract.address = ethers.utils.getAddress(
         res.ownedNfts[x].contract.address
       );
     }
-    return res.ownedNfts;
+    return res;
   }
 }

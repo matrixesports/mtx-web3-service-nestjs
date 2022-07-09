@@ -1,5 +1,13 @@
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { Contract } from 'ethers';
+import {
+  Args,
+  Context,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
+import { Contract, ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { GetRecipeChildDto } from './dto/GetRecipeChild.dto';
@@ -91,5 +99,35 @@ export class RecipeResolver {
       contractDBEntries[0]
     );
     return { contract, recipeId, creatorId };
+  }
+
+  @Mutation()
+  /**
+   */
+  async craft(
+    @Args('creatorId') creatorId: number,
+    @Args('recipeId') recipeId: number,
+    @Context() context
+  ) {
+    let userAddress: string = context.req.headers['user-address'];
+    if (userAddress == undefined || userAddress == null) return null;
+    // check if the address is valid
+    try {
+      userAddress = ethers.utils.getIcapAddress(userAddress);
+    } catch (e) {
+      return null;
+    }
+
+    let contractDB = await this.contractService.findByType('Crafting');
+    if (contractDB.length == 0) return null;
+    let contract = this.contractService.getSignerContract(contractDB[0]);
+
+    try {
+      let fee = await this.contractService.getMaticFeeData();
+      await contract.craft(recipeId, userAddress);
+      return { success: true };
+    } catch (e) {
+      return { success: false };
+    }
   }
 }
