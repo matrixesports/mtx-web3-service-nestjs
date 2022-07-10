@@ -19,10 +19,6 @@ $ yarn start:dev
 $ yarn start:prod
 ```
 
-- user service url for .env
-- better eror handline that returning null and shit
-- pass contract add info for creator token and betterhanling of IDS
-- document everythng
-- FINAL. THINK
-  contarcts should not allow for mistakes and FE shouldnt have to worry
+- contarcts should not allow for mistakes and FE shouldnt have to worry
 - sepoarate dbs for pass
+- commit history clean

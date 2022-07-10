@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import axios from 'axios';
-import { Contract as ContractDB, CtrType } from './contract.entity';
-import { BigNumber, Contract, ethers } from 'ethers';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import axios from 'axios';
+import { BigNumber, Contract, ethers } from 'ethers';
+import { FindOptionsWhere, Repository } from 'typeorm';
+import { Contract as ContractDB } from './contract.entity';
 
 export const MATIC_NUMBER_OF_BLOCKS_TO_WAIT = 1;
 
@@ -16,25 +16,11 @@ export class ContractService {
     private configService: ConfigService
   ) {}
 
-  // will return empty array if it cant find matching address
-  async findByAddress(address: string): Promise<ContractDB[]> {
-    return this.contractRepository.find({ where: { address: address } });
-  }
-
-  // will return empty array if it cant find matching address
-  async findForCreator(
-    creatorId: number,
-    ctrType: CtrType
-  ): Promise<ContractDB[]> {
-    return this.contractRepository.find({
-      where: { creator_id: creatorId, ctr_type: ctrType },
-    });
-  }
-
-  async findByType(ctrType: CtrType): Promise<ContractDB[]> {
-    return this.contractRepository.find({
-      where: { ctr_type: ctrType },
-    });
+  //will fail if it cannot find
+  async find(
+    where: FindOptionsWhere<ContractDB> | FindOptionsWhere<ContractDB>[]
+  ) {
+    return this.contractRepository.findOneByOrFail(where);
   }
 
   getProvider(network: string): ethers.providers.Provider {

@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import {
   Args,
   Context,
@@ -8,12 +7,11 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import axios from 'axios';
 import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
-import { LevelInfo, RewardType } from 'src/graphql.schema';
-import { MetadataService } from 'src/metadata/metadata.service';
+import { RewardType } from 'src/graphql.schema';
 import { rewardTypeArray } from 'src/types/rewardTypeArray';
+import { BattlepassService } from './battlepass.service';
 import { GetBattlePassChildDto } from './dto/GetBattlePassChild.dto';
 import { GetBattlePassUserInfoChildDto } from './dto/GetBattlePassUserInfoChild.dto';
 
@@ -21,8 +19,7 @@ import { GetBattlePassUserInfoChildDto } from './dto/GetBattlePassUserInfoChild.
 export class BattlepassResolver {
   constructor(
     private contractService: ContractService,
-    private metadataService: MetadataService,
-    private configService: ConfigService
+    private battlePassService: BattlepassService
   ) {}
 
   @ResolveField()
@@ -70,40 +67,16 @@ export class BattlepassResolver {
     let levelInfo = [];
     for (let x = 0; x <= maxLevel; x++) {
       let seasonInfo = await parent.contract.seasonInfo(parent.seasonId, x);
-      let freeReward;
-      let premiumReward;
-      try {
-        let freeRewardType = await parent.contract.checkType(
-          seasonInfo.freeRewardId
-        );
-        let rewardType = rewardTypeArray[freeRewardType];
-        let uri = await parent.contract.uri(seasonInfo.freeRewardId);
-        freeReward = {
-          id: seasonInfo.freeRewardId,
-          qty: seasonInfo.freeRewardQty,
-          metadata: await this.metadataService.readFromIPFS(uri),
-          rewardType,
-        };
-      } catch (e) {
-        freeReward = null;
-      }
-
-      try {
-        let premiumRewardType = await parent.contract.checkType(
-          seasonInfo.premiumRewardId
-        );
-        let rewardType = rewardTypeArray[premiumRewardType];
-        let uri = await parent.contract.uri(seasonInfo.premiumRewardId);
-        premiumReward = {
-          id: seasonInfo.premiumRewardId,
-          qty: seasonInfo.premiumRewardQty,
-          metadata: await this.metadataService.readFromIPFS(uri),
-          rewardType,
-        };
-      } catch (e) {
-        premiumReward = null;
-      }
-
+      let freeReward = await this.battlePassService.getRewardForLevel(
+        parent.contract,
+        seasonInfo.freeRewardId,
+        seasonInfo.freeRewardQty
+      );
+      let premiumReward = await this.battlePassService.getRewardForLevel(
+        parent.contract,
+        seasonInfo.premiumRewardId,
+        seasonInfo.premiumRewardQty
+      );
       levelInfo.push({
         level: x,
         xpToCompleteLevel: seasonInfo.xpToCompleteLevel,
@@ -120,13 +93,6 @@ export class BattlepassResolver {
     @Context() context
   ): GetBattlePassUserInfoChildDto {
     let userAddress: string = context.req.headers['user-address'];
-    if (userAddress == undefined || userAddress == null) return null;
-    // check if the address is valid
-    try {
-      userAddress = ethers.utils.getIcapAddress(userAddress);
-    } catch (e) {
-      return null;
-    }
     return { ...parent, userAddress };
   }
 
@@ -137,16 +103,13 @@ export class BattlepassResolver {
   async getBattlePass(
     @Args('creatorId') creatorId: number
   ): Promise<GetBattlePassChildDto> {
-    let contractDBEntries = await this.contractService.findForCreator(
-      creatorId,
-      'BattlePass'
-    );
-    if (contractDBEntries.length == 0) return null;
-    let contract = this.contractService.getProviderContract(
-      contractDBEntries[0]
-    );
-    let seasonId = await contract.seasonId();
-    return { contract, seasonId };
+    try {
+      let contract = await this.battlePassService.getPassContract(creatorId);
+      let seasonId = await contract.seasonId();
+      return { contract, seasonId };
+    } catch (e) {
+      return null;
+    }
   }
 
   @Mutation()
@@ -162,111 +125,66 @@ export class BattlepassResolver {
     @Args('autoRedeem') autoRedeem: boolean,
     @Context() context
   ) {
-    let userAddress: string = context.req.headers['user-address'];
-    if (userAddress == undefined || userAddress == null) return null;
-    // check if the address is valid
     try {
-      userAddress = ethers.utils.getIcapAddress(userAddress);
-    } catch (e) {
-      return null;
-    }
-
-    let contractDB = await this.contractService.findForCreator(
-      creatorId,
-      'BattlePass'
-    );
-    if (contractDB.length == 0) return null;
-    let contract = this.contractService.getSignerContract(contractDB[0]);
-    let seasonId = await contract.seasonId();
-
-    try {
+      let userAddress: string = context.req.headers['user-address'];
+      let contract = await this.battlePassService.getPassContract(
+        creatorId,
+        true
+      );
+      let seasonId = await contract.seasonId();
       let fee = await this.contractService.getMaticFeeData();
       await contract.claimReward(seasonId, userAddress, level, premium, fee);
-    } catch (e) {
-      return { success: false };
-    }
 
-    let rewardGiven = await contract.seasonInfo(seasonId, level);
-    let id;
-    if (premium) {
-      id = rewardGiven.premiumRewardId;
-    } else {
-      id = rewardGiven.freeRewardId;
-    }
+      let rewardGiven = await contract.seasonInfo(seasonId, level);
+      let id;
+      if (premium) {
+        id = rewardGiven.premiumRewardId;
+      } else {
+        id = rewardGiven.freeRewardId;
+      }
+      let rewardType;
+      rewardType = await contract.checkType(id);
 
-    let rewardType;
-    rewardType = await contract.checkType(id);
-    if (rewardTypeArray[rewardType] != RewardType.REDEEMABLE)
+      if (rewardTypeArray[rewardType] == RewardType.REDEEMABLE) {
+        if (!autoRedeem) return { success: true };
+        await this.battlePassService.redeemItemHelper(
+          contract,
+          id.toNumber(),
+          userAddress,
+          creatorId,
+          contract.address
+        );
+      } else if (rewardTypeArray[rewardType] == RewardType.LOOTBOX) {
+        fee = await this.contractService.getMaticFeeData();
+        await contract.openLootbox(id, userAddress, fee);
+      }
       return { success: true };
-    if (!autoRedeem) return { success: true };
-
-    try {
-      let uri = await contract.uri(id);
-      let metadata = await this.metadataService.readFromIPFS(uri);
-      let ticket = await axios.post(
-        `${this.configService.get('SERVICE').ticket}/api/ticket/redemption`,
-        {
-          ...metadata,
-          creatorId: creatorId,
-          itemId: id.toNumber(),
-          userAddress: userAddress,
-          itemAddress: contractDB[0].address,
-        }
-      );
-      let fee = await this.contractService.getMaticFeeData();
-      await contract.redeemReward(
-        ticket.data.data.ticketId,
-        userAddress,
-        id,
-        fee
-      );
     } catch (e) {
       return { success: false };
     }
   }
 
   @Mutation()
-  /**
-   */
   async redeemReward(
     @Args('creatorId') creatorId: number,
     @Args('itemId') itemId: number,
     @Context() context
   ) {
-    let userAddress: string = context.req.headers['user-address'];
-    if (userAddress == undefined || userAddress == null) return null;
-    // check if the address is valid
     try {
-      userAddress = ethers.utils.getIcapAddress(userAddress);
-    } catch (e) {
-      return null;
-    }
+      let userAddress: string = context.req.headers['user-address'];
 
-    let contractDB = await this.contractService.findForCreator(
-      creatorId,
-      'BattlePass'
-    );
-    if (contractDB.length == 0) return null;
-    let contract = this.contractService.getSignerContract(contractDB[0]);
-    let seasonId = await contract.seasonId();
-
-    try {
-      let uri = await contract.uri(itemId);
-      let metadata = await this.metadataService.readFromIPFS(uri);
-      let ticket = await axios.post(
-        `${this.configService.get('SERVICE').ticket}/api/ticket/redemption`,
-        {
-          ...metadata,
-          creatorId: creatorId,
-          itemId: itemId,
-          userAddress: userAddress,
-          itemAddress: contractDB[0].address,
-        }
+      let contract = await this.battlePassService.getPassContract(
+        creatorId,
+        true
       );
-      let fee = await this.contractService.getMaticFeeData();
-      let ticketId = ticket.data.data.ticketId;
-      ticketId = ticketId.replace('-', '');
-      await contract.redeemReward(ticketId, userAddress, itemId, fee);
+      await this.battlePassService.redeemItemHelper(
+        contract,
+        itemId,
+        userAddress,
+        creatorId,
+        contract.address
+      );
+      return { success: true };
     } catch (e) {
       return { success: false };
     }

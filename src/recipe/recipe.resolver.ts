@@ -7,7 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { Contract, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { GetRecipeChildDto } from './dto/GetRecipeChild.dto';
@@ -33,11 +33,15 @@ export class RecipeResolver {
     for (let x = 0; x <= inputIngredients.tokens.length; x++) {
       let id = inputIngredients.ids[x];
       let qty = inputIngredients.qtys[x];
-      let contractDB = await this.contractService.findByAddress(
-        inputIngredients.tokens[x]
-      );
-      if (contractDB.length == 0) continue;
-      let contract = this.contractService.getProviderContract(contractDB[0]);
+      let contractDB;
+      try {
+        contractDB = await this.contractService.find({
+          address: inputIngredients.tokens[x],
+        });
+      } catch (e) {
+        continue;
+      }
+      let contract = this.contractService.getProviderContract(contractDB);
       let uri = await contract.uri(id);
       let metadata = await this.metadataService.readFromIPFS(uri);
       ingredients.push({
@@ -59,11 +63,15 @@ export class RecipeResolver {
     for (let x = 0; x <= outputIngredients.tokens.length; x++) {
       let id = outputIngredients.ids[x];
       let qty = outputIngredients.qtys[x];
-      let contractDB = await this.contractService.findByAddress(
-        outputIngredients.tokens[x]
-      );
-      if (contractDB.length == 0) continue;
-      let contract = this.contractService.getProviderContract(contractDB[0]);
+      let contractDB;
+      try {
+        contractDB = await this.contractService.find({
+          address: outputIngredients.tokens[x],
+        });
+      } catch (e) {
+        continue;
+      }
+      let contract = this.contractService.getProviderContract(contractDB);
       let uri = await contract.uri(id);
       let metadata = await this.metadataService.readFromIPFS(uri);
       ingredients.push({
@@ -93,38 +101,28 @@ export class RecipeResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number
   ): Promise<GetRecipeChildDto> {
-    let contractDBEntries = await this.contractService.findByType('Crafting');
-    if (contractDBEntries.length == 0) return null;
-    let contract = this.contractService.getProviderContract(
-      contractDBEntries[0]
-    );
-    return { contract, recipeId, creatorId };
-  }
-
-  @Mutation()
-  /**
-   */
-  async craft(
-    @Args('creatorId') creatorId: number,
-    @Args('recipeId') recipeId: number,
-    @Context() context
-  ) {
-    let userAddress: string = context.req.headers['user-address'];
-    if (userAddress == undefined || userAddress == null) return null;
-    // check if the address is valid
     try {
-      userAddress = ethers.utils.getIcapAddress(userAddress);
+      let contractDB = await this.contractService.find({
+        ctr_type: 'Crafting',
+      });
+      let contract = this.contractService.getProviderContract(contractDB);
+      return { contract, recipeId, creatorId };
     } catch (e) {
       return null;
     }
+  }
 
-    let contractDB = await this.contractService.findByType('Crafting');
-    if (contractDB.length == 0) return null;
-    let contract = this.contractService.getSignerContract(contractDB[0]);
-
+  @Mutation()
+  async craft(@Args('recipeId') recipeId: number, @Context() context) {
     try {
+      let userAddress: string = context.req.headers['user-address'];
+
+      let contractDB = await this.contractService.find({
+        ctr_type: 'Crafting',
+      });
+      let contract = this.contractService.getSignerContract(contractDB);
       let fee = await this.contractService.getMaticFeeData();
-      await contract.craft(recipeId, userAddress);
+      await contract.craft(recipeId, userAddress, fee);
       return { success: true };
     } catch (e) {
       return { success: false };

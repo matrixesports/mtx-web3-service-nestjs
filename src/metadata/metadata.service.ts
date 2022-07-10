@@ -23,21 +23,15 @@ export class MetadataService {
    * @returns data from uri
    */
   async readFromIPFS(uri: string): Promise<RewardMetadata> {
-    const convertedGatewayUrl = await this.changeToGateway(uri);
-    if (convertedGatewayUrl == null) {
-      return null;
-    }
-    let res;
     try {
-      res = await axios.get(convertedGatewayUrl);
+      const convertedGatewayUrl = await this.changeToGateway(uri);
+      let res = await axios.get(convertedGatewayUrl);
+      const imageUri = await this.changeToGateway(res.data.image);
+      res.data.image = imageUri;
+      return res.data;
     } catch (e) {
       return null;
     }
-    const imageUri = await this.changeToGateway(res.data.image);
-    if (imageUri != null) {
-      res.data.image = imageUri;
-    }
-    return res.data;
   }
 
   /**
@@ -56,7 +50,7 @@ export class MetadataService {
       );
       return convertedGatewayUrl;
     }
-    return null;
+    throw new Error('INVALID URI');
   }
 }
 

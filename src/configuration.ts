@@ -19,6 +19,10 @@ export default () => ({
       process.env.ENV == 'dev'
         ? process.env.STAGING_USER_SERVICE_URL
         : process.env.USER_SERVICE_URL,
+    twitch:
+      process.env.ENV == 'dev'
+        ? process.env.STAGING_TWITCH_SERVICE_URL
+        : process.env.TWITCH_SERVICE_URL,
   },
   PINATA: {
     key: process.env.PINATA_API_KEY,

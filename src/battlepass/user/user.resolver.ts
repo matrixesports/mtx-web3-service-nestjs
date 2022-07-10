@@ -1,5 +1,4 @@
 import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
-import { ethers } from 'ethers';
 import { GetBattlePassUserInfoChildDto } from '../dto/GetBattlePassUserInfoChild.dto';
 
 @Resolver('BattlePassUser')

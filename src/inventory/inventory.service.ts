@@ -1,6 +1,5 @@
 import {
   AlchemyWeb3,
-  BaseNft,
   createAlchemyWeb3,
   GetNftsResponseWithoutMetadata,
 } from '@alch/alchemy-web3';
@@ -20,15 +19,11 @@ export class InventoryService {
     user: string
   ): Promise<GetNftsResponseWithoutMetadata> {
     let res: GetNftsResponseWithoutMetadata;
-    try {
-      res = await this.web3.alchemy.getNfts({
-        owner: user,
-        contractAddresses: token_contracts,
-        withMetadata: false,
-      });
-    } catch (e) {
-      return null;
-    }
+    res = await this.web3.alchemy.getNfts({
+      owner: user,
+      contractAddresses: token_contracts,
+      withMetadata: false,
+    });
     for (let x = 0; x < res.ownedNfts.length; x++) {
       res.ownedNfts[x].contract.address = ethers.utils.getAddress(
         res.ownedNfts[x].contract.address

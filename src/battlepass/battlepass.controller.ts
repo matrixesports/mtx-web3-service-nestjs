@@ -1,69 +1,70 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ContractService } from 'src/contract/contract.service';
+import { BattlepassService } from './battlepass.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
 import { MintPremiumPassDto } from './dto/MintPremiumPass.dto';
 import { UpdateRedeemableStatusDto } from './dto/UpdateRedeemableStatus.dto';
 
 @Controller('battlepass')
 export class BattlepassController {
-  constructor(private contractService: ContractService) {}
+  constructor(
+    private contractService: ContractService,
+    private battlePassService: BattlepassService
+  ) {}
+
   @Post('giveXp')
   async giveXp(@Body() giveXpDto: GiveXpDto) {
-    let contractDb = await this.contractService.findForCreator(
-      giveXpDto.creatorId,
-      'BattlePass'
-    );
-    if (contractDb.length == 0) return { success: false };
-    let contract = this.contractService.getSignerContract(contractDb[0]);
-    let seasonId = await contract.seasonId();
     try {
+      let contract = await this.battlePassService.getPassContract(
+        giveXpDto.creatorId,
+        true
+      );
+      let seasonId = await contract.seasonId();
       let fee = this.contractService.getMaticFeeData();
       await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
+      return { success: true };
     } catch (e) {
       return { success: false };
     }
-    return { success: true };
   }
 
   @Post('updateStatus')
   async updateStatus(
     @Body() updateRedeemableStatusDto: UpdateRedeemableStatusDto
   ) {
-    let contractDb = await this.contractService.findByAddress(
-      updateRedeemableStatusDto.address
-    );
-    if (contractDb.length == 0) return { success: false };
-    let contract = this.contractService.getSignerContract(contractDb[0]);
     try {
+      let contract = await this.battlePassService.getPassContract(
+        updateRedeemableStatusDto.creatorId,
+        true
+      );
       let fee = this.contractService.getMaticFeeData();
-      let ticketId = updateRedeemableStatusDto.ticketId.replace('-', '');
+      let ticketId = this.battlePassService.convertTicketToBytes32(
+        updateRedeemableStatusDto.ticketId
+      );
       if (updateRedeemableStatusDto.approved) {
         await contract.updateStatus(ticketId, 0, fee);
       } else {
         await contract.updateStatus(ticketId, 2, fee);
       }
+      return { success: true };
     } catch (e) {
       return { success: false };
     }
-    return { success: true };
   }
 
   @Post('mint')
   async mintPremiumPass(@Body() mintPremiumPassDto: MintPremiumPassDto) {
-    let contractDb = await this.contractService.findForCreator(
-      mintPremiumPassDto.creatorId,
-      'BattlePass'
-    );
-    if (contractDb.length == 0) return { success: false };
-    let contract = this.contractService.getSignerContract(contractDb[0]);
-    let seasonId = await contract.seasonId();
-
     try {
+      let contract = await this.battlePassService.getPassContract(
+        mintPremiumPassDto.creatorId,
+        true
+      );
+      let seasonId = await contract.seasonId();
       let fee = this.contractService.getMaticFeeData();
-      await contract.mint(mintPremiumPassDto.to, seasonId, 1);
+      await contract.mint(mintPremiumPassDto.to, seasonId, 1, fee);
+      return { success: true };
     } catch (e) {
       return { success: false };
     }
-    return { success: true };
   }
 }

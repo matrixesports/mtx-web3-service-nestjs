@@ -1,7 +1,5 @@
 export class UpdateRedeemableStatusDto {
-  address: string;
-  id: string;
-  user: string;
+  creatorId: number;
   ticketId: string;
   approved: boolean;
 }

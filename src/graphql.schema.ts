@@ -104,7 +104,7 @@ export abstract class IMutation {
 
     abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;
 
-    abstract craft(creatorId: number, recipeId: number): MutationResponse | Promise<MutationResponse>;
+    abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
 }
 
 export class MutationResponse {
