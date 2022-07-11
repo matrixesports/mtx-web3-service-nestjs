@@ -21,6 +21,19 @@ export enum RedeemStatus {
     REJECTED = "REJECTED"
 }
 
+export enum MissingUserSocialOptions {
+    INSTAGRAM_USERNAME = "INSTAGRAM_USERNAME",
+    TWITTER_USERNAME = "TWITTER_USERNAME",
+    TWITCH_USERNAME = "TWITCH_USERNAME",
+    CLASH_USERNAME = "CLASH_USERNAME"
+}
+
+export enum MissingUserPaymentOptions {
+    CASHAPP = "CASHAPP",
+    PAYPAL_EMAIL = "PAYPAL_EMAIL",
+    VENMO_USERNAME = "VENMO_USERNAME"
+}
+
 export class BattlePass {
     name: string;
     description: string;
@@ -100,11 +113,22 @@ export abstract class IQuery {
 }
 
 export abstract class IMutation {
-    abstract claimReward(creatorId: number, level: number, premium: boolean, autoRedeem: boolean): MutationResponse | Promise<MutationResponse>;
+    abstract claimReward(creatorId: number, level: number, premium: boolean, autoRedeem: boolean): ClaimRewardResponse | Promise<ClaimRewardResponse>;
 
     abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;
 
     abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
+}
+
+export class ClaimRewardResponse {
+    success: boolean;
+    description?: Nullable<string>;
+    missingFields?: Nullable<UserMissingFields>;
+}
+
+export class UserMissingFields {
+    payment?: Nullable<Nullable<MissingUserPaymentOptions>[]>;
+    social?: Nullable<Nullable<MissingUserSocialOptions>[]>;
 }
 
 export class MutationResponse {

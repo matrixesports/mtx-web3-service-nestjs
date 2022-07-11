@@ -7,10 +7,13 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
 import { RewardType } from 'src/graphql.schema';
 import { rewardTypeArray } from 'src/types/rewardTypeArray';
+import { Repository } from 'typeorm';
+import { BattlePass as BattlePassDB } from './battlepass.entity';
 import { BattlepassService } from './battlepass.service';
 import { GetBattlePassChildDto } from './dto/GetBattlePassChild.dto';
 import { GetBattlePassUserInfoChildDto } from './dto/GetBattlePassUserInfoChild.dto';
@@ -19,7 +22,9 @@ import { GetBattlePassUserInfoChildDto } from './dto/GetBattlePassUserInfoChild.
 export class BattlepassResolver {
   constructor(
     private contractService: ContractService,
-    private battlePassService: BattlepassService
+    private battlePassService: BattlepassService,
+    @InjectRepository(BattlePassDB)
+    private battlePassRepository: Repository<BattlePassDB>
   ) {}
 
   @ResolveField()

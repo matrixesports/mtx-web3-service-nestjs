@@ -98,9 +98,33 @@ type Mutation {
     level: Int!
     premium: Boolean!
     autoRedeem: Boolean!
-  ): MutationResponse!
+  ): ClaimRewardResponse!
   redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
   craft(recipeId: Int!): MutationResponse!
+}
+
+type ClaimRewardResponse {
+  success: Boolean!
+  description: String
+  missingFields: UserMissingFields
+}
+
+type UserMissingFields {
+  payment: [MissingUserPaymentOptions]
+  social: [MissingUserSocialOptions]
+}
+
+enum MissingUserSocialOptions {
+  INSTAGRAM_USERNAME
+  TWITTER_USERNAME
+  TWITCH_USERNAME
+  CLASH_USERNAME
+}
+
+enum MissingUserPaymentOptions {
+  CASHAPP
+  PAYPAL_EMAIL
+  VENMO_USERNAME
 }
 
 type MutationResponse {

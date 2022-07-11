@@ -18,7 +18,3 @@ $ yarn start:dev
 # production mode
 $ yarn start:prod
 ```
-
-- contarcts should not allow for mistakes and FE shouldnt have to worry
-- sepoarate dbs for pass
-- commit history clean
