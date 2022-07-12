@@ -1,4 +1,9 @@
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import {
+  ApolloDriver,
+  ApolloDriverConfig,
+  ApolloFederationDriver,
+  ApolloFederationDriverConfig,
+} from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
@@ -64,6 +69,10 @@ import * as Joi from 'joi';
       driver: ApolloDriver,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
       playground: false,
+    }),
+    GraphQLModule.forRoot<ApolloFederationDriverConfig>({
+      driver: ApolloFederationDriver,
+      typePaths: ['**/*.graphql'],
     }),
     ScalarModule,
     BattlepassModule,

@@ -38,11 +38,11 @@ export class BattlePass {
     type: 'enum',
     enum: MissingUserSocialOptions,
   })
-  missing_user_social_options: MissingUserSocialOptions;
+  missing_user_social_options: [MissingUserSocialOptions];
 
   @Column({
     type: 'enum',
     enum: MissingUserPaymentOptions,
   })
-  missing_user_payment_options: MissingUserPaymentOptions;
+  missing_user_payment_options: [MissingUserPaymentOptions];
 }
