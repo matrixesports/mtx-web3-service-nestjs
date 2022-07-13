@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { BattlepassModule } from 'src/battlepass/battlepass.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BattlePassModule } from 'src/battlepass/battlepass.module';
+import { Contract } from 'src/contract/contract.entity';
 import { InventoryResolver } from './inventory.resolver';
 import { InventoryService } from './inventory.service';
 
 @Module({
   providers: [InventoryResolver, InventoryService],
-  imports: [BattlepassModule],
+  imports: [BattlePassModule, TypeOrmModule.forFeature([Contract])],
 })
 export class InventoryModule {}

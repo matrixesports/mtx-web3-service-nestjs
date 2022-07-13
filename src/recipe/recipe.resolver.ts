@@ -8,6 +8,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { ethers } from 'ethers';
+import { ctrtype } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { GetRecipeChildDto } from './dto/GetRecipeChild.dto';
@@ -35,7 +36,7 @@ export class RecipeResolver {
       let qty = inputIngredients.qtys[x];
       let contractDB;
       try {
-        contractDB = await this.contractService.find({
+        contractDB = await this.contractService.findOne({
           address: inputIngredients.tokens[x],
         });
       } catch (e) {
@@ -65,7 +66,7 @@ export class RecipeResolver {
       let qty = outputIngredients.qtys[x];
       let contractDB;
       try {
-        contractDB = await this.contractService.find({
+        contractDB = await this.contractService.findOne({
           address: outputIngredients.tokens[x],
         });
       } catch (e) {
@@ -102,8 +103,8 @@ export class RecipeResolver {
     @Args('recipeId') recipeId: number
   ): Promise<GetRecipeChildDto> {
     try {
-      let contractDB = await this.contractService.find({
-        ctr_type: 'Crafting',
+      let contractDB = await this.contractService.findOne({
+        ctr_type: ctrtype.CRAFTING,
       });
       let contract = this.contractService.getProviderContract(contractDB);
       return { contract, recipeId, creatorId };
@@ -117,8 +118,8 @@ export class RecipeResolver {
     try {
       let userAddress: string = context.req.headers['user-address'];
 
-      let contractDB = await this.contractService.find({
-        ctr_type: 'Crafting',
+      let contractDB = await this.contractService.findOne({
+        ctr_type: ctrtype.CRAFTING,
       });
       let contract = this.contractService.getSignerContract(contractDB);
       let fee = await this.contractService.getMaticFeeData();

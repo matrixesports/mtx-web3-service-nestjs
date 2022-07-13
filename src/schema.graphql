@@ -69,8 +69,8 @@ type Inventory {
 }
 
 type Redeemed {
-  id: BigInt!
-  status: [RedeemStatus]!
+  reward: Reward!
+  status: RedeemStatus!
 }
 
 enum RedeemStatus {
@@ -86,7 +86,7 @@ type LootboxOption {
 
 type Query {
   getBattlePass(creatorId: Int!): BattlePass
-  getInventory(creatorId: Int!): Inventory
+  getInventory: Inventory
   getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
   getRecipes(creatorId: Int!): [Recipe]
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
@@ -110,18 +110,18 @@ type ClaimRewardResponse {
 }
 
 type UserMissingFields {
-  payment: [MissingUserPaymentOptions]
-  social: [MissingUserSocialOptions]
+  payment: [RequiredUserPaymentOptions]
+  social: [RequiredUserSocialOptions]
 }
 
-enum MissingUserSocialOptions {
+enum RequiredUserSocialOptions {
   INSTAGRAM_USERNAME
   TWITTER_USERNAME
   TWITCH_USERNAME
   CLASH_USERNAME
 }
 
-enum MissingUserPaymentOptions {
+enum RequiredUserPaymentOptions {
   CASHAPP
   PAYPAL_EMAIL
   VENMO_USERNAME

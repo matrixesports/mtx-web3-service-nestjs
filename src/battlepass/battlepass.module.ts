@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { BattlepassResolver } from './battlepass.resolver';
+import { BattlePassResolver } from './battlepass.resolver';
 import { UserModule } from './user/user.module';
-import { BattlepassController } from './battlepass.controller';
-import { BattlepassService } from './battlepass.service';
+import { BattlePassController } from './battlepass.controller';
+import { BattlePassService } from './battlepass.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BattlePass } from './battlepass.entity';
 
 @Module({
-  providers: [BattlepassResolver, BattlepassService],
+  providers: [BattlePassResolver, BattlePassService],
   imports: [UserModule, TypeOrmModule.forFeature([BattlePass])],
-  controllers: [BattlepassController],
-  exports: [BattlepassService],
+  controllers: [BattlePassController],
+  exports: [BattlePassService],
 })
-export class BattlepassModule {}
+export class BattlePassModule {}

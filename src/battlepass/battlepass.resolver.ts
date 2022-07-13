@@ -7,49 +7,44 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ethers } from 'ethers';
+import axios from 'axios';
 import { ContractService } from 'src/contract/contract.service';
 import { RewardType } from 'src/graphql.schema';
 import { rewardTypeArray } from 'src/types/rewardTypeArray';
-import { Repository } from 'typeorm';
-import { BattlePass as BattlePassDB } from './battlepass.entity';
-import { BattlepassService } from './battlepass.service';
+import { BattlePassService } from './battlepass.service';
 import { GetBattlePassChildDto } from './dto/GetBattlePassChild.dto';
 import { GetBattlePassUserInfoChildDto } from './dto/GetBattlePassUserInfoChild.dto';
 
 @Resolver('BattlePass')
-export class BattlepassResolver {
+export class BattlePassResolver {
   constructor(
     private contractService: ContractService,
-    private battlePassService: BattlepassService,
-    @InjectRepository(BattlePassDB)
-    private battlePassRepository: Repository<BattlePassDB>
+    private battlePassService: BattlePassService
   ) {}
 
   @ResolveField()
   name(@Parent() parent: GetBattlePassChildDto) {
-    return 'a';
+    return parent.battlePassDB.name;
   }
 
   @ResolveField()
   description(@Parent() parent: GetBattlePassChildDto) {
-    return 'a';
+    return parent.battlePassDB.description;
   }
 
   @ResolveField()
   price(@Parent() parent: GetBattlePassChildDto) {
-    return 'a';
+    return parent.battlePassDB.price;
   }
 
   @ResolveField()
   currency(@Parent() parent: GetBattlePassChildDto) {
-    return 'a';
+    return parent.battlePassDB.currency;
   }
 
   @ResolveField()
   endDate(@Parent() parent: GetBattlePassChildDto) {
-    return new Date();
+    return parent.battlePassDB.end_date;
   }
 
   @ResolveField()
@@ -63,10 +58,6 @@ export class BattlepassResolver {
   }
 
   @ResolveField()
-  /**
-   * for a free reward or premium reward if reward id is invalid then return null for that reward
-   * use an array here since contarct enum value returns a uint, so easier to reference by index
-   */
   async levelInfo(@Parent() parent: GetBattlePassChildDto) {
     let maxLevel = await parent.contract.getMaxLevel(parent.seasonId);
     let levelInfo = [];
@@ -102,16 +93,16 @@ export class BattlepassResolver {
   }
 
   @Query()
-  /**
-   * return null if cannot find pass contract for creator
-   */
   async getBattlePass(
     @Args('creatorId') creatorId: number
   ): Promise<GetBattlePassChildDto> {
     try {
       let contract = await this.battlePassService.getPassContract(creatorId);
       let seasonId = await contract.seasonId();
-      return { contract, seasonId };
+      let battlePassDB = await this.battlePassService.getBattlePassMetadata(
+        contract.address
+      );
+      return { contract, seasonId, battlePassDB };
     } catch (e) {
       return null;
     }
@@ -121,7 +112,8 @@ export class BattlepassResolver {
   /**
    * claim reward, if lootbox then open it, if redeemable item then redeem it
    * do not redeem items inside a lootbox
-   * should we open the lootbox?
+   * if autoRedeem == true then redeem item when u claim it
+   * if level == 1 then check for required fields; assumes there will always be a reward at level 1
    */
   async claimReward(
     @Args('creatorId') creatorId: number,
@@ -137,6 +129,27 @@ export class BattlepassResolver {
         true
       );
       let seasonId = await contract.seasonId();
+      if (level == 1) {
+        let missingFields = await this.battlePassService.checkRequiredFields(
+          userAddress,
+          contract.address
+        );
+        if (missingFields != undefined) {
+          if (
+            missingFields.missing_user_payment_options.length != 0 ||
+            missingFields.missing_user_social_options.length != 0
+          ) {
+            return {
+              success: true,
+              missingFields: {
+                payment: missingFields.missing_user_payment_options,
+                social: missingFields.missing_user_social_options,
+              },
+            };
+          }
+        }
+      }
+
       let fee = await this.contractService.getMaticFeeData();
       await contract.claimReward(seasonId, userAddress, level, premium, fee);
 
@@ -160,7 +173,6 @@ export class BattlepassResolver {
           contract.address
         );
       } else if (rewardTypeArray[rewardType] == RewardType.LOOTBOX) {
-        fee = await this.contractService.getMaticFeeData();
         await contract.openLootbox(id, userAddress, fee);
       }
       return { success: true };

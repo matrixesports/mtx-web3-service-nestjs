@@ -1,15 +1,14 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ContractService } from 'src/contract/contract.service';
-import { BattlepassService } from './battlepass.service';
+import { BattlePassService } from './battlepass.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
 import { MintPremiumPassDto } from './dto/MintPremiumPass.dto';
-import { UpdateRedeemableStatusDto } from './dto/UpdateRedeemableStatus.dto';
 
 @Controller('battlepass')
-export class BattlepassController {
+export class BattlePassController {
   constructor(
     private contractService: ContractService,
-    private battlePassService: BattlepassService
+    private battlePassService: BattlePassService
   ) {}
 
   @Post('giveXp')
@@ -22,30 +21,6 @@ export class BattlepassController {
       let seasonId = await contract.seasonId();
       let fee = this.contractService.getMaticFeeData();
       await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
-      return { success: true };
-    } catch (e) {
-      return { success: false };
-    }
-  }
-
-  @Post('updateStatus')
-  async updateStatus(
-    @Body() updateRedeemableStatusDto: UpdateRedeemableStatusDto
-  ) {
-    try {
-      let contract = await this.battlePassService.getPassContract(
-        updateRedeemableStatusDto.creatorId,
-        true
-      );
-      let fee = this.contractService.getMaticFeeData();
-      let ticketId = this.battlePassService.convertTicketToBytes32(
-        updateRedeemableStatusDto.ticketId
-      );
-      if (updateRedeemableStatusDto.approved) {
-        await contract.updateStatus(ticketId, 0, fee);
-      } else {
-        await contract.updateStatus(ticketId, 2, fee);
-      }
       return { success: true };
     } catch (e) {
       return { success: false };

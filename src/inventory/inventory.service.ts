@@ -1,11 +1,11 @@
 import {
   AlchemyWeb3,
+  BaseNft,
   createAlchemyWeb3,
   GetNftsResponseWithoutMetadata,
 } from '@alch/alchemy-web3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ethers } from 'ethers';
 
 @Injectable()
 export class InventoryService {
@@ -16,19 +16,36 @@ export class InventoryService {
 
   async getNFTSOwnedForUser(
     token_contracts: Array<string>,
-    user: string
-  ): Promise<GetNftsResponseWithoutMetadata> {
+    user: string,
+    pageKey?: string
+  ): Promise<BaseNft[]> {
     let res: GetNftsResponseWithoutMetadata;
-    res = await this.web3.alchemy.getNfts({
-      owner: user,
-      contractAddresses: token_contracts,
-      withMetadata: false,
-    });
-    for (let x = 0; x < res.ownedNfts.length; x++) {
-      res.ownedNfts[x].contract.address = ethers.utils.getAddress(
-        res.ownedNfts[x].contract.address
-      );
+    if (pageKey == null) {
+      res = await this.web3.alchemy.getNfts({
+        owner: user,
+        contractAddresses: token_contracts,
+        withMetadata: false,
+      });
+    } else {
+      res = await this.web3.alchemy.getNfts({
+        owner: user,
+        contractAddresses: token_contracts,
+        withMetadata: false,
+        pageKey: pageKey,
+      });
     }
-    return res;
+    if (res.pageKey == null) return res.ownedNfts;
+    let owned: BaseNft[];
+    owned.push(
+      ...res.ownedNfts,
+      ...(await this.getNFTSOwnedForUser(token_contracts, user, res.pageKey))
+    );
+    // for (let x = 0; x < owned.length; x++) {
+    //   owned[x].contract.address = ethers.utils.getAddress(
+    //     owned[x].contract.address
+    //   );
+    // }
+
+    return owned;
   }
 }

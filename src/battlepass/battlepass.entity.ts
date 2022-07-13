@@ -1,23 +1,13 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
-
-import { Contract } from 'src/contract/contract.entity';
-import {
-  MissingUserPaymentOptions,
-  MissingUserSocialOptions,
+  RequiredUserPaymentOptions,
+  RequiredUserSocialOptions,
 } from 'src/graphql.schema';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class BattlePass {
-  @OneToOne(type => Contract)
-  @JoinColumn()
-  @PrimaryGeneratedColumn()
-  address: Contract;
+  @PrimaryColumn()
+  address: string;
 
   @Column()
   name: string;
@@ -32,17 +22,17 @@ export class BattlePass {
   currency: string;
 
   @Column()
-  endDate: Date;
+  end_date: Date;
 
   @Column({
     type: 'enum',
-    enum: MissingUserSocialOptions,
+    enum: Object.values(RequiredUserSocialOptions),
   })
-  missing_user_social_options: [MissingUserSocialOptions];
+  required_user_social_options: RequiredUserSocialOptions[];
 
   @Column({
     type: 'enum',
-    enum: MissingUserPaymentOptions,
+    enum: Object.values(RequiredUserPaymentOptions),
   })
-  missing_user_payment_options: [MissingUserPaymentOptions];
+  required_user_payment_options: RequiredUserPaymentOptions[];
 }

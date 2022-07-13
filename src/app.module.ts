@@ -11,7 +11,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScalarModule } from './scalar/scalar.module';
-import { BattlepassModule } from './battlepass/battlepass.module';
+import { BattlePassModule } from './battlepass/battlepass.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { ContractModule } from './contract/contract.module';
 import { RecipeModule } from './recipe/recipe.module';
@@ -75,7 +75,7 @@ import * as Joi from 'joi';
       typePaths: ['**/*.graphql'],
     }),
     ScalarModule,
-    BattlepassModule,
+    BattlePassModule,
     MetadataModule,
     ContractModule,
     RecipeModule,

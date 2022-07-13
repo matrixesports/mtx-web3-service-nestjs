@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { BigNumber, Contract, ethers } from 'ethers';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
 import { Contract as ContractDB } from './contract.entity';
 
 export const MATIC_NUMBER_OF_BLOCKS_TO_WAIT = 1;
@@ -16,11 +16,11 @@ export class ContractService {
     private configService: ConfigService
   ) {}
 
-  //will fail if it cannot find
-  async find(
+  /// will fail if it cannot find
+  async findOne(
     where: FindOptionsWhere<ContractDB> | FindOptionsWhere<ContractDB>[]
   ) {
-    return this.contractRepository.findOneByOrFail(where);
+    return await this.contractRepository.findOneByOrFail(where);
   }
 
   getProvider(network: string): ethers.providers.Provider {
@@ -53,10 +53,7 @@ export class ContractService {
     );
   }
 
-  /**
-   *
-   * @returns fallback value is 40 coz minimum is 30
-   */
+  /// fallback value is 40 coz minimum is 30
   async getMaticFeeData(): Promise<{
     maxPriorityFeePerGas: BigNumber;
     maxFeePerGas?: BigNumber;

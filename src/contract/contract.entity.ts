@@ -1,8 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
+
+export enum ctrtype {
+  CRAFTING = 'Crafting',
+  BATTLE_PASS = 'BattlePass',
+  CREATOR_TOKEN = 'CreatorToken',
+  GAME = 'Game',
+}
 
 @Entity()
 export class Contract {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   address: string;
 
   @Column()
@@ -19,9 +26,7 @@ export class Contract {
 
   @Column({
     type: 'enum',
-    enum: ['Crafting', 'BattlePass', 'CreatorToken', 'Game'],
+    enum: ctrtype,
   })
-  ctr_type: CtrType;
+  ctr_type: ctrtype;
 }
-
-export type CtrType = 'Crafting' | 'BattlePass' | 'CreatorToken' | 'Game';

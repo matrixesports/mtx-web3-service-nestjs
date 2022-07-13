@@ -21,14 +21,14 @@ export enum RedeemStatus {
     REJECTED = "REJECTED"
 }
 
-export enum MissingUserSocialOptions {
+export enum RequiredUserSocialOptions {
     INSTAGRAM_USERNAME = "INSTAGRAM_USERNAME",
     TWITTER_USERNAME = "TWITTER_USERNAME",
     TWITCH_USERNAME = "TWITCH_USERNAME",
     CLASH_USERNAME = "CLASH_USERNAME"
 }
 
-export enum MissingUserPaymentOptions {
+export enum RequiredUserPaymentOptions {
     CASHAPP = "CASHAPP",
     PAYPAL_EMAIL = "PAYPAL_EMAIL",
     VENMO_USERNAME = "VENMO_USERNAME"
@@ -91,8 +91,8 @@ export class Inventory {
 }
 
 export class Redeemed {
-    id: BigInt;
-    status: Nullable<RedeemStatus>[];
+    reward: Reward;
+    status: RedeemStatus;
 }
 
 export class LootboxOption {
@@ -103,7 +103,7 @@ export class LootboxOption {
 export abstract class IQuery {
     abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
 
-    abstract getInventory(creatorId: number): Nullable<Inventory> | Promise<Nullable<Inventory>>;
+    abstract getInventory(): Nullable<Inventory> | Promise<Nullable<Inventory>>;
 
     abstract getLootboxOptions(creatorId: number, lootboxId: number): Nullable<Nullable<LootboxOption>[]> | Promise<Nullable<Nullable<LootboxOption>[]>>;
 
@@ -127,8 +127,8 @@ export class ClaimRewardResponse {
 }
 
 export class UserMissingFields {
-    payment?: Nullable<Nullable<MissingUserPaymentOptions>[]>;
-    social?: Nullable<Nullable<MissingUserSocialOptions>[]>;
+    payment?: Nullable<Nullable<RequiredUserPaymentOptions>[]>;
+    social?: Nullable<Nullable<RequiredUserSocialOptions>[]>;
 }
 
 export class MutationResponse {

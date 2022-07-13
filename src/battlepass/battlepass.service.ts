@@ -1,19 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { BigNumber, Contract } from 'ethers';
+import { ctrtype } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
-import { Reward } from 'src/graphql.schema';
+import {
+  RequiredUserPaymentOptions,
+  RequiredUserSocialOptions,
+  Reward,
+} from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { rewardTypeArray } from 'src/types/rewardTypeArray';
+import { Repository } from 'typeorm';
+import { BattlePass as BattlePassDB } from './battlepass.entity';
 
 @Injectable()
-export class BattlepassService {
+export class BattlePassService {
   constructor(
     private contractService: ContractService,
     private metadataService: MetadataService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    @InjectRepository(BattlePassDB)
+    private battlePassRepository: Repository<BattlePassDB>
   ) {}
+
+  async getBattlePassMetadata(address: string): Promise<BattlePassDB> {
+    return await this.battlePassRepository.findOneByOrFail({
+      address: address,
+    });
+  }
 
   async getRewardForLevel(
     contract: Contract,
@@ -39,14 +55,16 @@ export class BattlepassService {
     creatorId: number,
     isSigner?: boolean
   ): Promise<Contract> {
-    let contractDB = await this.contractService.find({
+    let contractDB = await this.contractService.findOne({
       creator_id: creatorId,
-      ctr_type: 'BattlePass',
+      ctr_type: ctrtype.BATTLE_PASS,
     });
     if (isSigner) return this.contractService.getSignerContract(contractDB);
     return this.contractService.getProviderContract(contractDB);
   }
 
+  /// notify redemption service and notify twitch service
+  /// errors bubble up
   async redeemItemHelper(
     contract: Contract,
     itemId: number,
@@ -56,33 +74,95 @@ export class BattlepassService {
   ) {
     let uri = await contract.uri(itemId);
     let metadata = await this.metadataService.readFromIPFS(uri);
-    let ticket = await axios.post(
+
+    let ticketRedeemBody: TicketRedeemBody = {
+      ...metadata,
+      creatorId: creatorId,
+      itemId: itemId,
+      userAddress: userAddress,
+      itemAddress: address,
+    };
+    await axios.post(
       `${this.configService.get('SERVICE').ticket}/api/ticket/redemption`,
-      {
-        ...metadata,
-        creatorId: creatorId,
-        itemId: itemId,
-        userAddress: userAddress,
-        itemAddress: address,
-      }
+      ticketRedeemBody
     );
-    let fee = await this.contractService.getMaticFeeData();
-    let ticketId = this.convertTicketToBytes32(ticket.data.data.ticketId);
 
-    let twitch = await axios.post(
+    let twitchRedeemBody: TwitchRedeemBody = {
+      ...metadata,
+      creatorId: creatorId,
+      itemId: itemId,
+      userAddress: userAddress,
+      itemAddress: address,
+    };
+    await axios.post(
       `${this.configService.get('SERVICE').twitch}/redemptions/redemption`,
-      {
-        ...metadata,
-        creatorId: creatorId,
-        rewardId: itemId,
-        userAddress: userAddress,
-        itemAddress: address,
-      }
+      twitchRedeemBody
     );
-    await contract.redeemReward(ticketId, userAddress, itemId, fee);
+
+    let fee = await this.contractService.getMaticFeeData();
+    await contract.burn(userAddress, itemId, 1, fee);
   }
 
-  convertTicketToBytes32(ticketId: string): string {
-    return ticketId.replace('-', '');
+  /**
+   * check what contact info is needed for a season
+   * only called for level 1
+   * @param userAddress
+   * @param address of contract
+   * @returns
+   */
+  async checkRequiredFields(
+    userAddress: string,
+    address: string
+  ): Promise<RequiredFieldsResponse> {
+    //will throw error if address does not exist
+    let battlePassDB = await this.getBattlePassMetadata(address);
+
+    if (
+      battlePassDB.required_user_social_options.length == 0 &&
+      battlePassDB.required_user_payment_options.length == 0
+    )
+      return;
+
+    let requiredFieldsBody: RequiredFieldsBody = {
+      userAddress,
+      required_user_social_options: battlePassDB.required_user_social_options,
+      required_user_payment_options: battlePassDB.required_user_payment_options,
+    };
+    let missingRedeemFields = await axios.post(
+      `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
+      requiredFieldsBody
+    );
+    return missingRedeemFields.data;
   }
+}
+
+interface TicketRedeemBody {
+  name: string;
+  description: string;
+  image: string;
+  creatorId: number;
+  itemId: number;
+  userAddress: string;
+  itemAddress: string;
+}
+
+interface TwitchRedeemBody {
+  name: string;
+  description: string;
+  image: string;
+  creatorId: number;
+  itemId: number;
+  userAddress: string;
+  itemAddress: string;
+}
+
+interface RequiredFieldsBody {
+  userAddress: string;
+  required_user_social_options: RequiredUserSocialOptions[];
+  required_user_payment_options: RequiredUserPaymentOptions[];
+}
+
+interface RequiredFieldsResponse {
+  missing_user_social_options: RequiredUserSocialOptions[];
+  missing_user_payment_options: RequiredUserPaymentOptions[];
 }
