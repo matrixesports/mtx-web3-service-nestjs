@@ -66,7 +66,7 @@ import * as Joi from 'joi';
         defaultScalarType: 'unknown',
       },
       typePaths: ['./**/*.graphql'],
-      driver: ApolloDriver,
+      driver: ApolloFederationDriver,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
       playground: false,
     }),
