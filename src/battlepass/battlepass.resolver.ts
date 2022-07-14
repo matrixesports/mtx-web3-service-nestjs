@@ -22,30 +22,30 @@ export class BattlePassResolver {
     private battlePassService: BattlePassService
   ) {}
 
-  @ResolveField()
-  name(@Parent() parent: GetBattlePassChildDto) {
-    return parent.battlePassDB.name;
-  }
+  //   @ResolveField()
+  //   name(@Parent() parent: GetBattlePassChildDto) {
+  //     return parent.battlePassDB.name;
+  //   }
 
-  @ResolveField()
-  description(@Parent() parent: GetBattlePassChildDto) {
-    return parent.battlePassDB.description;
-  }
+  //   @ResolveField()
+  //   description(@Parent() parent: GetBattlePassChildDto) {
+  //     return parent.battlePassDB.description;
+  //   }
 
-  @ResolveField()
-  price(@Parent() parent: GetBattlePassChildDto) {
-    return parent.battlePassDB.price;
-  }
+  //   @ResolveField()
+  //   price(@Parent() parent: GetBattlePassChildDto) {
+  //     return parent.battlePassDB.price;
+  //   }
 
-  @ResolveField()
-  currency(@Parent() parent: GetBattlePassChildDto) {
-    return parent.battlePassDB.currency;
-  }
+  //   @ResolveField()
+  //   currency(@Parent() parent: GetBattlePassChildDto) {
+  //     return parent.battlePassDB.currency;
+  //   }
 
-  @ResolveField()
-  endDate(@Parent() parent: GetBattlePassChildDto) {
-    return parent.battlePassDB.end_date;
-  }
+  //   @ResolveField()
+  //   endDate(@Parent() parent: GetBattlePassChildDto) {
+  //     return parent.battlePassDB.end_date;
+  //   }
 
   @ResolveField()
   seasonId(@Parent() parent: GetBattlePassChildDto) {
