@@ -104,6 +104,7 @@ export class BattlePassResolver {
       );
       return { contract, seasonId, battlePassDB };
     } catch (e) {
+      console.log(e);
       return null;
     }
   }
@@ -114,6 +115,7 @@ export class BattlePassResolver {
    * do not redeem items inside a lootbox
    * if autoRedeem == true then redeem item when u claim it
    * if level == 1 then check for required fields; assumes there will always be a reward at level 1
+   * make sure u only give 1 lootbox, will not open all of them
    */
   async claimReward(
     @Args('creatorId') creatorId: number,

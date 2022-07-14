@@ -57,8 +57,9 @@ export class BattlePassService {
   ): Promise<Contract> {
     let contractDB = await this.contractService.findOne({
       creator_id: creatorId,
-      ctr_type: ctrtype.BATTLE_PASS,
+      ctr_type: ctrtype.BATTLEPASS,
     });
+
     if (isSigner) return this.contractService.getSignerContract(contractDB);
     return this.contractService.getProviderContract(contractDB);
   }

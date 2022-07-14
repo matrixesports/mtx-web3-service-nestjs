@@ -2,8 +2,8 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 export enum ctrtype {
   CRAFTING = 'Crafting',
-  BATTLE_PASS = 'BattlePass',
-  CREATOR_TOKEN = 'CreatorToken',
+  BATTLEPASS = 'BattlePass',
+  CREATORTOKEN = 'CreatorToken',
   GAME = 'Game',
 }
 

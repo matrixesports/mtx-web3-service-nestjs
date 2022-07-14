@@ -18,7 +18,7 @@ export class LootboxResolver {
     try {
       let contractDB = await this.contractService.findOne({
         creator_id: creatorId,
-        ctr_type: ctrtype.BATTLE_PASS,
+        ctr_type: ctrtype.BATTLEPASS,
       });
       let contract = this.contractService.getProviderContract(contractDB);
       let lengthOfOptions = await contract.getLootboxOptionsLength(lootboxId);

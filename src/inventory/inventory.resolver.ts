@@ -35,7 +35,7 @@ export class InventoryResolver {
       let defaultRewards: Reward[];
       //get all creators
       let allBattlePasses = await this.contractRepository.find({
-        where: { ctr_type: ctrtype.BATTLE_PASS },
+        where: { ctr_type: ctrtype.BATTLEPASS },
       });
       for (let x = 0; x < allBattlePasses.length; x++) {
         //for each pass, return nfts and token owned by user
@@ -56,7 +56,7 @@ export class InventoryResolver {
         }
         //handle creator token now
         let creatorTokenDB = await this.contractService.findOne({
-          ctr_type: ctrtype.CREATOR_TOKEN,
+          ctr_type: ctrtype.CREATORTOKEN,
           creator_id: allBattlePasses[x].creator_id,
         });
         let tokenContract = await this.contractService.getProviderContract(
