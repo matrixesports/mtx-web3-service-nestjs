@@ -4,5 +4,4 @@ import { BattlePass } from '../battlepass.entity';
 export class GetBattlePassChildDto {
   contract: Contract;
   seasonId: number;
-  battlePassDB: BattlePass;
 }

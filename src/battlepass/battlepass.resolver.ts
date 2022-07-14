@@ -99,10 +99,11 @@ export class BattlePassResolver {
     try {
       let contract = await this.battlePassService.getPassContract(creatorId);
       let seasonId = await contract.seasonId();
-      let battlePassDB = await this.battlePassService.getBattlePassMetadata(
-        contract.address
-      );
-      return { contract, seasonId, battlePassDB };
+      //   let battlePassDB = await this.battlePassService.getBattlePassMetadata(
+      //     contract.address
+      //   );
+      //   return { contract, seasonId, battlePassDB };
+      return { contract, seasonId };
     } catch (e) {
       console.log(e);
       return null;
