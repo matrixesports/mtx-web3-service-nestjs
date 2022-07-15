@@ -88,7 +88,7 @@ export class InventoryResolver {
   async redeemed(@Parent() parent: GetInventoryChildDto) {
     try {
       let res = await axios.get(
-        `${this.configService.get('SERVICE').user}/api/ticket`,
+        `${this.configService.get('SERVICE').ticket}/api/ticket`,
         { params: { userAddress: parent.userAddress } }
       );
       let userRedeemedInfo: UserRedeemedRes[] = res.data;
