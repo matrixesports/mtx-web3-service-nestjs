@@ -93,7 +93,7 @@ export class InventoryResolver {
       );
       let userRedeemedInfo: UserRedeemedRes[] = res.data;
       console.log(userRedeemedInfo);
-      let redeemed: Redeemed[];
+      let redeemed: Redeemed[] = [];
       //creatorid->itemId->statuses
       let temp = {};
 
