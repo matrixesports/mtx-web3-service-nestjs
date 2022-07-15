@@ -100,6 +100,7 @@ export class InventoryResolver {
           userRedeemedInfo[x].status
         );
       }
+      console.log(temp);
       for (const creatorId in temp) {
         let contract = await this.battlePassService.getPassContract(
           parseInt(creatorId)
@@ -118,6 +119,7 @@ export class InventoryResolver {
 
       return redeemed;
     } catch (e) {
+      console.log(e);
       return [];
     }
   }
