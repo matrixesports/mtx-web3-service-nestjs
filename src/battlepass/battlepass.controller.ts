@@ -56,6 +56,7 @@ export class BattlePassController {
       name: battlePassDB.name,
       description: battlePassDB.description,
       seasonId: seasonId.toNumber(),
+      address: contract.address,
     };
   }
 }
