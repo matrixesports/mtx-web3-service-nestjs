@@ -98,9 +98,18 @@ export class InventoryResolver {
       let temp = {};
 
       for (let x = 0; x < userRedeemedInfo.length; x++) {
-        temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(
-          userRedeemedInfo[x].status
-        );
+        if (
+          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] ==
+          undefined
+        ) {
+          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] = [
+            userRedeemedInfo[x].status,
+          ];
+        } else {
+          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(
+            userRedeemedInfo[x].status
+          );
+        }
       }
       console.log(temp);
       for (const creatorId in temp) {
