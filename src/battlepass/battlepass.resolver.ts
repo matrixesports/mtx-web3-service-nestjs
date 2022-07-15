@@ -133,7 +133,7 @@ export class BattlePassResolver {
         true
       );
       let seasonId = await contract.seasonId();
-      if (level == 1) {
+      if (level == 4) {
         let missingFields = await this.battlePassService.checkRequiredFields(
           userAddress,
           contract.address
