@@ -24,15 +24,16 @@ export class BattlePass {
   @Column()
   end_date: Date;
 
+  //enum array returns {first,second} as string
   @Column({
     type: 'enum',
     enum: Object.values(RequiredUserSocialOptions),
   })
-  required_user_social_options: RequiredUserSocialOptions[];
+  required_user_social_options: string;
 
   @Column({
     type: 'enum',
     enum: Object.values(RequiredUserPaymentOptions),
   })
-  required_user_payment_options: RequiredUserPaymentOptions[];
+  required_user_payment_options: string;
 }

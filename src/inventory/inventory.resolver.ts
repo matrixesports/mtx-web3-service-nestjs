@@ -11,12 +11,13 @@ import { ethers } from 'ethers';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ctrtype } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
-import { Redeemed, RedeemStatus, Reward } from 'src/graphql.schema';
+import { Redeemed, RedeemStatus, Reward, RewardType } from 'src/graphql.schema';
 import { GetInventoryChildDto } from './dto/GetInventoryChild.dto';
 import { InventoryService } from './inventory.service';
 import { Contract as ContractDB } from '../contract/contract.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { rewardTypeArray } from 'src/types/rewardTypeArray';
 
 @Resolver('Inventory')
 export class InventoryResolver {
@@ -32,11 +33,12 @@ export class InventoryResolver {
   @ResolveField()
   async default(@Parent() parent: GetInventoryChildDto) {
     try {
-      let defaultRewards: Reward[];
+      let defaultRewards: Reward[] = [];
       //get all creators
       let allBattlePasses = await this.contractRepository.find({
         where: { ctr_type: ctrtype.BATTLEPASS },
       });
+
       for (let x = 0; x < allBattlePasses.length; x++) {
         //for each pass, return nfts and token owned by user
         let contract = await this.battlePassService.getPassContract(
@@ -46,6 +48,7 @@ export class InventoryResolver {
           [allBattlePasses[x].address],
           parent.userAddress
         );
+
         for (let y = 0; y < owned.length; y++) {
           let reward = await this.battlePassService.getRewardForLevel(
             contract,
@@ -54,6 +57,7 @@ export class InventoryResolver {
           );
           defaultRewards.push(reward);
         }
+
         //handle creator token now
         let creatorTokenDB = await this.contractService.findOne({
           ctr_type: ctrtype.CREATORTOKEN,
@@ -62,16 +66,18 @@ export class InventoryResolver {
         let tokenContract = await this.contractService.getProviderContract(
           creatorTokenDB
         );
+        let balance = await tokenContract.balanceOf(parent.userAddress);
+        if (balance == 0) continue;
         let tokenReward = await this.battlePassService.getRewardForLevel(
           contract,
-          await tokenContract.balanceOf(parent.userAddress),
+          balance,
           await contract.CREATOR_TOKEN_ID()
         );
         defaultRewards.push(tokenReward);
       }
       return defaultRewards;
     } catch (e) {
-      return null;
+      return [];
     }
   }
 
@@ -85,17 +91,28 @@ export class InventoryResolver {
       );
       let userRedeemedInfo: UserRedeemedRes[] = res.data;
       let redeemed: Redeemed[];
+      //creatorid->itemId->statuses
+      let temp = {};
       for (let x = 0; x < userRedeemedInfo.length; x++) {
-        let contact = await this.battlePassService.getPassContract(
-          userRedeemedInfo[x].creatorId
+        temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(
+          userRedeemedInfo[x].status
         );
-        let reward = await this.battlePassService.getRewardForLevel(
-          contact,
-          ethers.BigNumber.from(userRedeemedInfo[x].itemId),
-          ethers.BigNumber.from(1)
-        );
-        redeemed.push({ reward, status: userRedeemedInfo[x].status });
       }
+      for (const creatorId in temp) {
+        let contract = await this.battlePassService.getPassContract(
+          parseInt(creatorId)
+        );
+        for (const itemId in temp[creatorId]) {
+          // qty is length of statuses to signify how many have been redeemed
+          let reward = await this.battlePassService.getRewardForLevel(
+            contract,
+            ethers.BigNumber.from(temp[creatorId][itemId].length),
+            ethers.BigNumber.from(itemId)
+          );
+          redeemed.push({ reward, status: temp[creatorId[itemId]] });
+        }
+      }
+
       return redeemed;
     } catch (e) {
       return [];

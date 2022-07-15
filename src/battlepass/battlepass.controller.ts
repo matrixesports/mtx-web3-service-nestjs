@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ContractService } from 'src/contract/contract.service';
 import { BattlePassService } from './battlepass.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
@@ -41,5 +41,21 @@ export class BattlePassController {
     } catch (e) {
       return { success: false };
     }
+  }
+
+  @Get('metadata/:creatorId')
+  async getBattlePassMetadata(@Param('creatorId') creatorId: number) {
+    let contract = await this.battlePassService.getPassContract(creatorId);
+    let seasonId = await contract.seasonId();
+    let battlePassDB = await this.battlePassService.getBattlePassMetadata(
+      contract.address
+    );
+    return {
+      price: battlePassDB.price,
+      currency: battlePassDB.currency,
+      name: battlePassDB.name,
+      description: battlePassDB.description,
+      seasonId: seasonId.toNumber(),
+    };
   }
 }

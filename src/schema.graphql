@@ -68,9 +68,10 @@ type Inventory {
   redeemed: [Redeemed]!
 }
 
+#group by same id in same contract since user can redeem multiple of same id
 type Redeemed {
   reward: Reward!
-  status: RedeemStatus!
+  status: [RedeemStatus]!
 }
 
 enum RedeemStatus {

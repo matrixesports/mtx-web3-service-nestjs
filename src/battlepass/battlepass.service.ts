@@ -14,7 +14,7 @@ import { MetadataService } from 'src/metadata/metadata.service';
 import { rewardTypeArray } from 'src/types/rewardTypeArray';
 import { Repository } from 'typeorm';
 import { BattlePass as BattlePassDB } from './battlepass.entity';
-
+import { parse } from 'postgres-array';
 @Injectable()
 export class BattlePassService {
   constructor(
@@ -124,10 +124,20 @@ export class BattlePassService {
     )
       return;
 
+    //convert string to array
+    let required_user_social_options = parse(
+      battlePassDB.required_user_social_options,
+      value => value
+    );
+    let required_user_payment_options = parse(
+      battlePassDB.required_user_payment_options,
+      value => value
+    );
+
     let requiredFieldsBody: RequiredFieldsBody = {
       userAddress,
-      required_user_social_options: battlePassDB.required_user_social_options,
-      required_user_payment_options: battlePassDB.required_user_payment_options,
+      required_user_social_options,
+      required_user_payment_options,
     };
     let missingRedeemFields = await axios.post(
       `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
@@ -159,11 +169,11 @@ interface TwitchRedeemBody {
 
 interface RequiredFieldsBody {
   userAddress: string;
-  required_user_social_options: RequiredUserSocialOptions[];
-  required_user_payment_options: RequiredUserPaymentOptions[];
+  required_user_social_options: string[];
+  required_user_payment_options: string[];
 }
 
 interface RequiredFieldsResponse {
-  missing_user_social_options: RequiredUserSocialOptions[];
-  missing_user_payment_options: RequiredUserPaymentOptions[];
+  missing_user_social_options: string[];
+  missing_user_payment_options: string[];
 }

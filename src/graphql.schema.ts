@@ -92,7 +92,7 @@ export class Inventory {
 
 export class Redeemed {
     reward: Reward;
-    status: RedeemStatus;
+    status: Nullable<RedeemStatus>[];
 }
 
 export class LootboxOption {

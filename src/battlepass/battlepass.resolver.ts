@@ -22,30 +22,30 @@ export class BattlePassResolver {
     private battlePassService: BattlePassService
   ) {}
 
-  //   @ResolveField()
-  //   name(@Parent() parent: GetBattlePassChildDto) {
-  //     return parent.battlePassDB.name;
-  //   }
+  @ResolveField()
+  name(@Parent() parent: GetBattlePassChildDto) {
+    return parent.battlePassDB.name;
+  }
 
-  //   @ResolveField()
-  //   description(@Parent() parent: GetBattlePassChildDto) {
-  //     return parent.battlePassDB.description;
-  //   }
+  @ResolveField()
+  description(@Parent() parent: GetBattlePassChildDto) {
+    return parent.battlePassDB.description;
+  }
 
-  //   @ResolveField()
-  //   price(@Parent() parent: GetBattlePassChildDto) {
-  //     return parent.battlePassDB.price;
-  //   }
+  @ResolveField()
+  price(@Parent() parent: GetBattlePassChildDto) {
+    return parent.battlePassDB.price;
+  }
 
-  //   @ResolveField()
-  //   currency(@Parent() parent: GetBattlePassChildDto) {
-  //     return parent.battlePassDB.currency;
-  //   }
+  @ResolveField()
+  currency(@Parent() parent: GetBattlePassChildDto) {
+    return parent.battlePassDB.currency;
+  }
 
-  //   @ResolveField()
-  //   endDate(@Parent() parent: GetBattlePassChildDto) {
-  //     return parent.battlePassDB.end_date;
-  //   }
+  @ResolveField()
+  endDate(@Parent() parent: GetBattlePassChildDto) {
+    return parent.battlePassDB.end_date;
+  }
 
   @ResolveField()
   seasonId(@Parent() parent: GetBattlePassChildDto) {
@@ -99,11 +99,10 @@ export class BattlePassResolver {
     try {
       let contract = await this.battlePassService.getPassContract(creatorId);
       let seasonId = await contract.seasonId();
-      //   let battlePassDB = await this.battlePassService.getBattlePassMetadata(
-      //     contract.address
-      //   );
-      //   return { contract, seasonId, battlePassDB };
-      return { contract, seasonId };
+      let battlePassDB = await this.battlePassService.getBattlePassMetadata(
+        contract.address
+      );
+      return { contract, seasonId, battlePassDB };
     } catch (e) {
       console.log(e);
       return null;
@@ -166,7 +165,7 @@ export class BattlePassResolver {
       let rewardType;
       rewardType = await contract.checkType(id);
 
-      if (rewardTypeArray[rewardType] == RewardType.REDEEMABLE) {
+      if (rewardTypeArray[rewardType] === RewardType.REDEEMABLE) {
         if (!autoRedeem) return { success: true };
         await this.battlePassService.redeemItemHelper(
           contract,
@@ -175,11 +174,12 @@ export class BattlePassResolver {
           creatorId,
           contract.address
         );
-      } else if (rewardTypeArray[rewardType] == RewardType.LOOTBOX) {
+      } else if (rewardTypeArray[rewardType] === RewardType.LOOTBOX) {
         await contract.openLootbox(id, userAddress, fee);
       }
       return { success: true };
     } catch (e) {
+      console.log(e);
       return { success: false };
     }
   }
