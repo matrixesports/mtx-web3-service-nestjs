@@ -98,19 +98,20 @@ export class InventoryResolver {
       let temp = {};
 
       for (let x = 0; x < userRedeemedInfo.length; x++) {
+        if (temp[userRedeemedInfo[x].creatorId] === undefined) {
+          temp[userRedeemedInfo[x].creatorId] = {};
+        }
         if (
-          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] ==
+          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] ===
           undefined
         ) {
-          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] = [
-            userRedeemedInfo[x].status,
-          ];
-        } else {
-          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(
-            userRedeemedInfo[x].status
-          );
+          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] = [];
         }
+        temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(
+          userRedeemedInfo[x].status
+        );
       }
+
       console.log(temp);
       for (const creatorId in temp) {
         let contract = await this.battlePassService.getPassContract(
