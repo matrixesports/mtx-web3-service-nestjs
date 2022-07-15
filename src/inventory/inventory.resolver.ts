@@ -64,6 +64,7 @@ export class InventoryResolver {
           ctr_type: ctrtype.CREATORTOKEN,
           creator_id: allBattlePasses[x].creator_id,
         });
+
         let tokenContract = await this.contractService.getProviderContract(
           creatorTokenDB
         );
@@ -92,7 +93,6 @@ export class InventoryResolver {
         { params: { userAddress: parent.userAddress } }
       );
       let userRedeemedInfo: UserRedeemedRes[] = res.data;
-      console.log(userRedeemedInfo);
       let redeemed: Redeemed[] = [];
       //creatorid->itemId->statuses
       let temp = {};
@@ -112,7 +112,6 @@ export class InventoryResolver {
         );
       }
 
-      console.log(temp);
       for (const creatorId in temp) {
         let contract = await this.battlePassService.getPassContract(
           parseInt(creatorId)
