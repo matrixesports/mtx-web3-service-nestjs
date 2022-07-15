@@ -111,11 +111,11 @@ export class InventoryResolver {
           // qty is length of statuses to signify how many have been redeemed
           let reward = await this.battlePassService.getRewardForLevel(
             contract,
-            ethers.BigNumber.from(temp[creatorId][itemId].length),
             ethers.BigNumber.from(itemId),
+            ethers.BigNumber.from(temp[creatorId][itemId].length),
             parseInt(creatorId)
           );
-          redeemed.push({ reward, status: temp[creatorId[itemId]] });
+          redeemed.push({ reward, status: temp[creatorId][itemId] });
         }
       }
 
