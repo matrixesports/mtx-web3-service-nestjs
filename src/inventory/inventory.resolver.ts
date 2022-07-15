@@ -92,9 +92,11 @@ export class InventoryResolver {
         { params: { userAddress: parent.userAddress } }
       );
       let userRedeemedInfo: UserRedeemedRes[] = res.data;
+      console.log(userRedeemedInfo);
       let redeemed: Redeemed[];
       //creatorid->itemId->statuses
       let temp = {};
+
       for (let x = 0; x < userRedeemedInfo.length; x++) {
         temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(
           userRedeemedInfo[x].status
