@@ -44,9 +44,6 @@ export class UserResolver {
       parent.userAddress,
       parent.seasonId
     );
-    console.log(isPremium);
-    console.log(await parent.contract.balanceOf(parent.userAddress, 1));
-    console.log(parent.seasonId);
     if (!isPremium) return null;
     return parent;
   }
