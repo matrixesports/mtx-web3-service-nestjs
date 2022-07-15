@@ -53,7 +53,8 @@ export class InventoryResolver {
           let reward = await this.battlePassService.getRewardForLevel(
             contract,
             ethers.BigNumber.from(owned[y].id.tokenId),
-            ethers.BigNumber.from(owned[y].balance)
+            ethers.BigNumber.from(owned[y].balance),
+            allBattlePasses[x].creator_id
           );
           defaultRewards.push(reward);
         }
@@ -71,7 +72,8 @@ export class InventoryResolver {
         let tokenReward = await this.battlePassService.getRewardForLevel(
           contract,
           balance,
-          await contract.CREATOR_TOKEN_ID()
+          await contract.CREATOR_TOKEN_ID(),
+          creatorTokenDB.creator_id
         );
         defaultRewards.push(tokenReward);
       }
@@ -107,7 +109,8 @@ export class InventoryResolver {
           let reward = await this.battlePassService.getRewardForLevel(
             contract,
             ethers.BigNumber.from(temp[creatorId][itemId].length),
-            ethers.BigNumber.from(itemId)
+            ethers.BigNumber.from(itemId),
+            parseInt(creatorId)
           );
           redeemed.push({ reward, status: temp[creatorId[itemId]] });
         }

@@ -5,4 +5,5 @@ export class GetBattlePassChildDto {
   contract: Contract;
   seasonId: number;
   battlePassDB: BattlePass;
+  creatorId: number;
 }

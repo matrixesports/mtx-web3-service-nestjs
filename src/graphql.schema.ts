@@ -70,6 +70,7 @@ export class Reward {
     qty: BigInt;
     metadata?: Nullable<RewardMetadata>;
     rewardType?: Nullable<RewardType>;
+    creatorId: number;
 }
 
 export class RewardMetadata {

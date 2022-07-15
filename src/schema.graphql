@@ -37,6 +37,7 @@ type Reward {
   qty: BigInt!
   metadata: RewardMetadata
   rewardType: RewardType
+  creatorId: Int!
 }
 
 # do not change order

@@ -66,12 +66,14 @@ export class BattlePassResolver {
       let freeReward = await this.battlePassService.getRewardForLevel(
         parent.contract,
         seasonInfo.freeRewardId,
-        seasonInfo.freeRewardQty
+        seasonInfo.freeRewardQty,
+        parent.creatorId
       );
       let premiumReward = await this.battlePassService.getRewardForLevel(
         parent.contract,
         seasonInfo.premiumRewardId,
-        seasonInfo.premiumRewardQty
+        seasonInfo.premiumRewardQty,
+        parent.creatorId
       );
       levelInfo.push({
         level: x,
@@ -102,7 +104,7 @@ export class BattlePassResolver {
       let battlePassDB = await this.battlePassService.getBattlePassMetadata(
         contract.address
       );
-      return { contract, seasonId, battlePassDB };
+      return { contract, seasonId, battlePassDB, creatorId };
     } catch (e) {
       console.log(e);
       return null;

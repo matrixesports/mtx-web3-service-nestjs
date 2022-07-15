@@ -34,7 +34,8 @@ export class BattlePassService {
   async getRewardForLevel(
     contract: Contract,
     id: BigNumber,
-    qty: BigNumber
+    qty: BigNumber,
+    creatorId: number
   ): Promise<Reward> {
     try {
       let rewardType = await contract.checkType(id);
@@ -45,6 +46,7 @@ export class BattlePassService {
         qty: qty,
         metadata: await this.metadataService.readFromIPFS(uri),
         rewardType,
+        creatorId,
       };
     } catch (e) {
       return null;
