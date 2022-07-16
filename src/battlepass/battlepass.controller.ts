@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
 import { BattlePassService } from './battlepass.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
@@ -35,8 +36,9 @@ export class BattlePassController {
         true
       );
       let seasonId = await contract.seasonId();
-      let fee = this.contractService.getMaticFeeData();
-      await contract.mint(mintPremiumPassDto.to, seasonId, 1, fee);
+      let user = ethers.utils.getAddress(mintPremiumPassDto.userAddress);
+      let fee = await this.contractService.getMaticFeeData();
+      await contract.mint(user, seasonId, 1, fee);
       return { success: true };
     } catch (e) {
       return { success: false };
