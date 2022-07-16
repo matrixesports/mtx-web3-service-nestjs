@@ -1,5 +1,5 @@
 import { Args, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { ctrtype } from 'src/contract/contract.entity';
+import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { MetadataService } from 'src/metadata/metadata.service';
 
@@ -18,7 +18,7 @@ export class LootboxResolver {
     try {
       let contractDB = await this.contractService.findOne({
         creator_id: creatorId,
-        ctr_type: ctrtype.BATTLEPASS,
+        ctr_type: CtrType.BATTLE_PASS,
       });
       let contract = this.contractService.getProviderContract(contractDB);
       let lengthOfOptions = await contract.getLootboxOptionsLength(lootboxId);

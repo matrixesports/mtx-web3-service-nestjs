@@ -9,7 +9,7 @@ import {
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
-import { ctrtype } from 'src/contract/contract.entity';
+import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { Redeemed, RedeemStatus, Reward, RewardType } from 'src/graphql.schema';
 import { GetInventoryChildDto } from './dto/GetInventoryChild.dto';
@@ -36,7 +36,7 @@ export class InventoryResolver {
       let defaultRewards: Reward[] = [];
       //get all creators
       let allBattlePasses = await this.contractRepository.find({
-        where: { ctr_type: ctrtype.BATTLEPASS },
+        where: { ctr_type: CtrType.BATTLE_PASS },
       });
 
       for (let x = 0; x < allBattlePasses.length; x++) {
@@ -61,7 +61,7 @@ export class InventoryResolver {
 
         //handle creator token now
         let creatorTokenDB = await this.contractService.findOne({
-          ctr_type: ctrtype.CREATORTOKEN,
+          ctr_type: CtrType.CREATOR_TOKEN,
           creator_id: allBattlePasses[x].creator_id,
         });
 

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { BigNumber, Contract } from 'ethers';
-import { ctrtype } from 'src/contract/contract.entity';
+import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import {
   RequiredUserPaymentOptions,
@@ -59,7 +59,7 @@ export class BattlePassService {
   ): Promise<Contract> {
     let contractDB = await this.contractService.findOne({
       creator_id: creatorId,
-      ctr_type: ctrtype.BATTLEPASS,
+      ctr_type: CtrType.BATTLE_PASS,
     });
 
     if (isSigner) return this.contractService.getSignerContract(contractDB);
