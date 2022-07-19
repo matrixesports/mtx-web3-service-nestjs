@@ -26,22 +26,22 @@ export class LootboxResolver {
       for (let x = 0; x < lengthOfOptions; x++) {
         let option = await contract.getLootboxOptionByIdx(lootboxId, x);
         let rewards = [];
-        for (let y = 0; y < option[x].ids.length; y++) {
-          let uri = await contract.uri(option[x].ids[y]);
+        for (let y = 0; y < option[1].length; y++) {
+          let uri = await contract.uri(option[1][y]);
           rewards.push({
-            id: option[x].ids[y],
-            qty: option[x].qtys[y],
+            id: option[1][y],
+            qty: option[2][y],
             metadata: await this.metadataService.readFromIPFS(uri),
           });
         }
         allOptions.push({
           rewards,
-          probability:
-            option.rarityRange[1].toNumber() - option.rarityRange[0].toNumber(),
+          probability: option[0][1].toNumber() - option[0][0].toNumber(),
         });
       }
       return allOptions;
     } catch (e) {
+      console.log(e);
       return null;
     }
   }
