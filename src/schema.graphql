@@ -107,6 +107,7 @@ type Mutation {
 
 type ClaimRewardResponse {
   success: Boolean!
+  reward: [Reward]
   description: String
   missingFields: UserMissingFields
 }

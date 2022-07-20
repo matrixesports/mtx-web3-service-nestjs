@@ -1,4 +1,5 @@
 import { Args, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { MetadataService } from 'src/metadata/metadata.service';
@@ -7,7 +8,8 @@ import { MetadataService } from 'src/metadata/metadata.service';
 export class LootboxResolver {
   constructor(
     private contractService: ContractService,
-    private metadataService: MetadataService
+    private metadataService: MetadataService,
+    private battlePassService: BattlePassService
   ) {}
 
   @Query()
@@ -27,12 +29,14 @@ export class LootboxResolver {
         let option = await contract.getLootboxOptionByIdx(lootboxId, x);
         let rewards = [];
         for (let y = 0; y < option[1].length; y++) {
-          let uri = await contract.uri(option[1][y]);
-          rewards.push({
-            id: option[1][y],
-            qty: option[2][y],
-            metadata: await this.metadataService.readFromIPFS(uri),
-          });
+          rewards.push(
+            await this.battlePassService.getRewardForLevel(
+              contract,
+              option[1][y],
+              option[2][y],
+              creatorId
+            )
+          );
         }
         allOptions.push({
           rewards,
