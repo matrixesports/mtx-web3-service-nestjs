@@ -143,6 +143,11 @@ export class BattlePassResolver {
             missingFields.missing_user_payment_options.length != 0 ||
             missingFields.missing_user_social_options.length != 0
           ) {
+            console.log({              success: true,
+              missingFields: {
+                payment: missingFields.missing_user_payment_options,
+                social: missingFields.missing_user_social_options,
+              }});
             return {
               success: true,
               missingFields: {
