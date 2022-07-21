@@ -20,7 +20,7 @@ export class BattlePassController {
         true
       );
       let seasonId = await contract.seasonId();
-      let fee = this.contractService.getMaticFeeData();
+      let fee = await this.contractService.getMaticFeeData();
       await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
       return { success: true };
     } catch (e) {
