@@ -122,6 +122,7 @@ enum RequiredUserSocialOptions {
   TWITTER_USERNAME
   TWITCH_USERNAME
   CLASH_USERNAME
+  PREFERRED_SOCIAL
 }
 
 enum RequiredUserPaymentOptions {
