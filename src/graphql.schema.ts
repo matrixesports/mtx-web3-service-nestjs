@@ -123,6 +123,7 @@ export abstract class IMutation {
 
 export class ClaimRewardResponse {
     success: boolean;
+    reward?: Nullable<Nullable<Reward>[]>;
     description?: Nullable<string>;
     missingFields?: Nullable<UserMissingFields>;
 }

@@ -3,18 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { BigNumber, Contract } from 'ethers';
+import { parse } from 'postgres-array';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
-import {
-  RequiredUserPaymentOptions,
-  RequiredUserSocialOptions,
-  Reward,
-} from 'src/graphql.schema';
+import { Reward } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { rewardTypeArray } from 'src/types/rewardTypeArray';
 import { Repository } from 'typeorm';
 import { BattlePass as BattlePassDB } from './battlepass.entity';
-import { parse } from 'postgres-array';
 @Injectable()
 export class BattlePassService {
   constructor(

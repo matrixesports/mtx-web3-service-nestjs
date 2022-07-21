@@ -159,27 +159,53 @@ export class BattlePassResolver {
 
       let rewardGiven = await contract.seasonInfo(seasonId, level);
       let id;
+      let qty;
       if (premium) {
         id = rewardGiven.premiumRewardId;
+        qty = rewardGiven.premiumRewardQty;
       } else {
         id = rewardGiven.freeRewardId;
+        qty = rewardGiven.freeRewardQty;
       }
       let rewardType;
       rewardType = await contract.checkType(id);
-
       if (rewardTypeArray[rewardType] === RewardType.REDEEMABLE) {
-        if (!autoRedeem) return { success: true };
-        await this.battlePassService.redeemItemHelper(
-          contract,
-          id.toNumber(),
-          userAddress,
-          creatorId,
-          contract.address
-        );
+        if (autoRedeem) {
+          await this.battlePassService.redeemItemHelper(
+            contract,
+            id.toNumber(),
+            userAddress,
+            creatorId,
+            contract.address
+          );
+        }
       } else if (rewardTypeArray[rewardType] === RewardType.LOOTBOX) {
-        await contract.openLootbox(id, userAddress, fee);
+        //special case, u want to show all rewards rewarded in a lootbox
+        let tx = await contract.openLootbox(id, userAddress, fee);
+        let rc = await tx.wait();
+        let event = rc.events?.find(event => event.event === 'LootboxOpened');
+        const [lootboxId, idxOpened, user] = event.args;
+        let option = await contract.getLootboxOptionByIdx(lootboxId, idxOpened);
+        let rewards = [];
+        for (let y = 0; y < option[1].length; y++) {
+          rewards.push(
+            await this.battlePassService.getRewardForLevel(
+              contract,
+              option[1][y],
+              option[2][y],
+              creatorId
+            )
+          );
+        }
+        return { success: true, reward: rewards };
       }
-      return { success: true };
+      let reward = await this.battlePassService.getRewardForLevel(
+        contract,
+        id,
+        qty,
+        creatorId
+      );
+      return { success: true, reward: [reward] };
     } catch (e) {
       console.log(e);
       return { success: false };

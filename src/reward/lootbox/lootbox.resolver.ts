@@ -1,4 +1,5 @@
 import { Args, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { MetadataService } from 'src/metadata/metadata.service';
@@ -7,7 +8,8 @@ import { MetadataService } from 'src/metadata/metadata.service';
 export class LootboxResolver {
   constructor(
     private contractService: ContractService,
-    private metadataService: MetadataService
+    private metadataService: MetadataService,
+    private battlePassService: BattlePassService
   ) {}
 
   @Query()
@@ -26,22 +28,24 @@ export class LootboxResolver {
       for (let x = 0; x < lengthOfOptions; x++) {
         let option = await contract.getLootboxOptionByIdx(lootboxId, x);
         let rewards = [];
-        for (let y = 0; y < option[x].ids.length; y++) {
-          let uri = await contract.uri(option[x].ids[y]);
-          rewards.push({
-            id: option[x].ids[y],
-            qty: option[x].qtys[y],
-            metadata: await this.metadataService.readFromIPFS(uri),
-          });
+        for (let y = 0; y < option[1].length; y++) {
+          rewards.push(
+            await this.battlePassService.getRewardForLevel(
+              contract,
+              option[1][y],
+              option[2][y],
+              creatorId
+            )
+          );
         }
         allOptions.push({
           rewards,
-          probability:
-            option.rarityRange[1].toNumber() - option.rarityRange[0].toNumber(),
+          probability: option[0][1].toNumber() - option[0][0].toNumber(),
         });
       }
       return allOptions;
     } catch (e) {
+      console.log(e);
       return null;
     }
   }
