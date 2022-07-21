@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
+import console from 'console';
 import { BigNumber, Contract } from 'ethers';
 import { parse } from 'postgres-array';
 import { CtrType } from 'src/contract/contract.entity';
@@ -141,6 +142,7 @@ export class BattlePassService {
       `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
       requiredFieldsBody
     );
+    console.log(missingRedeemFields.data);
     return missingRedeemFields.data;
   }
 }
