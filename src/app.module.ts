@@ -20,8 +20,36 @@ import { RedeemableModule } from './reward/redeemable/redeemable.module';
 import { LootboxModule } from './reward/lootbox/lootbox.module';
 import configuration from './configuration';
 import * as Joi from 'joi';
+import { LoggerModule } from 'nestjs-pino';
+import { GraphQLLogger } from './common/plugins/graphql.logger';
+
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        base: null,
+        formatters: {
+          level: (label) => {
+            return { level: label };
+          },
+        },
+        autoLogging: {
+          ignore: (req) => {
+            return req.headers?.origin === "https://studio.apollographql.com";
+          }
+        },
+        serializers: {
+          req: (req) => {
+            delete req["headers"];
+            return req;
+          },
+          res: (res) => {
+            delete res["headers"];
+            return res;
+          }
+        }
+      }
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -84,6 +112,6 @@ import * as Joi from 'joi';
     LootboxModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [GraphQLLogger],
 })
 export class AppModule {}
