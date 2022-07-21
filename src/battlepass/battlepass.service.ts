@@ -141,7 +141,6 @@ export class BattlePassService {
       `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
       requiredFieldsBody
     );
-    console.log(missingRedeemFields.data);
     return missingRedeemFields.data;
   }
 }
