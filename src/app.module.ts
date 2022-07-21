@@ -27,7 +27,6 @@ import * as Joi from 'joi';
       cache: true,
       load: [configuration],
       validationSchema: Joi.object({
-        ENV: Joi.string().valid('dev', 'prod').default('dev'),
         PVT_KEY: Joi.string().required(),
         POLYGONSCAN_API_KEY: Joi.string().required(),
         POLYGON_RPC: Joi.string().required(),
