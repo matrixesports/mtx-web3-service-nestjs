@@ -39,16 +39,19 @@ class Listener<T = unknown>implements
     errorsCtx: GraphQLRequestContextDidEncounterErrors<T>,
   ): Promise<void> {
     this.logData.errors = errorsCtx.errors;
+    this.logger.error({ graphql: this.logData });
   }
 
   async willSendResponse(startCtx: GraphQLRequestContext): Promise<void> {
+    if (this.logData.errors) {
+      return;
+    }
     this.logData["response"] = startCtx.response.data;
     this.logger.log(
       {
         graphql: this.logData,
         responseTime: Date.now() - this.start,
       },
-      this.logData.errors ? 'request errored' : 'request completed',
     );
   }
 }

@@ -19,7 +19,7 @@ import { GetBattlePassUserInfoChildDto } from './dto/GetBattlePassUserInfoChild.
 export class BattlePassResolver {
   constructor(
     private contractService: ContractService,
-    private battlePassService: BattlePassService
+    private battlePassService: BattlePassService,
   ) {}
 
   @ResolveField()
