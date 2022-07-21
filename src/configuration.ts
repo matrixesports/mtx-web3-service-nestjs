@@ -1,4 +1,19 @@
-let zeet_env = process.env.ZEET_ENV || 'dev';
+let WEB3_DATABASE;
+let ticket;
+let user;
+let twitch;
+
+if (process.env.ZEET_ENV == 'main') {
+  WEB3_DATABASE = process.env.DB_WEB3_SERVICE_URL;
+  ticket = process.env.TICKET_SERVICE_URL;
+  user = process.env.USER_SERVICE_URL;
+  twitch = process.env.TWITCH_SERVICE_URL;
+} else {
+  WEB3_DATABASE = process.env.DB_STAGING_WEB3_SERVICE_URL;
+  ticket = process.env.STAGING_TICKET_SERVICE_URL;
+  user = process.env.STAGING_USER_SERVICE_URL;
+  twitch = process.env.STAGING_TWITCH_SERVICE_URL;
+}
 
 export default () => ({
   PVT_KEY: process.env.PVT_KEY,
@@ -7,24 +22,11 @@ export default () => ({
     polygonscan: process.env.POLYGONSCAN_API_KEY,
     rpc: process.env.POLYGON_RPC,
   },
-  WEB3_DATABASE:
-    process.env.ZEET_ENV == 'dev'
-      ? process.env.DB_STAGING_WEB3_SERVICE_URL
-      : process.env.DB_WEB3_SERVICE_URL,
-
+  WEB3_DATABASE,
   SERVICE: {
-    ticket:
-      process.env.ZEET_ENV == 'dev'
-        ? process.env.STAGING_TICKET_SERVICE_URL
-        : process.env.TICKET_SERVICE_URL,
-    user:
-      process.env.ZEET_ENV == 'dev'
-        ? process.env.STAGING_USER_SERVICE_URL
-        : process.env.USER_SERVICE_URL,
-    twitch:
-      process.env.ZEET_ENV == 'dev'
-        ? process.env.STAGING_TWITCH_SERVICE_URL
-        : process.env.TWITCH_SERVICE_URL,
+    ticket,
+    user,
+    twitch,
   },
   PINATA: {
     key: process.env.PINATA_API_KEY,
