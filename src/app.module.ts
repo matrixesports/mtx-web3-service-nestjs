@@ -22,6 +22,7 @@ import configuration from './configuration';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
 import { GraphQLLogger } from './common/plugins/graphql.logger';
+import { error } from 'console';
 
 @Module({
   imports: [
@@ -35,16 +36,17 @@ import { GraphQLLogger } from './common/plugins/graphql.logger';
         },
         autoLogging: {
           ignore: (req) => {
-            return req.headers?.origin === "https://studio.apollographql.com";
-          }
+              return req["params"]["0"] === "graphql" ? true : false;
+            }
         },
         serializers: {
           req: (req) => {
-            delete req["headers"];
+            req["user-address"] = req["headers"]["user-address"]
+            delete req["headers"]; //GDPR compliant ?
             return req;
           },
           res: (res) => {
-            delete res["headers"];
+            delete res["headers"]; //GDPR compliant ?
             return res;
           }
         }

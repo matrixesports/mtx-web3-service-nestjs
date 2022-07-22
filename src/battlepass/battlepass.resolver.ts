@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import {
   Args,
   Context,
@@ -98,6 +99,7 @@ export class BattlePassResolver {
   async getBattlePass(
     @Args('creatorId') creatorId: number
   ): Promise<GetBattlePassChildDto> {
+    const logger = new Logger(this.getBattlePass.name);
     try {
       let contract = await this.battlePassService.getPassContract(creatorId);
       let seasonId = await contract.seasonId();
@@ -106,7 +108,7 @@ export class BattlePassResolver {
       );
       return { contract, seasonId, battlePassDB, creatorId };
     } catch (e) {
-      console.log(e);
+      logger.warn(e);
       return null;
     }
   }
@@ -126,6 +128,7 @@ export class BattlePassResolver {
     @Args('autoRedeem') autoRedeem: boolean,
     @Context() context
   ) {
+    const logger = new Logger(this.getBattlePass.name);
     try {
       let userAddress: string = context.req.headers['user-address'];
       let contract = await this.battlePassService.getPassContract(
@@ -207,7 +210,7 @@ export class BattlePassResolver {
       );
       return { success: true, reward: [reward] };
     } catch (e) {
-      console.log(e);
+      logger.warn(e);
       return { success: false };
     }
   }
@@ -218,6 +221,7 @@ export class BattlePassResolver {
     @Args('itemId') itemId: number,
     @Context() context
   ) {
+    const logger = new Logger(this.redeemReward.name);
     try {
       let userAddress: string = context.req.headers['user-address'];
 
@@ -234,6 +238,7 @@ export class BattlePassResolver {
       );
       return { success: true };
     } catch (e) {
+      logger.warn(e);
       return { success: false };
     }
   }

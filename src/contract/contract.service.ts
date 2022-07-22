@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
@@ -58,6 +58,7 @@ export class ContractService {
     maxPriorityFeePerGas: BigNumber;
     maxFeePerGas?: BigNumber;
   } | null> {
+    const logger = new Logger(this.getMaticFeeData.name);
     try {
       const { data } = await axios({
         method: 'get',
@@ -77,6 +78,7 @@ export class ContractService {
         maxFeePerGas,
       };
     } catch (e) {
+      logger.warn(e);
       return {
         maxPriorityFeePerGas: ethers.utils.parseUnits(
           Math.ceil(40) + '',

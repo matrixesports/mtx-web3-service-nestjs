@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import pinataSDK, { PinataClient } from '@pinata/sdk';
 import axios from 'axios';
@@ -23,6 +23,7 @@ export class MetadataService {
    * @returns data from uri
    */
   async readFromIPFS(uri: string): Promise<RewardMetadata> {
+    const logger = new Logger(this.readFromIPFS.name);
     try {
       const convertedGatewayUrl = await this.changeToGateway(uri);
       let res = await axios.get(convertedGatewayUrl);
@@ -30,6 +31,7 @@ export class MetadataService {
       res.data.image = imageUri;
       return res.data;
     } catch (e) {
+      logger.warn(e);
       return null;
     }
   }

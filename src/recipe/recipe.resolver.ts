@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import {
   Args,
   Context,
@@ -27,6 +28,7 @@ export class RecipeResolver {
 
   @ResolveField()
   async inputIngredients(@Parent() parent: GetRecipeChildDto) {
+    const logger = new Logger(this.inputIngredients.name);
     let inputIngredients = await parent.contract.getInputIngredients(
       parent.recipeId
     );
@@ -40,6 +42,7 @@ export class RecipeResolver {
           address: inputIngredients.tokens[x],
         });
       } catch (e) {
+        logger.warn(e);
         continue;
       }
       let contract = this.contractService.getProviderContract(contractDB);
@@ -57,6 +60,7 @@ export class RecipeResolver {
 
   @ResolveField()
   async outputIngredients(@Parent() parent: GetRecipeChildDto) {
+    const logger = new Logger(this.outputIngredients.name);
     let outputIngredients = await parent.contract.getOutputIngredients(
       parent.recipeId
     );
@@ -70,6 +74,7 @@ export class RecipeResolver {
           address: outputIngredients.tokens[x],
         });
       } catch (e) {
+        logger.warn(e);
         continue;
       }
       let contract = this.contractService.getProviderContract(contractDB);
@@ -102,6 +107,7 @@ export class RecipeResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number
   ): Promise<GetRecipeChildDto> {
+    const logger = new Logger(this.getRecipe.name);
     try {
       let contractDB = await this.contractService.findOne({
         ctr_type: CtrType.CRAFTING,
@@ -109,12 +115,14 @@ export class RecipeResolver {
       let contract = this.contractService.getProviderContract(contractDB);
       return { contract, recipeId, creatorId };
     } catch (e) {
+      logger.warn(e);
       return null;
     }
   }
 
   @Mutation()
   async craft(@Args('recipeId') recipeId: number, @Context() context) {
+    const logger = new Logger(this.craft.name);
     try {
       let userAddress: string = context.req.headers['user-address'];
 
@@ -126,6 +134,7 @@ export class RecipeResolver {
       await contract.craft(recipeId, userAddress, fee);
       return { success: true };
     } catch (e) {
+      logger.warn(e);
       return { success: false };
     }
   }

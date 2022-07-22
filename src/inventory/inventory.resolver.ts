@@ -18,6 +18,7 @@ import { Contract as ContractDB } from '../contract/contract.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { rewardTypeArray } from 'src/types/rewardTypeArray';
+import { Logger } from '@nestjs/common';
 
 @Resolver('Inventory')
 export class InventoryResolver {
@@ -32,6 +33,7 @@ export class InventoryResolver {
 
   @ResolveField()
   async default(@Parent() parent: GetInventoryChildDto) {
+    const logger = new Logger(this.default.name);
     try {
       let defaultRewards: Reward[] = [];
       //get all creators
@@ -80,6 +82,7 @@ export class InventoryResolver {
       }
       return defaultRewards;
     } catch (e) {
+      logger.warn(e);
       return [];
     }
   }
@@ -87,6 +90,7 @@ export class InventoryResolver {
   @ResolveField()
   //get all tickets for a user
   async redeemed(@Parent() parent: GetInventoryChildDto) {
+    const logger = new Logger(this.redeemed.name);
     try {
       let res = await axios.get(
         `${this.configService.get('SERVICE').ticket}/api/ticket`,
@@ -130,7 +134,7 @@ export class InventoryResolver {
 
       return redeemed;
     } catch (e) {
-      console.log(e);
+      logger.warn(e);
       return [];
     }
   }

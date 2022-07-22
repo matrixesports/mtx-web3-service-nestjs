@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Args, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { CtrType } from 'src/contract/contract.entity';
@@ -17,6 +18,7 @@ export class LootboxResolver {
     @Args('creatorId') creatorId: number,
     @Args('lootboxId') lootboxId: number
   ) {
+    const logger = new Logger(this.getLootboxOptions.name);
     try {
       let contractDB = await this.contractService.findOne({
         creator_id: creatorId,
@@ -45,7 +47,7 @@ export class LootboxResolver {
       }
       return allOptions;
     } catch (e) {
-      console.log(e);
+      logger.warn(e);
       return null;
     }
   }

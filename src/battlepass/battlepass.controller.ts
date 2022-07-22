@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
 import { BattlePassService } from './battlepass.service';
@@ -9,11 +9,12 @@ import { MintPremiumPassDto } from './dto/MintPremiumPass.dto';
 export class BattlePassController {
   constructor(
     private contractService: ContractService,
-    private battlePassService: BattlePassService
+    private battlePassService: BattlePassService,
   ) {}
 
   @Post('giveXp')
   async giveXp(@Body() giveXpDto: GiveXpDto) {
+    const logger = new Logger(this.giveXp.name);
     try {
       let contract = await this.battlePassService.getPassContract(
         giveXpDto.creatorId,
@@ -24,12 +25,14 @@ export class BattlePassController {
       await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
       return { success: true };
     } catch (e) {
+      logger.warn(e);
       return { success: false };
     }
   }
 
   @Post('mint')
   async mintPremiumPass(@Body() mintPremiumPassDto: MintPremiumPassDto) {
+    const logger = new Logger(this.giveXp.name);
     try {
       let contract = await this.battlePassService.getPassContract(
         mintPremiumPassDto.creatorId,
@@ -41,6 +44,7 @@ export class BattlePassController {
       await contract.mint(user, seasonId, 1, fee);
       return { success: true };
     } catch (e) {
+      logger.warn(e);
       return { success: false };
     }
   }
