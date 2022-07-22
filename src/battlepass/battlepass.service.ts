@@ -2,7 +2,6 @@ import { Injectable, Logger} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
-import console from 'console';
 import { BigNumber, Contract } from 'ethers';
 import { parse } from 'postgres-array';
 import { CtrType } from 'src/contract/contract.entity';
@@ -74,6 +73,8 @@ export class BattlePassService {
     creatorId: number,
     address: string
   ) {
+    const logger = new Logger(this.redeemItemHelper.name);
+    let logData = { external: {} }
     let uri = await contract.uri(itemId);
     let metadata = await this.metadataService.readFromIPFS(uri);
 
@@ -84,10 +85,17 @@ export class BattlePassService {
       userAddress: userAddress,
       itemAddress: address,
     };
+    let start = Date.now();
     await axios.post(
       `${this.configService.get('SERVICE').ticket}/api/ticket/redemption`,
       ticketRedeemBody
     );
+    logData.external["0"] = {
+      service: "ticket",
+      path: "/api/ticket/redemption",
+      body: ticketRedeemBody,
+      responseTime: Date.now() - start,
+    }
 
     let twitchRedeemBody: TwitchRedeemBody = {
       ...metadata,
@@ -96,11 +104,18 @@ export class BattlePassService {
       userAddress: userAddress,
       itemAddress: address,
     };
+    start = Date.now();
     await axios.post(
       `${this.configService.get('SERVICE').twitch}/redemptions/redemption`,
       twitchRedeemBody
     );
-
+    logData.external["1"] = {
+      service: "twitch",
+      path: "/redemptions/redemption",
+      body: twitchRedeemBody,
+      responseTime: Date.now() - start,
+    }
+    logger.log(logData);
     let fee = await this.contractService.getMaticFeeData();
     await contract.burn(userAddress, itemId, 1, fee);
   }
@@ -116,6 +131,8 @@ export class BattlePassService {
     userAddress: string,
     address: string
   ): Promise<RequiredFieldsResponse> {
+    const logger = new Logger(this.checkRequiredFields.name);
+    let logData = { external: {} }
     //will throw error if address does not exist
     let battlePassDB = await this.getBattlePassMetadata(address);
 
@@ -140,11 +157,18 @@ export class BattlePassService {
       required_user_social_options,
       required_user_payment_options,
     };
+    let start = Date.now();
     let missingRedeemFields = await axios.post(
       `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
       requiredFieldsBody
     );
-    console.log(missingRedeemFields.data);
+    logData.external["0"] = {
+      service: "user",
+      path: "/api/user/missingRedeemFields",
+      body: requiredFieldsBody,
+      responseTime: Date.now() - start
+    }
+    logger.log(logData);
     return missingRedeemFields.data;
   }
 }
