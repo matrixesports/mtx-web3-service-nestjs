@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post, Logger } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Logger, UseFilters } from '@nestjs/common';
 import { ethers } from 'ethers';
+import { TypeORMFilter } from 'src/common/filters/typeorm.filter';
 import { ContractService } from 'src/contract/contract.service';
 import { BattlePassService } from './battlepass.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
@@ -13,6 +14,7 @@ export class BattlePassController {
   ) {}
 
   @Post('giveXp')
+  @UseFilters(TypeORMFilter)
   async giveXp(@Body() giveXpDto: GiveXpDto) {
     const logger = new Logger(this.giveXp.name);
     try {
@@ -31,6 +33,7 @@ export class BattlePassController {
   }
 
   @Post('mint')
+  @UseFilters(TypeORMFilter)
   async mintPremiumPass(@Body() mintPremiumPassDto: MintPremiumPassDto) {
     const logger = new Logger(this.giveXp.name);
     try {
@@ -50,6 +53,7 @@ export class BattlePassController {
   }
 
   @Get('metadata/:creatorId')
+  @UseFilters(TypeORMFilter)
   async getBattlePassMetadata(@Param('creatorId') creatorId: number) {
     let contract = await this.battlePassService.getPassContract(creatorId);
     let seasonId = await contract.seasonId();
