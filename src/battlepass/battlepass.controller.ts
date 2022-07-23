@@ -16,20 +16,14 @@ export class BattlePassController {
   @Post('giveXp')
   @UseFilters(TypeORMFilter)
   async giveXp(@Body() giveXpDto: GiveXpDto) {
-    const logger = new Logger(this.giveXp.name);
-    try {
-      let contract = await this.battlePassService.getPassContract(
-        giveXpDto.creatorId,
-        true
-      );
-      let seasonId = await contract.seasonId();
-      let fee = this.contractService.getMaticFeeData();
-      await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
-      return { success: true };
-    } catch (e) {
-      logger.warn(e);
-      return { success: false };
-    }
+    let contract = await this.battlePassService.getPassContract(
+      giveXpDto.creatorId,
+      true
+    );
+    let seasonId = await contract.seasonId();
+    let fee = this.contractService.getMaticFeeData();
+    await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
+    return { success: true };
   }
 
   @Post('mint')

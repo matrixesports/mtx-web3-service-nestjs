@@ -2,36 +2,42 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logge
 import { QueryFailedError } from 'typeorm';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 import { Request, Response } from 'express';
-import { GlobalResponseError } from './global.filter';
+import { IResponseError } from './global.filter';
 
 
 // full list of error https://github.com/typeorm/typeorm/tree/master/src/error
 @Catch(QueryFailedError, EntityNotFoundError)
 export class TypeORMFilter implements ExceptionFilter {
     catch(error: Error, host: ArgumentsHost) {
+        const logger = new Logger(TypeORMFilter.name);
         const ctx = host.switchToHttp();
-        const response = ctx.getResponse<Response>();
-        const request = ctx.getRequest<Request>();
-        let status = HttpStatus.INTERNAL_SERVER_ERROR;
-        let message;
-        let code;
+        const res = ctx.getResponse<Response>();
+        const req = ctx.getRequest<Request>();
+        let message: string;
+        let status: number;
         switch (error.constructor) {
             case QueryFailedError: 
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
                 message = (error as QueryFailedError).message;
-                code = (error as any).code;
+                logger.warn(error);
                 break;
             case EntityNotFoundError:
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
                 message = (error as EntityNotFoundError).message;
-                code = (error as any).code;
+                logger.warn(error);
                 break;
             default:
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
                 message = "unregistered error!";
-                code = HttpStatus.INTERNAL_SERVER_ERROR;
+                logger.error(error);
         }
-
-        response.status(status).json(GlobalResponseError(status, message, code, request));
+        res
+        .status(status)
+        .json({ 
+          status, 
+          message, 
+          timestamp: new Date().toISOString(), 
+          path: req.url, 
+          method: req.method } as IResponseError);
     }
 }
