@@ -39,7 +39,7 @@ export class LootboxResolver {
           );
         }
         allOptions.push({
-          rewards,
+          reward: rewards,
           probability: option[0][1].toNumber() - option[0][0].toNumber(),
         });
       }
