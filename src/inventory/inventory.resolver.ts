@@ -59,27 +59,32 @@ export class InventoryResolver {
           defaultRewards.push(reward);
         }
 
-        //handle creator token now
-        let creatorTokenDB = await this.contractService.findOne({
-          ctr_type: CtrType.CREATOR_TOKEN,
-          creator_id: allBattlePasses[x].creator_id,
-        });
+        try {
+          //handle creator token now
+          let creatorTokenDB = await this.contractService.findOne({
+            ctr_type: CtrType.CREATOR_TOKEN,
+            creator_id: allBattlePasses[x].creator_id,
+          });
 
-        let tokenContract = await this.contractService.getProviderContract(
-          creatorTokenDB
-        );
-        let balance = await tokenContract.balanceOf(parent.userAddress);
-        if (balance == 0) continue;
-        let tokenReward = await this.battlePassService.getRewardForLevel(
-          contract,
-          balance,
-          await contract.CREATOR_TOKEN_ID(),
-          creatorTokenDB.creator_id
-        );
-        defaultRewards.push(tokenReward);
+          let tokenContract = await this.contractService.getProviderContract(
+            creatorTokenDB
+          );
+          let balance = await tokenContract.balanceOf(parent.userAddress);
+          if (balance == 0) continue;
+          let tokenReward = await this.battlePassService.getRewardForLevel(
+            contract,
+            balance,
+            await contract.CREATOR_TOKEN_ID(),
+            creatorTokenDB.creator_id
+          );
+          defaultRewards.push(tokenReward);
+        } catch (e) {
+          continue;
+        }
       }
       return defaultRewards;
     } catch (e) {
+      console.log(e);
       return [];
     }
   }
