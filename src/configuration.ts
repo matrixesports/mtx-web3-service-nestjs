@@ -4,7 +4,7 @@ export default () => {
   let user;
   let twitch;
 
-  if (process.env.ZEET_ENV == 'main') {
+  if (process.env.ZEET_ENVIRONMENT == 'main') {
     WEB3_DATABASE = process.env.DB_WEB3_SERVICE_URL;
     ticket = process.env.TICKET_SERVICE_URL;
     user = process.env.USER_SERVICE_URL;
