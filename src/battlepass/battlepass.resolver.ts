@@ -99,7 +99,16 @@ export class BattlePassResolver {
   ): Promise<GetBattlePassChildDto> {
     try {
       //seasonid,
-      //max level,
+      //max level
+      //season info for each level
+      //reward type for each reward
+      //uri for each reward + ipfs info / no ipfs
+
+      //userinfo
+      //user level
+      //user claimed rewards till usee level
+      //is premium
+
       let contract = await this.battlePassService.getPassContract(creatorId);
       let seasonId = await contract.seasonId();
       let battlePassDB = await this.battlePassService.getBattlePassMetadata(
@@ -190,14 +199,15 @@ export class BattlePassResolver {
         }
       } else if (rewardTypeArray[rewardType] === RewardType.LOOTBOX) {
         //special case, u want to show all rewards rewarded in a lootbox
+        fee['gasLimit'] = 1000000;
         let tx = await contract.openLootbox(id, userAddress, fee);
         let rc = await tx.wait();
         let event = rc.events?.find(event => event.event === 'LootboxOpened');
         const [lootboxId, idxOpened, user] = event.args;
         let option = await contract.getLootboxOptionByIdx(lootboxId, idxOpened);
+        console.log(option);
         let rewards = [];
         for (let y = 0; y < option[1].length; y++) {
-          console.log(y);
           rewards.push(
             await this.battlePassService.getRewardForLevel(
               contract,
