@@ -5,10 +5,11 @@ import { BattlePassController } from './battlepass.controller';
 import { BattlePassService } from './battlepass.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BattlePass } from './battlepass.entity';
+import { MetadataModule } from 'src/metadata/metadata.module';
 
 @Module({
   providers: [BattlePassResolver, BattlePassService],
-  imports: [UserModule, TypeOrmModule.forFeature([BattlePass])],
+  imports: [UserModule, TypeOrmModule.forFeature([BattlePass]), MetadataModule],
   controllers: [BattlePassController],
   exports: [BattlePassService],
 })

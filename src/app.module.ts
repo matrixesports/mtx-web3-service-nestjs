@@ -1,25 +1,26 @@
 import {
-  ApolloDriver,
   ApolloDriverConfig,
   ApolloFederationDriver,
   ApolloFederationDriverConfig,
 } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
-import { GraphQLModule } from '@nestjs/graphql';
-import { join } from 'path';
-import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScalarModule } from './scalar/scalar.module';
-import { BattlePassModule } from './battlepass/battlepass.module';
-import { MetadataModule } from './metadata/metadata.module';
-import { ContractModule } from './contract/contract.module';
-import { RecipeModule } from './recipe/recipe.module';
-import { InventoryModule } from './inventory/inventory.module';
-import { RedeemableModule } from './reward/redeemable/redeemable.module';
-import { LootboxModule } from './reward/lootbox/lootbox.module';
-import configuration from './configuration';
+import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import * as Joi from 'joi';
+import { join } from 'path';
+import { BattlePassModule } from './battlepass/battlepass.module';
+import configuration from './configuration';
+import { ContractModule } from './contract/contract.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { MetadataModule } from './metadata/metadata.module';
+import { RecipeModule } from './recipe/recipe.module';
+import { LootboxModule } from './reward/lootbox/lootbox.module';
+import { RedeemableModule } from './reward/redeemable/redeemable.module';
+import { ScalarModule } from './scalar/scalar.module';
+import responseCachePlugin from 'apollo-server-plugin-response-cache';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -66,7 +67,10 @@ import * as Joi from 'joi';
       },
       typePaths: ['./**/*.graphql'],
       driver: ApolloFederationDriver,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault(),
+        responseCachePlugin(),
+      ],
       playground: false,
     }),
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
