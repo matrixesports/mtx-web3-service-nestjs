@@ -14,7 +14,6 @@ export class UserResolver {
 
   @ResolveField()
   async level(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    console.log(parent);
     return await parent.contract.level(parent.userAddress, parent.seasonId);
   }
 

@@ -203,8 +203,8 @@ export class BattlePassResolver {
         let tx = await contract.openLootbox(id, userAddress, fee);
         let rc = await tx.wait();
         let event = rc.events?.find(event => event.event === 'LootboxOpened');
-        const [lootboxId, idxOpened, user] = event.args;
-        let option = await contract.getLootboxOptionByIdx(lootboxId, idxOpened);
+        const [idxOpened] = event.args;
+        let option = await contract.getLootboxOptionByIdx(id, idxOpened);
         console.log(option);
         let rewards = [];
         for (let y = 0; y < option[1].length; y++) {
