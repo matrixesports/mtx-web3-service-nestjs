@@ -79,9 +79,11 @@ export class InventoryResolver {
           );
           defaultRewards.push(tokenReward);
         } catch (e) {
+          console.log(e);
           continue;
         }
       }
+      console.log(defaultRewards);
       return defaultRewards;
     } catch (e) {
       console.log(e);
