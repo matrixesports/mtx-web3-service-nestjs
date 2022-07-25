@@ -36,12 +36,11 @@ export class BattlePassService {
     try {
       let rewardType = await contract.checkType(id);
       rewardType = rewardTypeArray[rewardType];
-      //   let uri = await contract.uri(id);
+      let uri = await contract.uri(id);
       return {
         id: id,
         qty: qty,
-        // metadata: await this.metadataService.readFromIPFS(uri),
-        metadata: null,
+        metadata: await this.metadataService.readFromIPFS(uri),
         rewardType,
         creatorId,
       };
