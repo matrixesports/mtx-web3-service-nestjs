@@ -193,7 +193,6 @@ export class BattlePassResolver {
         const [lootboxId, idxOpened, user] = event.args;
         let option = await contract.getLootboxOptionByIdx(lootboxId, idxOpened);
         let rewards = [];
-        console.log(option);
         for (let y = 0; y < option[1].length; y++) {
           console.log(y);
           rewards.push(

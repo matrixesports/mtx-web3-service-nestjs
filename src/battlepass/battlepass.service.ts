@@ -81,7 +81,6 @@ export class BattlePassService {
       userAddress: userAddress,
       itemAddress: address,
     };
-    console.log(this.configService.get('SERVICE'));
     await axios.post(
       `${this.configService.get('SERVICE').ticket}/api/ticket/redemption`,
       ticketRedeemBody

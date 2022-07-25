@@ -83,7 +83,6 @@ export class InventoryResolver {
           continue;
         }
       }
-      console.log(defaultRewards);
       return defaultRewards;
     } catch (e) {
       console.log(e);
