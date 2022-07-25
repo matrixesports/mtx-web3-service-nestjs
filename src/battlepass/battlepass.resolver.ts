@@ -163,7 +163,8 @@ export class BattlePassResolver {
         premium,
         fee
       );
-      await tx.wait();
+      let provider = this.contractService.getProvider('matic');
+      await provider.waitForTransaction(tx.hash, 1);
 
       let rewardGiven = await contract.seasonInfo(seasonId, level);
       let id;
