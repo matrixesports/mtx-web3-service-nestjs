@@ -154,7 +154,14 @@ export class BattlePassResolver {
       }
 
       let fee = await this.contractService.getMaticFeeData();
-      await contract.claimReward(seasonId, userAddress, level, premium, fee);
+      let tx = await contract.claimReward(
+        seasonId,
+        userAddress,
+        level,
+        premium,
+        fee
+      );
+      tx.wait();
 
       let rewardGiven = await contract.seasonInfo(seasonId, level);
       let id;
@@ -181,8 +188,6 @@ export class BattlePassResolver {
       } else if (rewardTypeArray[rewardType] === RewardType.LOOTBOX) {
         //special case, u want to show all rewards rewarded in a lootbox
         let tx = await contract.openLootbox(id, userAddress, fee);
-
-        console.log(tx);
         let rc = await tx.wait();
         let event = rc.events?.find(event => event.event === 'LootboxOpened');
         const [lootboxId, idxOpened, user] = event.args;
