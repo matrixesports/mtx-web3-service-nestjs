@@ -181,12 +181,16 @@ export class BattlePassResolver {
       } else if (rewardTypeArray[rewardType] === RewardType.LOOTBOX) {
         //special case, u want to show all rewards rewarded in a lootbox
         let tx = await contract.openLootbox(id, userAddress, fee);
+
+        console.log(tx);
         let rc = await tx.wait();
         let event = rc.events?.find(event => event.event === 'LootboxOpened');
         const [lootboxId, idxOpened, user] = event.args;
         let option = await contract.getLootboxOptionByIdx(lootboxId, idxOpened);
         let rewards = [];
+        console.log(option);
         for (let y = 0; y < option[1].length; y++) {
+          console.log(y);
           rewards.push(
             await this.battlePassService.getRewardForLevel(
               contract,
