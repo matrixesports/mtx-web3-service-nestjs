@@ -8,18 +8,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
+import responseCachePlugin from 'apollo-server-plugin-response-cache';
 import * as Joi from 'joi';
 import { join } from 'path';
 import { BattlePassModule } from './battlepass/battlepass.module';
 import configuration from './configuration';
 import { ContractModule } from './contract/contract.module';
 import { InventoryModule } from './inventory/inventory.module';
-import { MetadataModule } from './metadata/metadata.module';
 import { RecipeModule } from './recipe/recipe.module';
 import { LootboxModule } from './reward/lootbox/lootbox.module';
-import { RedeemableModule } from './reward/redeemable/redeemable.module';
 import { ScalarModule } from './scalar/scalar.module';
-import responseCachePlugin from 'apollo-server-plugin-response-cache';
 
 @Module({
   imports: [
@@ -79,11 +77,9 @@ import responseCachePlugin from 'apollo-server-plugin-response-cache';
     }),
     ScalarModule,
     BattlePassModule,
-    MetadataModule,
     ContractModule,
     RecipeModule,
     InventoryModule,
-    RedeemableModule,
     LootboxModule,
   ],
   controllers: [],

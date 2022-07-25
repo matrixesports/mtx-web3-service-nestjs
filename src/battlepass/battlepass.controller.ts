@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ethers } from 'ethers';
 import { ContractService } from 'src/contract/contract.service';
 import { BattlePassService } from './battlepass.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
@@ -15,7 +14,7 @@ export class BattlePassController {
   @Post('giveXp')
   async giveXp(@Body() giveXpDto: GiveXpDto) {
     try {
-      let contract = await this.battlePassService.getPassContract(
+      let contract = await this.battlePassService.getBattlePassContract(
         giveXpDto.creatorId,
         true
       );
@@ -31,14 +30,13 @@ export class BattlePassController {
   @Post('mint')
   async mintPremiumPass(@Body() mintPremiumPassDto: MintPremiumPassDto) {
     try {
-      let contract = await this.battlePassService.getPassContract(
+      let contract = await this.battlePassService.getBattlePassContract(
         mintPremiumPassDto.creatorId,
         true
       );
       let seasonId = await contract.seasonId();
-      let user = ethers.utils.getAddress(mintPremiumPassDto.userAddress);
       let fee = await this.contractService.getMaticFeeData();
-      await contract.mint(user, seasonId, 1, fee);
+      await contract.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee);
       return { success: true };
     } catch (e) {
       return { success: false };
@@ -46,10 +44,12 @@ export class BattlePassController {
   }
 
   @Get('metadata/:creatorId')
-  async getBattlePassMetadata(@Param('creatorId') creatorId: number) {
-    let contract = await this.battlePassService.getPassContract(creatorId);
+  async getBattlePassDB(@Param('creatorId') creatorId: number) {
+    let contract = await this.battlePassService.getBattlePassContract(
+      creatorId
+    );
     let seasonId = await contract.seasonId();
-    let battlePassDB = await this.battlePassService.getBattlePassMetadata(
+    let battlePassDB = await this.battlePassService.getBattlePassDB(
       contract.address
     );
     return {

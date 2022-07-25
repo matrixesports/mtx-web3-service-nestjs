@@ -41,7 +41,7 @@ export class InventoryResolver {
 
       for (let x = 0; x < allBattlePasses.length; x++) {
         //for each pass, return nfts and token owned by user
-        let contract = await this.battlePassService.getPassContract(
+        let contract = await this.battlePassService.getBattlePassContract(
           allBattlePasses[x].creator_id
         );
         let owned = await this.inventoryService.getNFTSOwnedForUser(
@@ -50,7 +50,7 @@ export class InventoryResolver {
         );
 
         for (let y = 0; y < owned.length; y++) {
-          let reward = await this.battlePassService.getRewardForLevel(
+          let reward = await this.battlePassService.createRewardObj(
             contract,
             ethers.BigNumber.from(owned[y].id.tokenId),
             ethers.BigNumber.from(owned[y].balance),
@@ -71,7 +71,7 @@ export class InventoryResolver {
           );
           let balance = await tokenContract.balanceOf(parent.userAddress);
           if (balance == 0) continue;
-          let tokenReward = await this.battlePassService.getRewardForLevel(
+          let tokenReward = await this.battlePassService.createRewardObj(
             contract,
             balance,
             await contract.CREATOR_TOKEN_ID(),
@@ -119,12 +119,12 @@ export class InventoryResolver {
       }
 
       for (const creatorId in temp) {
-        let contract = await this.battlePassService.getPassContract(
+        let contract = await this.battlePassService.getBattlePassContract(
           parseInt(creatorId)
         );
         for (const itemId in temp[creatorId]) {
           // qty is length of statuses to signify how many have been redeemed
-          let reward = await this.battlePassService.getRewardForLevel(
+          let reward = await this.battlePassService.createRewardObj(
             contract,
             ethers.BigNumber.from(itemId),
             ethers.BigNumber.from(temp[creatorId][itemId].length),

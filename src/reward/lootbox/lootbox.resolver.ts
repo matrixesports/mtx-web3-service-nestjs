@@ -8,7 +8,6 @@ import { MetadataService } from 'src/metadata/metadata.service';
 export class LootboxResolver {
   constructor(
     private contractService: ContractService,
-    private metadataService: MetadataService,
     private battlePassService: BattlePassService
   ) {}
 
@@ -30,7 +29,7 @@ export class LootboxResolver {
         let rewards = [];
         for (let y = 0; y < option[1].length; y++) {
           rewards.push(
-            await this.battlePassService.getRewardForLevel(
+            await this.battlePassService.createRewardObj(
               contract,
               option[1][y],
               option[2][y],
