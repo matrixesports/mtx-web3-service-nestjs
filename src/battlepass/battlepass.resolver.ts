@@ -98,6 +98,8 @@ export class BattlePassResolver {
     @Args('creatorId') creatorId: number
   ): Promise<GetBattlePassChildDto> {
     try {
+      //seasonid,
+      //max level,
       let contract = await this.battlePassService.getPassContract(creatorId);
       let seasonId = await contract.seasonId();
       let battlePassDB = await this.battlePassService.getBattlePassMetadata(
@@ -161,7 +163,7 @@ export class BattlePassResolver {
         premium,
         fee
       );
-      tx.wait();
+      await tx.wait();
 
       let rewardGiven = await contract.seasonInfo(seasonId, level);
       let id;
