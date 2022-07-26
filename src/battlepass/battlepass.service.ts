@@ -58,6 +58,7 @@ export class BattlePassService {
    * @returns
    */
   async getMetadata(creatorId: number, id: number): Promise<RewardMetadata> {
+    console.log(id);
     let metadata = await import(
       `${process.cwd()}/creators/${creatorId}/metadata/${id}.json`
     );

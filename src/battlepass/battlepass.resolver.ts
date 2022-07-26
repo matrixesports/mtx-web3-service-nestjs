@@ -246,7 +246,7 @@ export class BattlePassResolver {
         id = rewardGiven.freeRewardId;
         qty = rewardGiven.freeRewardQty;
       }
-
+      console.log(id, qty);
       let rewardTypeIdx = await contract.checkType(id);
       let rewardType = await this.battlePassService.getRewardType(
         rewardTypeIdx
