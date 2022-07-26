@@ -126,22 +126,24 @@ export class BattlePassResolver {
 
         let freeReward = null;
         if (seasonInfo.freeRewardId != 0) {
-          freeReward = await this.battlePassService.createRewardObj(
-            seasonInfo.freeRewardId,
-            seasonInfo.freeRewardQty,
-            parent.creatorId,
-            checkTypeResults[x].returnData[1]
-          );
+          freeReward =
+            await this.battlePassService.createRewardObjWithRewardType(
+              seasonInfo.freeRewardId,
+              seasonInfo.freeRewardQty,
+              parent.creatorId,
+              parseInt(checkTypeResults[x].returnData[1])
+            );
         }
 
         let premiumReward = null;
         if (seasonInfo.premiumRewardId != 0) {
-          premiumReward = await this.battlePassService.createRewardObj(
-            seasonInfo.premiumRewardId,
-            seasonInfo.premiumRewardQty,
-            parent.creatorId,
-            checkTypeResults[x + 1].returnData[1]
-          );
+          premiumReward =
+            await this.battlePassService.createRewardObjWithRewardType(
+              seasonInfo.premiumRewardId,
+              seasonInfo.premiumRewardQty,
+              parent.creatorId,
+              parseInt(checkTypeResults[x + 1].returnData[1])
+            );
         }
 
         levelInfo.push({
@@ -270,10 +272,10 @@ export class BattlePassResolver {
       }
 
       let reward = await this.battlePassService.createRewardObj(
+        contract,
         id,
         qty,
-        creatorId,
-        rewardTypeIdx
+        creatorId
       );
       return { success: true, reward: [reward] };
     } catch (e) {

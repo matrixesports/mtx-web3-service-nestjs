@@ -47,13 +47,12 @@ export class LootboxResolver {
         );
         let rewardsInOption = [];
         for (let y = 0; y < option[0].ids.length; y++) {
-          let rewardType = await contract.checkType(option[0].ids[y]);
           rewardsInOption.push(
             await this.battlePassService.createRewardObj(
+              contract,
               option[0].ids[y],
               option[0].qtys[y],
-              creatorId,
-              rewardType
+              creatorId
             )
           );
         }

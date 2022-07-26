@@ -50,14 +50,11 @@ export class InventoryResolver {
         );
 
         for (let y = 0; y < owned.length; y++) {
-          let rewardType = await contract.checkType(
-            ethers.BigNumber.from(owned[y].id.tokenId)
-          );
           let reward = await this.battlePassService.createRewardObj(
+            contract,
             ethers.BigNumber.from(owned[y].id.tokenId),
             ethers.BigNumber.from(owned[y].balance),
-            allBattlePasses[x].creator_id,
-            rewardType
+            allBattlePasses[x].creator_id
           );
           defaultRewards.push(reward);
         }
@@ -74,12 +71,13 @@ export class InventoryResolver {
           );
           let balance = await tokenContract.balanceOf(parent.userAddress);
           if (balance == 0) continue;
-          let tokenReward = await this.battlePassService.createRewardObj(
-            await contract.CREATOR_TOKEN_ID(),
-            balance,
-            creatorTokenDB.creator_id,
-            Object.keys(RewardType).indexOf('CREATOR_TOKEN')
-          );
+          let tokenReward =
+            await this.battlePassService.createRewardObjWithRewardType(
+              await contract.CREATOR_TOKEN_ID(),
+              balance,
+              creatorTokenDB.creator_id,
+              Object.keys(RewardType).indexOf('CREATOR_TOKEN')
+            );
           defaultRewards.push(tokenReward);
         } catch (e) {
           continue;
@@ -122,14 +120,14 @@ export class InventoryResolver {
 
       for (const creatorId in temp) {
         for (const itemId in temp[creatorId]) {
-          console.log(Object.keys(RewardType).indexOf('REDEEMABLE'));
           // qty is length of statuses to signify how many have been redeemed
-          let reward = await this.battlePassService.createRewardObj(
-            ethers.BigNumber.from(itemId),
-            ethers.BigNumber.from(temp[creatorId][itemId].length),
-            parseInt(creatorId),
-            Object.keys(RewardType).indexOf('REDEEMABLE')
-          );
+          let reward =
+            await this.battlePassService.createRewardObjWithRewardType(
+              ethers.BigNumber.from(itemId),
+              ethers.BigNumber.from(temp[creatorId][itemId].length),
+              parseInt(creatorId),
+              Object.keys(RewardType).indexOf('REDEEMABLE')
+            );
           redeemed.push({ reward, status: temp[creatorId][itemId] });
         }
       }

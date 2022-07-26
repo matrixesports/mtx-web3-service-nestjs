@@ -91,6 +91,24 @@ export class BattlePassService {
    * @returns
    */
   async createRewardObj(
+    contract: Contract,
+    id: BigNumber,
+    qty: BigNumber,
+    creatorId: number
+  ): Promise<Reward> {
+    if (id.isZero()) return null;
+    let metadata = await this.getMetadata(creatorId, id.toNumber());
+    let rewardType = await this.getRewardTypeForId(contract, id);
+    return {
+      id,
+      qty,
+      metadata,
+      rewardType,
+      creatorId,
+    };
+  }
+
+  async createRewardObjWithRewardType(
     id: BigNumber,
     qty: BigNumber,
     creatorId: number,
@@ -98,7 +116,7 @@ export class BattlePassService {
   ): Promise<Reward> {
     if (id.isZero()) return null;
     let metadata = await this.getMetadata(creatorId, id.toNumber());
-    let rewardType = this.getRewardType(rewardTypeIdx);
+    let rewardType = await this.getRewardType(rewardTypeIdx);
     return {
       id,
       qty,
@@ -226,10 +244,10 @@ export class BattlePassService {
       let rewardType = await contract.checkType(option[1][y]);
       rewards.push(
         await this.createRewardObj(
+          contract,
           option[1][y],
           option[2][y],
-          creatorId,
-          rewardType
+          creatorId
         )
       );
     }
