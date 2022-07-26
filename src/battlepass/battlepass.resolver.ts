@@ -251,6 +251,7 @@ export class BattlePassResolver {
       let rewardType = await this.battlePassService.getRewardType(
         rewardTypeIdx
       );
+      console.log(rewardType);
       if (rewardType === RewardType.REDEEMABLE && autoRedeem) {
         await this.battlePassService.redeemItemHelper(
           contract,
@@ -260,6 +261,7 @@ export class BattlePassResolver {
           contract.address
         );
       } else if (rewardType === RewardType.LOOTBOX) {
+        console.log('yes');
         let rewards = await this.battlePassService.openLootbox(
           fee,
           contract,

@@ -75,8 +75,8 @@ export class InventoryResolver {
           let balance = await tokenContract.balanceOf(parent.userAddress);
           if (balance == 0) continue;
           let tokenReward = await this.battlePassService.createRewardObj(
-            balance,
             await contract.CREATOR_TOKEN_ID(),
+            balance,
             creatorTokenDB.creator_id,
             Object.keys(RewardType).indexOf('CREATOR_TOKEN')
           );

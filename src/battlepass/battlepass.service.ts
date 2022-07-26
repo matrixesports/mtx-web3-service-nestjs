@@ -58,7 +58,6 @@ export class BattlePassService {
    * @returns
    */
   async getMetadata(creatorId: number, id: number): Promise<RewardMetadata> {
-    console.log(id);
     let metadata = await import(
       `${process.cwd()}/creators/${creatorId}/metadata/${id}.json`
     );
@@ -217,19 +216,22 @@ export class BattlePassService {
     let rc = await tx.wait();
     let event = rc.events?.find(event => event.event === 'LootboxOpened');
     const [idxOpened] = event.args;
+    console.log(idxOpened);
     let option = await contract.getLootboxOptionByIdx(id, idxOpened);
+    console.log(option);
     let rewards = [];
-    for (let y = 0; y < option[1].length; y++) {
+    for (let y = 0; y < option[0].ids.length; y++) {
       let rewardType = await contract.checkType();
       rewards.push(
         await this.createRewardObj(
-          option[1][y],
-          option[2][y],
+          option[0].ids[y],
+          option[0].qtys[y],
           creatorId,
           rewardType
         )
       );
     }
+    console.log(rewards);
     return rewards;
   }
 }
