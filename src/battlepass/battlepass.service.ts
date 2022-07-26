@@ -221,17 +221,13 @@ export class BattlePassService {
     let event = rc.events?.find(event => event.event === 'LootboxOpened');
     const [idxOpened] = event.args;
     let option = await contract.getLootboxOptionByIdx(id, idxOpened);
-    console.log(option);
-    console.log(option[0]);
-    console.log(option[0][1]);
-    console.log(option[0][0]);
     let rewards = [];
-    for (let y = 0; y < option[0][1].length; y++) {
+    for (let y = 0; y < option[1].length; y++) {
       let rewardType = await contract.checkType();
       rewards.push(
         await this.createRewardObj(
-          option[0].ids[y],
-          option[0].qtys[y],
+          option[1][y],
+          option[2][y],
           creatorId,
           rewardType
         )
