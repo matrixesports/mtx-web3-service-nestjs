@@ -75,7 +75,7 @@ export class BattlePassService {
 
   async getRewardTypeForId(contract: Contract, id: BigNumber) {
     let rewardType = await contract.checkType(id);
-    return await this.getRewardType(rewardType.toNumber());
+    return await this.getRewardType(rewardType);
   }
 
   /**

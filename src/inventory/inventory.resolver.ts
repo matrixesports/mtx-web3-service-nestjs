@@ -50,7 +50,7 @@ export class InventoryResolver {
         );
 
         for (let y = 0; y < owned.length; y++) {
-          let rewardType = await contract.checktype(
+          let rewardType = await contract.checkType(
             ethers.BigNumber.from(owned[y].id.tokenId)
           );
           let reward = await this.battlePassService.createRewardObj(
