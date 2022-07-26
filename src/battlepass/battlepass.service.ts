@@ -223,11 +223,10 @@ export class BattlePassService {
     let option = await contract.getLootboxOptionByIdx(id, idxOpened);
     console.log(option);
     console.log(option[0]);
-    console.log(option[0].ids);
+    console.log(option[0][1]);
     console.log(option[0][0]);
-    console.log(option[0][0].ids);
     let rewards = [];
-    for (let y = 0; y < option[0].ids.length; y++) {
+    for (let y = 0; y < option[0][1].length; y++) {
       let rewardType = await contract.checkType();
       rewards.push(
         await this.createRewardObj(
