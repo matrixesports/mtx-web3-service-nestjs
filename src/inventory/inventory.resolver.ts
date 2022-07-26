@@ -6,18 +6,17 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { Redeemed, RedeemStatus, Reward, RewardType } from 'src/graphql.schema';
+import { Repository } from 'typeorm';
+import { Contract as ContractDB } from '../contract/contract.entity';
 import { GetInventoryChildDto } from './dto/GetInventoryChild.dto';
 import { InventoryService } from './inventory.service';
-import { Contract as ContractDB } from '../contract/contract.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { rewardTypeArray } from 'src/types/rewardTypeArray';
 
 @Resolver('Inventory')
 export class InventoryResolver {
@@ -31,16 +30,17 @@ export class InventoryResolver {
   ) {}
 
   @ResolveField()
+  /**
+   *
+   */
   async default(@Parent() parent: GetInventoryChildDto) {
     try {
       let defaultRewards: Reward[] = [];
-      //get all creators
       let allBattlePasses = await this.contractRepository.find({
         where: { ctr_type: CtrType.BATTLE_PASS },
       });
 
       for (let x = 0; x < allBattlePasses.length; x++) {
-        //for each pass, return nfts and token owned by user
         let contract = await this.battlePassService.getBattlePassContract(
           allBattlePasses[x].creator_id
         );
@@ -50,11 +50,14 @@ export class InventoryResolver {
         );
 
         for (let y = 0; y < owned.length; y++) {
+          let rewardType = await contract.checktype(
+            ethers.BigNumber.from(owned[y].id.tokenId)
+          );
           let reward = await this.battlePassService.createRewardObj(
-            contract,
             ethers.BigNumber.from(owned[y].id.tokenId),
             ethers.BigNumber.from(owned[y].balance),
-            allBattlePasses[x].creator_id
+            allBattlePasses[x].creator_id,
+            rewardType
           );
           defaultRewards.push(reward);
         }
@@ -72,14 +75,13 @@ export class InventoryResolver {
           let balance = await tokenContract.balanceOf(parent.userAddress);
           if (balance == 0) continue;
           let tokenReward = await this.battlePassService.createRewardObj(
-            contract,
             balance,
             await contract.CREATOR_TOKEN_ID(),
-            creatorTokenDB.creator_id
+            creatorTokenDB.creator_id,
+            Object.keys(RewardType).indexOf('CREATOR_TOKEN')
           );
           defaultRewards.push(tokenReward);
         } catch (e) {
-          console.log(e);
           continue;
         }
       }
@@ -119,21 +121,17 @@ export class InventoryResolver {
       }
 
       for (const creatorId in temp) {
-        let contract = await this.battlePassService.getBattlePassContract(
-          parseInt(creatorId)
-        );
         for (const itemId in temp[creatorId]) {
           // qty is length of statuses to signify how many have been redeemed
           let reward = await this.battlePassService.createRewardObj(
-            contract,
             ethers.BigNumber.from(itemId),
             ethers.BigNumber.from(temp[creatorId][itemId].length),
-            parseInt(creatorId)
+            parseInt(creatorId),
+            Object.keys(RewardType).indexOf('REDEEMABLE')
           );
           redeemed.push({ reward, status: temp[creatorId][itemId] });
         }
       }
-
       return redeemed;
     } catch (e) {
       console.log(e);

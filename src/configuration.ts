@@ -29,11 +29,6 @@ export default () => {
       user,
       twitch,
     },
-    PINATA: {
-      key: process.env.PINATA_API_KEY,
-      secret: process.env.PINATA_API_SECRET,
-      gateway: process.env.PINATA_GATEWAY,
-    },
   };
   return config;
 };

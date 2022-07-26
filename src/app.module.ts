@@ -37,9 +37,6 @@ import { ScalarModule } from './scalar/scalar.module';
         STAGING_TICKET_SERVICE_URL: Joi.string().required(),
         TWITCH_SERVICE_URL: Joi.string().required(),
         STAGING_TWITCH_SERVICE_URL: Joi.string().required(),
-        PINATA_API_KEY: Joi.string().required(),
-        PINATA_API_SECRET: Joi.string().required(),
-        PINATA_GATEWAY: Joi.string().required(),
         ALCHEMY_API_KEY: Joi.string().required(),
       }),
       validationOptions: {

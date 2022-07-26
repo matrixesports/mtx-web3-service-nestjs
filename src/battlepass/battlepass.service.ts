@@ -59,7 +59,7 @@ export class BattlePassService {
    */
   async getMetadata(creatorId: number, id: number): Promise<RewardMetadata> {
     let metadata = await import(
-      `${process.cwd()}/creator/${creatorId}/metadata/${id}.json`
+      `${process.cwd()}/creators/${creatorId}/metadata/${id}.json`
     );
     return metadata.default;
   }
@@ -225,7 +225,7 @@ export class BattlePassService {
           option[1][y],
           option[2][y],
           creatorId,
-          rewardType.toNumber()
+          rewardType
         )
       );
     }
