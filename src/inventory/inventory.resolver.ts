@@ -122,6 +122,7 @@ export class InventoryResolver {
 
       for (const creatorId in temp) {
         for (const itemId in temp[creatorId]) {
+          console.log(Object.keys(RewardType).indexOf('REDEEMABLE'));
           // qty is length of statuses to signify how many have been redeemed
           let reward = await this.battlePassService.createRewardObj(
             ethers.BigNumber.from(itemId),
