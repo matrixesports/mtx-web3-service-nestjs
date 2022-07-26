@@ -6,52 +6,39 @@ import { BigNumber, Contract } from 'ethers';
 import { parse } from 'postgres-array';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
-import { Reward } from 'src/graphql.schema';
-import { MetadataService } from 'src/metadata/metadata.service';
-import { rewardTypeArray } from 'src/types/rewardTypeArray';
+import { Reward, RewardMetadata, RewardType } from 'src/graphql.schema';
 import { Repository } from 'typeorm';
 import { BattlePass as BattlePassDB } from './battlepass.entity';
+
+export const rewardTypeArray = Object.values(RewardType);
+
 @Injectable()
 export class BattlePassService {
   constructor(
     private contractService: ContractService,
-    private metadataService: MetadataService,
     private configService: ConfigService,
     @InjectRepository(BattlePassDB)
     private battlePassRepository: Repository<BattlePassDB>
   ) {}
 
-  async getBattlePassMetadata(address: string): Promise<BattlePassDB> {
+  /**
+   * get info from battlepass db
+   * @param address contract address
+   * @returns throws error if cant find it else return db object
+   */
+  async getBattlePassDB(address: string): Promise<BattlePassDB> {
     return await this.battlePassRepository.findOneByOrFail({
       address: address,
     });
   }
 
-  async getRewardForLevel(
-    contract: Contract,
-    id: BigNumber,
-    qty: BigNumber,
-    creatorId: number
-  ): Promise<Reward> {
-    const logger = new Logger(this.getRewardForLevel.name);
-    try {
-      let rewardType = await contract.checkType(id);
-      rewardType = rewardTypeArray[rewardType];
-      let uri = await contract.uri(id);
-      return {
-        id: id,
-        qty: qty,
-        metadata: await this.metadataService.readFromIPFS(uri),
-        rewardType,
-        creatorId,
-      };
-    } catch (e) {
-      logger.warn(e);
-      return null;
-    }
-  }
-
-  async getPassContract(
+  /**
+   * get battle pass contract
+   * @param creatorId
+   * @param isSigner true if connected to signer
+   * @returns throws error if cannot find contract
+   */
+  async getBattlePassContract(
     creatorId: number,
     isSigner?: boolean
   ): Promise<Contract> {
@@ -64,8 +51,89 @@ export class BattlePassService {
     return this.contractService.getProviderContract(contractDB);
   }
 
-  /// notify redemption service and notify twitch service
-  /// errors bubble up
+  /**
+   * get metadata from fs
+   * @param creatorId
+   * @param id
+   * @returns
+   */
+  async getMetadata(creatorId: number, id: number): Promise<RewardMetadata> {
+    try {
+      let metadata = await import(
+        `${process.cwd()}/creators/${creatorId}/metadata/${id}.json`
+      );
+      return metadata.default;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   *
+   * @param rewardType
+   * @returns return type of reward
+   */
+  getRewardType(rewardTypeIdx: number): RewardType {
+    return rewardTypeArray[rewardTypeIdx];
+  }
+
+  async getRewardTypeForId(contract: Contract, id: BigNumber) {
+    let rewardType = await contract.checkType(id);
+    return await this.getRewardType(rewardType);
+  }
+
+  /**
+   * create reward object
+   * @param id
+   * @param qty
+   * @param creatorId
+   * @param rewardType
+   * @returns
+   */
+  async createRewardObj(
+    contract: Contract,
+    id: BigNumber,
+    qty: BigNumber,
+    creatorId: number
+  ): Promise<Reward> {
+    if (id.isZero()) return null;
+    let metadata = await this.getMetadata(creatorId, id.toNumber());
+    let rewardType = await this.getRewardTypeForId(contract, id);
+    return {
+      id,
+      qty,
+      metadata,
+      rewardType,
+      creatorId,
+    };
+  }
+
+  async createRewardObjWithRewardType(
+    id: BigNumber,
+    qty: BigNumber,
+    creatorId: number,
+    rewardTypeIdx: number
+  ): Promise<Reward> {
+    if (id.isZero()) return null;
+    let metadata = await this.getMetadata(creatorId, id.toNumber());
+    let rewardType = await this.getRewardType(rewardTypeIdx);
+    return {
+      id,
+      qty,
+      metadata,
+      rewardType,
+      creatorId,
+    };
+  }
+
+  /**
+   * helper when item is redeemed
+   * @param contract
+   * @param itemId
+   * @param userAddress
+   * @param creatorId
+   * @param address
+   */
   async redeemItemHelper(
     contract: Contract,
     itemId: number,
@@ -76,7 +144,7 @@ export class BattlePassService {
     const logger = new Logger(this.redeemItemHelper.name);
     let logData = { external: {} }
     let uri = await contract.uri(itemId);
-    let metadata = await this.metadataService.readFromIPFS(uri);
+    let metadata = await this.getMetadata(creatorId, itemId);
 
     let ticketRedeemBody: TicketRedeemBody = {
       ...metadata,
@@ -129,13 +197,13 @@ export class BattlePassService {
    */
   async checkRequiredFields(
     userAddress: string,
-    address: string
+    address: string,
+    level: number
   ): Promise<RequiredFieldsResponse> {
     const logger = new Logger(this.checkRequiredFields.name);
     let logData = { external: {} }
-    //will throw error if address does not exist
-    let battlePassDB = await this.getBattlePassMetadata(address);
-
+    if (level != 1) return;
+    let battlePassDB = await this.getBattlePassDB(address);
     if (
       battlePassDB.required_user_social_options.length == 0 &&
       battlePassDB.required_user_payment_options.length == 0
@@ -169,7 +237,47 @@ export class BattlePassService {
       responseTime: Date.now() - start
     }
     logger.log(logData);
-    return missingRedeemFields.data;
+    if (
+      missingRedeemFields.data.missing_user_payment_options.length != 0 ||
+      missingRedeemFields.data.missing_user_social_options.length != 0
+    ) {
+      return {
+        missing_user_payment_options:
+          missingRedeemFields.data.missing_user_payment_options,
+        missing_user_social_options:
+          missingRedeemFields.data.missing_user_social_options,
+      };
+    } else {
+      return;
+    }
+  }
+
+  async openLootbox(
+    fee: any,
+    contract: Contract,
+    id: number,
+    userAddress: string,
+    creatorId: number
+  ): Promise<Reward[]> {
+    fee['gasLimit'] = 1000000;
+    let tx = await contract.openLootbox(id, userAddress, fee);
+    let rc = await tx.wait();
+    let event = rc.events?.find(event => event.event === 'LootboxOpened');
+    const [idxOpened] = event.args;
+    let option = await contract.getLootboxOptionByIdx(id, idxOpened);
+    let rewards = [];
+    for (let y = 0; y < option[1].length; y++) {
+      let rewardType = await contract.checkType(option[1][y]);
+      rewards.push(
+        await this.createRewardObj(
+          contract,
+          option[1][y],
+          option[2][y],
+          creatorId
+        )
+      );
+    }
+    return rewards;
   }
 }
 

@@ -35,6 +35,11 @@ export enum RequiredUserPaymentOptions {
     VENMO_USERNAME = "VENMO_USERNAME"
 }
 
+export enum CacheControlScope {
+    PUBLIC = "PUBLIC",
+    PRIVATE = "PRIVATE"
+}
+
 export class BattlePass {
     name: string;
     description: string;

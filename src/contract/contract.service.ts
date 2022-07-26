@@ -3,7 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { BigNumber, Contract, ethers } from 'ethers';
-import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
+import { ContractCall, Multicall } from 'pilum';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { Contract as ContractDB } from './contract.entity';
 
 export const MATIC_NUMBER_OF_BLOCKS_TO_WAIT = 1;
@@ -86,5 +87,12 @@ export class ContractService {
         ),
       };
     }
+  }
+
+  async multicall(calls: ContractCall[], provider: ethers.providers.Provider) {
+    const multicall = new Multicall({ provider });
+    const { chainId } = await provider.getNetwork();
+    let res = await multicall.call(calls, { network: chainId });
+    return res.results;
   }
 }

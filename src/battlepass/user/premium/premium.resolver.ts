@@ -1,9 +1,12 @@
 import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
-import { ethers } from 'ethers';
+import { ContractCall } from 'pilum';
 import { GetBattlePassUserInfoChildDto } from 'src/battlepass/dto/GetBattlePassUserInfoChild.dto';
+import { ContractService } from 'src/contract/contract.service';
 
 @Resolver('PremiumBattlePassUser')
 export class PremiumResolver {
+  constructor(private contractService: ContractService) {}
+
   @ResolveField()
   async owned(@Parent() parent: GetBattlePassUserInfoChildDto) {
     return await parent.contract.balanceOf(parent.userAddress, parent.seasonId);
@@ -18,14 +21,24 @@ export class PremiumResolver {
       parent.seasonId
     );
     let unclaimedPrem = [];
+    let calls: ContractCall[] = [];
+
     for (let x = 0; x <= userLevel; x++) {
-      let isClaimed = await parent.contract.isRewardClaimed(
-        parent.userAddress,
-        parent.seasonId,
-        x,
-        true
-      );
-      if (!isClaimed) unclaimedPrem.push(x);
+      calls.push({
+        reference: 'isRewardClaimed',
+        address: parent.contract.address,
+        abi: [parent.contract.interface.getFunction('isRewardClaimed')],
+        method: 'isRewardClaimed',
+        params: [parent.userAddress, parent.seasonId, x, true],
+        value: 0,
+      });
+    }
+    let results = await this.contractService.multicall(
+      calls,
+      parent.contract.provider
+    );
+    for (let x = 0; x <= userLevel; x++) {
+      if (!parseInt(results[x].returnData[1])) unclaimedPrem.push(x);
     }
     return unclaimedPrem;
   }

@@ -8,18 +8,14 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { ethers } from 'ethers';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
-import { MetadataService } from 'src/metadata/metadata.service';
+
 import { GetRecipeChildDto } from './dto/GetRecipeChild.dto';
 
 @Resolver('Recipe')
 export class RecipeResolver {
-  constructor(
-    private contractService: ContractService,
-    private metadataService: MetadataService
-  ) {}
+  constructor(private contractService: ContractService) {}
 
   @ResolveField()
   async isActive(@Parent() parent: GetRecipeChildDto) {
@@ -33,27 +29,26 @@ export class RecipeResolver {
       parent.recipeId
     );
     let ingredients = [];
-    for (let x = 0; x <= inputIngredients.tokens.length; x++) {
-      let id = inputIngredients.ids[x];
-      let qty = inputIngredients.qtys[x];
-      let contractDB;
-      try {
-        contractDB = await this.contractService.findOne({
-          address: inputIngredients.tokens[x],
-        });
-      } catch (e) {
-        logger.warn(e);
-        continue;
-      }
-      let contract = this.contractService.getProviderContract(contractDB);
-      let uri = await contract.uri(id);
-      let metadata = await this.metadataService.readFromIPFS(uri);
-      ingredients.push({
-        id,
-        qty,
-        metadata,
-      });
-    }
+    // for (let x = 0; x <= inputIngredients.tokens.length; x++) {
+    //   let id = inputIngredients.ids[x];
+    //   let qty = inputIngredients.qtys[x];
+    //   let contractDB;
+    //   try {
+    //     contractDB = await this.contractService.findOne({
+    //       address: inputIngredients.tokens[x],
+    //     });
+    //   } catch (e) {
+    //     continue;
+    //   }
+    //   let contract = this.contractService.getProviderContract(contractDB);
+    //   let uri = await contract.uri(id);
+    //   let metadata = await this.metadataService.readFromIPFS(uri);
+    //   ingredients.push({
+    //     id,
+    //     qty,
+    //     metadata,
+    //   });
+    // }
 
     return ingredients;
   }
@@ -65,27 +60,26 @@ export class RecipeResolver {
       parent.recipeId
     );
     let ingredients = [];
-    for (let x = 0; x <= outputIngredients.tokens.length; x++) {
-      let id = outputIngredients.ids[x];
-      let qty = outputIngredients.qtys[x];
-      let contractDB;
-      try {
-        contractDB = await this.contractService.findOne({
-          address: outputIngredients.tokens[x],
-        });
-      } catch (e) {
-        logger.warn(e);
-        continue;
-      }
-      let contract = this.contractService.getProviderContract(contractDB);
-      let uri = await contract.uri(id);
-      let metadata = await this.metadataService.readFromIPFS(uri);
-      ingredients.push({
-        id,
-        qty,
-        metadata,
-      });
-    }
+    // for (let x = 0; x <= outputIngredients.tokens.length; x++) {
+    //   let id = outputIngredients.ids[x];
+    //   let qty = outputIngredients.qtys[x];
+    //   let contractDB;
+    //   try {
+    //     contractDB = await this.contractService.findOne({
+    //       address: outputIngredients.tokens[x],
+    //     });
+    //   } catch (e) {
+    //     continue;
+    //   }
+    //   let contract = this.contractService.getProviderContract(contractDB);
+    //   let uri = await contract.uri(id);
+    //   let metadata = await this.metadataService.readFromIPFS(uri);
+    //   ingredients.push({
+    //     id,
+    //     qty,
+    //     metadata,
+    //   });
+    // }
 
     return ingredients;
   }

@@ -1,15 +1,14 @@
 import { Logger } from '@nestjs/common';
 import { Args, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { ContractCall } from 'pilum';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
-import { MetadataService } from 'src/metadata/metadata.service';
 
 @Resolver('LootboxOption')
 export class LootboxResolver {
   constructor(
     private contractService: ContractService,
-    private metadataService: MetadataService,
     private battlePassService: BattlePassService
   ) {}
 
@@ -20,29 +19,50 @@ export class LootboxResolver {
   ) {
     const logger = new Logger(this.getLootboxOptions.name);
     try {
-      let contractDB = await this.contractService.findOne({
-        creator_id: creatorId,
-        ctr_type: CtrType.BATTLE_PASS,
-      });
-      let contract = this.contractService.getProviderContract(contractDB);
+      let contract = await this.battlePassService.getBattlePassContract(
+        creatorId
+      );
       let lengthOfOptions = await contract.getLootboxOptionsLength(lootboxId);
       let allOptions = [];
+      let calls: ContractCall[] = [];
+
       for (let x = 0; x < lengthOfOptions; x++) {
-        let option = await contract.getLootboxOptionByIdx(lootboxId, x);
-        let rewards = [];
-        for (let y = 0; y < option[1].length; y++) {
-          rewards.push(
-            await this.battlePassService.getRewardForLevel(
+        calls.push({
+          reference: 'getLootboxOptionByIdx',
+          address: contract.address,
+          abi: [contract.interface.getFunction('getLootboxOptionByIdx')],
+          method: 'getLootboxOptionByIdx',
+          params: [lootboxId, x],
+          value: 0,
+        });
+      }
+      let results = await this.contractService.multicall(
+        calls,
+        contract.provider
+      );
+      for (let x = 0; x < lengthOfOptions; x++) {
+        //for some reason it return an array lol
+        //arrays have len 1. keep an eye out for this
+        let option = contract.interface.decodeFunctionResult(
+          'getLootboxOptionByIdx',
+          results[x].returnData[1]
+        );
+        let rewardsInOption = [];
+        for (let y = 0; y < option[0].ids.length; y++) {
+          rewardsInOption.push(
+            await this.battlePassService.createRewardObj(
               contract,
-              option[1][y],
-              option[2][y],
+              option[0].ids[y],
+              option[0].qtys[y],
               creatorId
             )
           );
         }
         allOptions.push({
-          rewards,
-          probability: option[0][1].toNumber() - option[0][0].toNumber(),
+          reward: rewardsInOption,
+          probability:
+            option[0].rarityRange[1].toNumber() -
+            option[0].rarityRange[0].toNumber(),
         });
       }
       return allOptions;
