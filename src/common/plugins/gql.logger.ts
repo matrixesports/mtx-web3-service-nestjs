@@ -3,7 +3,6 @@ import { GraphQLRequestContext } from 'apollo-server-core';
 import {
   ApolloServerPlugin,
   GraphQLRequestListener,
-  GraphQLRequestContextDidEncounterErrors,
 } from 'apollo-server-plugin-base';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
@@ -39,22 +38,16 @@ class Listener<T = unknown>implements
     this.start = Date.now();
   }
 
-  async didEncounterErrors(
-    gqlCtx: GraphQLRequestContextDidEncounterErrors<T>,
-  ): Promise<void> {
-    this.logData.errors = gqlCtx.errors;
-    gqlCtx.logger.error({ graphql: this.logData });
-  }
-
   async willSendResponse(gqlCtx: GraphQLRequestContext): Promise<void> {
-    if (this.logData.errors) {
-      return;
+    if (gqlCtx?.errors && gqlCtx.operation.operation === "mutation") {
+       gqlCtx.response.data = { success: false };
     }
-    this.logData["response"] = gqlCtx.response.data;
+    this.logData["response"] = gqlCtx.response.data;  // logging response may expose sensitive info ?
     gqlCtx.logger.info(
       {
         graphql: this.logData,
         responseTime: Date.now() - this.start,
+        success: gqlCtx?.errors ? false : true,
       },
     );
   }

@@ -1,11 +1,14 @@
-import { Body, Controller, Get, Param, Post, Logger, UseFilters } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Logger, UseFilters, UseInterceptors } from '@nestjs/common';
+import { EthersFilter } from 'src/common/filters/ethers.filter';
 import { TypeORMFilter } from 'src/common/filters/typeorm.filter';
+import { ErrorInterceptor } from 'src/common/interceptors/errorr.interceptor';
 import { ContractService } from 'src/contract/contract.service';
 import { BattlePassService } from './battlepass.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
 import { MintPremiumPassDto } from './dto/MintPremiumPass.dto';
 
 @Controller('battlepass')
+@UseFilters(TypeORMFilter, EthersFilter)
 export class BattlePassController {
   constructor(
     private contractService: ContractService,
@@ -13,39 +16,27 @@ export class BattlePassController {
   ) {}
 
   @Post('giveXp')
-  @UseFilters(TypeORMFilter)
   async giveXp(@Body() giveXpDto: GiveXpDto) {
-    try {
-      let contract = await this.battlePassService.getBattlePassContract(
-        giveXpDto.creatorId,
-        true
-      );
-      let seasonId = await contract.seasonId();
-      let fee = await this.contractService.getMaticFeeData();
-      await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
-      return { success: true };
-    } catch (e) {
-      return { success: false };
-    }
+    let contract = await this.battlePassService.getBattlePassContract(
+      giveXpDto.creatorId,
+      true
+    );
+    let seasonId = await contract.seasonId();
+    let fee = await this.contractService.getMaticFeeData();
+    await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
+    return { success: true };
   }
 
   @Post('mint')
-  @UseFilters(TypeORMFilter)
   async mintPremiumPass(@Body() mintPremiumPassDto: MintPremiumPassDto) {
-    const logger = new Logger(this.giveXp.name);
-    try {
-      let contract = await this.battlePassService.getBattlePassContract(
-        mintPremiumPassDto.creatorId,
-        true
-      );
-      let seasonId = await contract.seasonId();
-      let fee = await this.contractService.getMaticFeeData();
-      await contract.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee);
-      return { success: true };
-    } catch (e) {
-      logger.warn(e);
-      return { success: false };
-    }
+    let contract = await this.battlePassService.getBattlePassContract(
+      mintPremiumPassDto.creatorId,
+      true
+    );
+    let seasonId = await contract.seasonId();
+    let fee = await this.contractService.getMaticFeeData();
+    await contract.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee);
+    return { success: true };
   }
 
   @Get('metadata/:creatorId')

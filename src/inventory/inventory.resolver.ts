@@ -17,7 +17,6 @@ import { Contract as ContractDB } from '../contract/contract.entity';
 import { GetInventoryChildDto } from './dto/GetInventoryChild.dto';
 import { InventoryService } from './inventory.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { rewardTypeArray } from 'src/types/rewardTypeArray';
 import { Logger } from '@nestjs/common';
 
 @Resolver('Inventory')

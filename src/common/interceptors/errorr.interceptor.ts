@@ -15,26 +15,23 @@ export class ErrorInterceptor implements NestInterceptor {
     next: CallHandler,
   ): Observable<any> | Promise<Observable<any>> {
     return next.handle().pipe(
-      catchError((error) => {
-        return throwError(() => {
-          let logger = new Logger("ErrorLogger");
-          logger.error(error);
-          const response = context.switchToHttp().getResponse();          
-          if (codes.includes(error?.code)) {
-            let newerr = new EthersException(
-              error.message,
-              error.stack,
-              error.reason,
-              error.code,
-              error.error,
-            ) 
-            response.err = newerr;
-            return newerr;
-          }
-          return error;
-        });
-      }),
-    );
+      catchError((error) => throwError(() => {
+        let logger = new Logger(ErrorInterceptor.name);
+        const response = context.switchToHttp().getResponse();        
+        if (codes.includes(error?.code)) {
+          let newerr = new EthersException(
+            error.message,
+            error.stack,
+            error.reason,
+            error.code,
+            error.error,
+          ) 
+          logger.error(newerr);
+          return newerr;
+        }
+        logger.error(error);
+        return error;
+    })))
   }
 }
 

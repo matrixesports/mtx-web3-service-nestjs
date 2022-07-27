@@ -1,9 +1,8 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 import { Request, Response } from 'express';
 import { IResponseError } from './global.filter';
-
 
 // full list of error https://github.com/typeorm/typeorm/tree/master/src/error
 @Catch(QueryFailedError, EntityNotFoundError)
@@ -19,12 +18,10 @@ export class TypeORMFilter implements ExceptionFilter {
             case QueryFailedError: 
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
                 message = (error as QueryFailedError).message;
-                logger.warn(error);
                 break;
             case EntityNotFoundError:
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
                 message = (error as EntityNotFoundError).message;
-                logger.warn(error);
                 break;
             default:
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -36,8 +33,6 @@ export class TypeORMFilter implements ExceptionFilter {
         .json({ 
           status, 
           message, 
-          timestamp: new Date().toISOString(), 
-          path: req.url, 
-          method: req.method } as IResponseError);
+        } as IResponseError);
     }
 }

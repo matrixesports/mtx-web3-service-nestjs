@@ -18,7 +18,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { RecipeModule } from './recipe/recipe.module';
 import { LootboxModule } from './reward/lootbox/lootbox.module';
 import { LoggerModule } from 'nestjs-pino';
-import { GraphQLLogger } from './common/plugins/graphql.logger';
+import { GraphQLLogger } from './common/plugins/gql.logger';
 import { ScalarModule } from './scalar/scalar.module';
 
 @Module({
@@ -35,6 +35,12 @@ import { ScalarModule } from './scalar/scalar.module';
           ignore: (req) => {
               return req["params"]["0"] === "graphql" ? true : false;
             }
+        },
+        customErrorObject: (req, res, error, val) => {
+          delete val["err"];      
+          return {
+            ...val,
+          };
         },
         serializers: {
           req: (req) => {
@@ -95,6 +101,17 @@ import { ScalarModule } from './scalar/scalar.module';
         responseCachePlugin(),
       ],
       playground: false,
+      debug: true,  // stacktrace
+      formatError : (error) => {
+        let newError = JSON.parse(JSON.stringify(error))
+        delete newError["extensions"];
+        delete newError["locations"];
+        delete newError["path"];
+        if (newError["message"].search("https://polygon-mainnet.g.alchemy.com/v2/")) {
+          newError["message"] = "on-chain error"; // hide provider
+        }
+        return newError;
+      }
     }),
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
