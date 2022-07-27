@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Param, Post, Logger, UseFilters, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Logger, UseFilters } from '@nestjs/common';
 import { EthersFilter } from 'src/common/filters/ethers.filter';
 import { TypeORMFilter } from 'src/common/filters/typeorm.filter';
-import { ErrorInterceptor } from 'src/common/interceptors/errorr.interceptor';
 import { ContractService } from 'src/contract/contract.service';
 import { BattlePassService } from './battlepass.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
