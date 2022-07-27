@@ -101,35 +101,23 @@ export class RecipeResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number
   ): Promise<GetRecipeChildDto> {
-    const logger = new Logger(this.getRecipe.name);
-    try {
-      let contractDB = await this.contractService.findOne({
-        ctr_type: CtrType.CRAFTING,
-      });
-      let contract = this.contractService.getProviderContract(contractDB);
-      return { contract, recipeId, creatorId };
-    } catch (e) {
-      logger.warn(e);
-      return null;
-    }
+    let contractDB = await this.contractService.findOne({
+      ctr_type: CtrType.CRAFTING,
+    });
+    let contract = this.contractService.getProviderContract(contractDB);
+    return { contract, recipeId, creatorId };
   }
 
   @Mutation()
   async craft(@Args('recipeId') recipeId: number, @Context() context) {
-    const logger = new Logger(this.craft.name);
-    try {
-      let userAddress: string = context.req.headers['user-address'];
+    let userAddress: string = context.req.headers['user-address'];
 
-      let contractDB = await this.contractService.findOne({
-        ctr_type: CtrType.CRAFTING,
-      });
-      let contract = this.contractService.getSignerContract(contractDB);
-      let fee = await this.contractService.getMaticFeeData();
-      await contract.craft(recipeId, userAddress, fee);
-      return { success: true };
-    } catch (e) {
-      logger.warn(e);
-      return { success: false };
-    }
+    let contractDB = await this.contractService.findOne({
+      ctr_type: CtrType.CRAFTING,
+    });
+    let contract = this.contractService.getSignerContract(contractDB);
+    let fee = await this.contractService.getMaticFeeData();
+    await contract.craft(recipeId, userAddress, fee);
+    return { success: true };
   }
 }

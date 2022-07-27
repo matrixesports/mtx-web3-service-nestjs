@@ -35,61 +35,55 @@ export class InventoryResolver {
    *
    */
   async default(@Parent() parent: GetInventoryChildDto) {
-    const logger = new Logger(this.default.name);
-    try {
-      let defaultRewards: Reward[] = [];
-      let allBattlePasses = await this.contractRepository.find({
-        where: { ctr_type: CtrType.BATTLE_PASS },
-      });
+    let defaultRewards: Reward[] = [];
+    let allBattlePasses = await this.contractRepository.find({
+      where: { ctr_type: CtrType.BATTLE_PASS },
+    });
 
-      for (let x = 0; x < allBattlePasses.length; x++) {
-        let contract = await this.battlePassService.getBattlePassContract(
+    for (let x = 0; x < allBattlePasses.length; x++) {
+      let contract = await this.battlePassService.getBattlePassContract(
+        allBattlePasses[x].creator_id
+      );
+      let owned = await this.inventoryService.getNFTSOwnedForUser(
+        [allBattlePasses[x].address],
+        parent.userAddress
+      );
+
+      for (let y = 0; y < owned.length; y++) {
+        let reward = await this.battlePassService.createRewardObj(
+          contract,
+          ethers.BigNumber.from(owned[y].id.tokenId),
+          ethers.BigNumber.from(owned[y].balance),
           allBattlePasses[x].creator_id
         );
-        let owned = await this.inventoryService.getNFTSOwnedForUser(
-          [allBattlePasses[x].address],
-          parent.userAddress
-        );
-
-        for (let y = 0; y < owned.length; y++) {
-          let reward = await this.battlePassService.createRewardObj(
-            contract,
-            ethers.BigNumber.from(owned[y].id.tokenId),
-            ethers.BigNumber.from(owned[y].balance),
-            allBattlePasses[x].creator_id
-          );
-          defaultRewards.push(reward);
-        }
-
-        try {
-          //handle creator token now
-          let creatorTokenDB = await this.contractService.findOne({
-            ctr_type: CtrType.CREATOR_TOKEN,
-            creator_id: allBattlePasses[x].creator_id,
-          });
-
-          let tokenContract = await this.contractService.getProviderContract(
-            creatorTokenDB
-          );
-          let balance = await tokenContract.balanceOf(parent.userAddress);
-          if (balance == 0) continue;
-          let tokenReward =
-            await this.battlePassService.createRewardObjWithRewardType(
-              await contract.CREATOR_TOKEN_ID(),
-              balance,
-              creatorTokenDB.creator_id,
-              Object.keys(RewardType).indexOf('CREATOR_TOKEN')
-            );
-          defaultRewards.push(tokenReward);
-        } catch (e) {
-          continue;
-        }
+        defaultRewards.push(reward);
       }
-      return defaultRewards;
-    } catch (e) {
-      logger.warn(e);
-      return [];
+
+      try {
+        //handle creator token now
+        let creatorTokenDB = await this.contractService.findOne({
+          ctr_type: CtrType.CREATOR_TOKEN,
+          creator_id: allBattlePasses[x].creator_id,
+        });
+
+        let tokenContract = await this.contractService.getProviderContract(
+          creatorTokenDB
+        );
+        let balance = await tokenContract.balanceOf(parent.userAddress);
+        if (balance == 0) continue;
+        let tokenReward =
+          await this.battlePassService.createRewardObjWithRewardType(
+            await contract.CREATOR_TOKEN_ID(),
+            balance,
+            creatorTokenDB.creator_id,
+            Object.keys(RewardType).indexOf('CREATOR_TOKEN')
+          );
+        defaultRewards.push(tokenReward);
+      } catch (e) {
+        continue;
+      }
     }
+    return defaultRewards;
   }
 
   @ResolveField()
@@ -97,56 +91,51 @@ export class InventoryResolver {
   async redeemed(@Parent() parent: GetInventoryChildDto) {
     const logger = new Logger(this.redeemed.name);
     let logData = { external: {} }
-    try {
-      let start = Date.now();
-      let res = await axios.get(
-        `${this.configService.get('SERVICE').ticket}/api/ticket`,
-        { params: { userAddress: parent.userAddress } }
-      );
-      logData.external["0"] = {
-        service: "ticket",
-        path: "/api/ticket",
-        body: { params: { userAddress: parent.userAddress } },
-        responseTime: Date.now() - start
-      }
-      let userRedeemedInfo: UserRedeemedRes[] = res.data;
-      let redeemed: Redeemed[] = [];
-      //creatorid->itemId->statuses
-      let temp = {};
-
-      for (let x = 0; x < userRedeemedInfo.length; x++) {
-        if (temp[userRedeemedInfo[x].creatorId] === undefined) {
-          temp[userRedeemedInfo[x].creatorId] = {};
-        }
-        if (
-          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] ===
-          undefined
-        ) {
-          temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] = [];
-        }
-        temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(
-          userRedeemedInfo[x].status
-        );
-      }
-
-      for (const creatorId in temp) {
-        for (const itemId in temp[creatorId]) {
-          // qty is length of statuses to signify how many have been redeemed
-          let reward =
-            await this.battlePassService.createRewardObjWithRewardType(
-              ethers.BigNumber.from(itemId),
-              ethers.BigNumber.from(temp[creatorId][itemId].length),
-              parseInt(creatorId),
-              Object.keys(RewardType).indexOf('REDEEMABLE')
-            );
-          redeemed.push({ reward, status: temp[creatorId][itemId] });
-        }
-      }
-      return redeemed;
-    } catch (e) {
-      logger.warn(e);
-      return [];
+    let start = Date.now();
+    let res = await axios.get(
+      `${this.configService.get('SERVICE').ticket}/api/ticket`,
+      { params: { userAddress: parent.userAddress } }
+    );
+    logData.external["0"] = {
+      service: "ticket",
+      path: "/api/ticket",
+      body: { params: { userAddress: parent.userAddress } },
+      responseTime: Date.now() - start
     }
+    let userRedeemedInfo: UserRedeemedRes[] = res.data;
+    let redeemed: Redeemed[] = [];
+    //creatorid->itemId->statuses
+    let temp = {};
+
+    for (let x = 0; x < userRedeemedInfo.length; x++) {
+      if (temp[userRedeemedInfo[x].creatorId] === undefined) {
+        temp[userRedeemedInfo[x].creatorId] = {};
+      }
+      if (
+        temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] ===
+        undefined
+      ) {
+        temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] = [];
+      }
+      temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(
+        userRedeemedInfo[x].status
+      );
+    }
+
+    for (const creatorId in temp) {
+      for (const itemId in temp[creatorId]) {
+        // qty is length of statuses to signify how many have been redeemed
+        let reward =
+          await this.battlePassService.createRewardObjWithRewardType(
+            ethers.BigNumber.from(itemId),
+            ethers.BigNumber.from(temp[creatorId][itemId].length),
+            parseInt(creatorId),
+            Object.keys(RewardType).indexOf('REDEEMABLE')
+          );
+        redeemed.push({ reward, status: temp[creatorId][itemId] });
+      }
+    }
+    return redeemed;
   }
 
   @Query()
