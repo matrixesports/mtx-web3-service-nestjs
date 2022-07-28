@@ -6,6 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { catchError, Observable, throwError } from 'rxjs';
+import { ErrorCode as codes } from "@ethersproject/logger";
 
 //https://github.com/iamolegga/nestjs-pino/blob/master/src/LoggerErrorInterceptor.ts
 @Injectable()
@@ -17,8 +18,8 @@ export class ErrorInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((error) => throwError(() => {
         let logger = new Logger(ErrorInterceptor.name);
-        const response = context.switchToHttp().getResponse();        
-        if (codes.includes(error?.code)) {
+        const response = context.switchToHttp().getResponse();       
+        if (error?.code in codes) {
           let newerr = new EthersException(
             error.message,
             error.stack,
@@ -51,25 +52,3 @@ export class EthersException extends Error {
 // provider errors (url == polygon) 
 // contract errors (revets, typechain may generate revert reasosn ?) 
 // recursive error transofrmation [ethers wraps error from polygon which wraps contract revert]
-
-// https://docs.ethers.io/v5/api/utils/logger/#errors
-const codes = [
-  "NOT_IMPLEMENTED",
-  "SERVER_ERROR", 
-  "TIMEOUT", 
-  "UNKNOWN_ERROR", 
-  "UNSUPPORTED_OPERATION",
-  "BUFFER_OVERRUN",
-  "NUMERIC_FAULT",
-  "INVALID_ARGUMENT",
-  "MISSING_ARGUMENT",
-  "MISSING_NEW",
-  "UNEXPECTED_ARGUMENT",
-  "CALL_EXCEPTION",
-  "INSUFFICIENT_FUNDS",
-  "NETWORK_ERROR",
-  "NONCE_EXPIRED",
-  "REPLACEMENT_UNDERPRICED",
- "TRANSACTION_REPLACED",
- "UNPREDICTABLE_GAS_LIMIT",
-]

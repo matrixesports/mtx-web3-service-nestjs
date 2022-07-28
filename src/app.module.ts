@@ -24,7 +24,7 @@ import { ScalarModule } from './scalar/scalar.module';
 @Module({
   imports: [
     LoggerModule.forRoot({
-      pinoHttp: {
+      pinoHttp: { 
         base: null,
         formatters: {
           level: (label) => {
@@ -33,10 +33,12 @@ import { ScalarModule } from './scalar/scalar.module';
         },
         autoLogging: {
           ignore: (req) => {
+              // no auto logging for gql; see gql.logger.ts
               return req["params"]["0"] === "graphql" ? true : false;
             }
         },
         customErrorObject: (req, res, error, val) => {
+          // no error context for info logs; see error.interceptor.ts
           delete val["err"];      
           return {
             ...val,
@@ -88,30 +90,34 @@ import { ScalarModule } from './scalar/scalar.module';
         };
       },
     }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      definitions: {
-        path: join(process.cwd(), 'src/graphql.schema.ts'),
-        outputAs: 'class',
-        defaultScalarType: 'unknown',
-      },
-      typePaths: ['./**/*.graphql'],
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloFederationDriver,
-      plugins: [
-        ApolloServerPluginLandingPageLocalDefault(),
-        responseCachePlugin(),
-      ],
-      playground: false,
-      debug: true,  // stacktrace
-      formatError : (error) => {
-        let newError = JSON.parse(JSON.stringify(error))
-        delete newError["extensions"];
-        delete newError["locations"];
-        delete newError["path"];
-        if (newError["message"].search("https://polygon-mainnet.g.alchemy.com/v2/")) {
-          newError["message"] = "on-chain error"; // hide provider
-        }
-        return newError;
-      }
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory : (config: ConfigService) => ({
+        definitions: {
+          path: join(process.cwd(), 'src/graphql.schema.ts'),
+          outputAs: 'class',
+          defaultScalarType: 'unknown',
+        },
+        typePaths: ['./**/*.graphql'],
+        playground: false,
+        debug: true,  // stacktrace for error context
+        formatError : (error) => {
+          let newError = JSON.parse(JSON.stringify(error))
+          delete newError["extensions"];
+          delete newError["locations"];
+          delete newError["path"];
+          if (newError["message"].search(config.get("POLYGON").rpc)) {
+            newError["message"] = "on-chain error"; // hide provider
+          }
+          return newError;
+        },
+        plugins: [
+          ApolloServerPluginLandingPageLocalDefault(),
+          responseCachePlugin(),
+        ],
+      }),
     }),
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,

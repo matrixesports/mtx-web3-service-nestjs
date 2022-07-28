@@ -143,7 +143,6 @@ export class BattlePassService {
   ) {
     const logger = new Logger(this.redeemItemHelper.name);
     let logData = { external: {} }
-    let uri = await contract.uri(itemId);
     let metadata = await this.getMetadata(creatorId, itemId);
 
     let ticketRedeemBody: TicketRedeemBody = {

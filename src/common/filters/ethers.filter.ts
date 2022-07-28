@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { IResponseError } from './global.filter';
-import { EthersException } from '../interceptors/errorr.interceptor';
+import { EthersException } from '../interceptors/error.interceptor';
 
 
 @Catch(EthersException)
