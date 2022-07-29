@@ -103,15 +103,15 @@ import { ScalarModule } from './scalar/scalar.module';
         typePaths: ['./**/*.graphql'],
         playground: false,
         debug: true,  // stacktrace for error context
-        formatError : (error) => {
-          let newError = JSON.parse(JSON.stringify(error))
-          delete newError["extensions"];
-          delete newError["locations"];
-          delete newError["path"];
-          if (newError["message"].search(config.get("POLYGON").rpc)) {
-            newError["message"] = "on-chain error"; // hide provider
+        formatError : (err) => {
+          let newerr = JSON.parse(JSON.stringify(err));
+          delete newerr.extensions;
+          delete newerr.locations;
+          delete newerr.path;
+          if (newerr.message.search(config.get("POLYGON").rpc)) {
+            newerr.message = "on-chain error"; // hide provider
           }
-          return newError;
+          return newerr;
         },
         plugins: [
           ApolloServerPluginLandingPageLocalDefault(),

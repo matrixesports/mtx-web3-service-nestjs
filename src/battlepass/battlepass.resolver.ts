@@ -287,7 +287,9 @@ export class BattlePassResolver {
       userAddress,
       creatorId,
       contract.address
-    );
+    ).catch((err) => {
+      throw {err: err,};
+    });
     return { success: true };
   }
 }

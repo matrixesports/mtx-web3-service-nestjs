@@ -158,8 +158,7 @@ export class BattlePassService {
       ticketRedeemBody
     );
     logData.external["0"] = {
-      service: "ticket",
-      path: "/api/ticket/redemption",
+      path: `${this.configService.get('SERVICE').ticket}/api/ticket/redemption`,
       body: ticketRedeemBody,
       responseTime: Date.now() - start,
     }
@@ -177,14 +176,14 @@ export class BattlePassService {
       twitchRedeemBody
     );
     logData.external["1"] = {
-      service: "twitch",
-      path: "/redemptions/redemption",
+      path: `${this.configService.get('SERVICE').twitch}/redemptions/redemption`,
       body: twitchRedeemBody,
       responseTime: Date.now() - start,
     }
     logger.log(logData);
     let fee = await this.contractService.getMaticFeeData();
     await contract.burn(userAddress, itemId, 1, fee);
+    return 5;
   }
 
   /**
@@ -230,8 +229,7 @@ export class BattlePassService {
       requiredFieldsBody
     );
     logData.external["0"] = {
-      service: "user",
-      path: "/api/user/missingRedeemFields",
+      path: `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
       body: requiredFieldsBody,
       responseTime: Date.now() - start
     }

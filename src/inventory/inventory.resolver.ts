@@ -97,8 +97,7 @@ export class InventoryResolver {
       { params: { userAddress: parent.userAddress } }
     );
     logData.external["0"] = {
-      service: "ticket",
-      path: "/api/ticket",
+      path: `${this.configService.get('SERVICE').ticket}/api/ticket`,
       body: { params: { userAddress: parent.userAddress } },
       responseTime: Date.now() - start
     }
