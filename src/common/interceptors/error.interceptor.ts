@@ -20,13 +20,33 @@ export class ErrorInterceptor implements NestInterceptor {
         let logger = new Logger(ErrorInterceptor.name);
         const response = context.switchToHttp().getResponse();       
         if (error?.code in codes) {
+          if (error.error?.code in codes) {
+            if (error.error.error?.code in codes) {
+              let newerr = new EthersException(
+                error.error.error.reason,
+                error.error.error.stack,
+                error.error.error.code,
+                error.error.error.url ? {"requestBody": error.error.error.requestBody, "body": error.error.error.body } : undefined,
+                error.error.error.error
+              );
+              error.error.error = newerr; 
+            }
+            let newerr = new EthersException(
+              error.error.reason,
+              error.error.stack,
+              error.error.code,
+              error.error.transaction ? { "transaction": error.error.transaction, "method": error.error.method } : undefined,
+              error.error.error,
+            );
+            error.error = newerr;
+          }
           let newerr = new EthersException(
-            error.message,
+            error.reason, 
             error.stack,
-            error.reason,
             error.code,
+            undefined,
             error.error,
-          ) 
+          ); 
           logger.error(newerr);
           return newerr;
         }
@@ -39,16 +59,13 @@ export class ErrorInterceptor implements NestInterceptor {
 export class EthersException extends Error {
   constructor(
     message: string,
-    private readonly trace: Record<string, any>,
-    private readonly reason: string,
+    stack: string,
     private readonly code: string,
-    private readonly error: Record<string, any>
+    private readonly context?: Record<string, any>,
+    private readonly error?: Record<string, any>,
     ) {
       super(message);
+      this.stack = stack;
     }
 }
 
-// TODO:
-// provider errors (url == polygon) 
-// contract errors (revets, typechain may generate revert reasosn ?) 
-// recursive error transofrmation [ethers wraps error from polygon which wraps contract revert]
