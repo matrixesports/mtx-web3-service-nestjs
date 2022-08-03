@@ -1,7 +1,7 @@
 {
   "name": "mtx-web3-service",
-  "version": "0.0.1",
-  "description": "Graphql service for talking to the contracts",
+  "version": "1.0.0",
+  "description": "GraphQL and REST endpoints for interacting with the MTX EVM contracts",
   "author": "",
   "private": true,
   "license": "MIT",
@@ -16,7 +16,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -63,7 +63,9 @@
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^8.0.1",
     "jest": "28.0.3",
+    "lint-staged": "^13.0.3",
     "prettier": "^2.3.2",
     "source-map-support": "^0.5.20",
     "supertest": "^6.1.3",
@@ -72,5 +74,13 @@
     "ts-node": "^10.0.0",
     "tsconfig-paths": "4.0.0",
     "typescript": "^4.3.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.ts": "eslint \"{src,test}/**/*.ts\" --fix && prettier --write \"{src}/**/*.ts\""
   }
 }
