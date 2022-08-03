@@ -2,8 +2,7 @@
 /dist
 /node_modules
 
-#for abi
-out/
+# env
 .env
 
 # Logs
@@ -37,3 +36,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# typechain
+src/common/typechain

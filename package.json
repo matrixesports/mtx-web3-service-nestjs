@@ -6,6 +6,10 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "setup": "yarn install && yarn run init && yarn run compile && yarn run generate",
+    "init": "git submodule update --recursive && cd contracts && make install",
+    "compile": "cd contracts && forge build",
+    "generate": "npx typechain --target ethers-v5 --out-dir admincli/src/types './contracts/out/**/*.json'",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
