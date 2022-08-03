@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { BigNumber, Contract } from 'ethers';
 import { parse } from 'postgres-array';
+import { BattlePass } from 'src/common/typechain';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { Reward, RewardMetadata, RewardType } from 'src/graphql.schema';
@@ -41,14 +42,14 @@ export class BattlePassService {
   async getBattlePassContract(
     creatorId: number,
     isSigner?: boolean
-  ): Promise<Contract> {
+  ) {
     let contractDB = await this.contractService.findOne({
       creator_id: creatorId,
       ctr_type: CtrType.BATTLE_PASS,
     });
 
-    if (isSigner) return this.contractService.getSignerContract(contractDB);
-    return this.contractService.getProviderContract(contractDB);
+    if (isSigner) return this.contractService.getSignerContract(contractDB) as BattlePass;
+    return this.contractService.getProviderContract(contractDB) as BattlePass;
   }
 
   /**
@@ -70,7 +71,7 @@ export class BattlePassService {
 
   /**
    *
-   * @param rewardType
+   * @param rewardTypeIdx
    * @returns return type of reward
    */
   getRewardType(rewardTypeIdx: number): RewardType {
@@ -79,7 +80,7 @@ export class BattlePassService {
 
   async getRewardTypeForId(contract: Contract, id: BigNumber) {
     let rewardType = await contract.checkType(id);
-    return await this.getRewardType(rewardType);
+    return this.getRewardType(rewardType);
   }
 
   /**
@@ -116,7 +117,7 @@ export class BattlePassService {
   ): Promise<Reward> {
     if (id.isZero()) return null;
     let metadata = await this.getMetadata(creatorId, id.toNumber());
-    let rewardType = await this.getRewardType(rewardTypeIdx);
+    let rewardType = this.getRewardType(rewardTypeIdx);
     return {
       id,
       qty,
@@ -135,7 +136,7 @@ export class BattlePassService {
    * @param address
    */
   async redeemItemHelper(
-    contract: Contract,
+    contract: BattlePass,
     itemId: number,
     userAddress: string,
     creatorId: number,
@@ -228,7 +229,7 @@ export class BattlePassService {
 
   async openLootbox(
     fee: any,
-    contract: Contract,
+    contract: BattlePass,
     id: number,
     userAddress: string,
     creatorId: number

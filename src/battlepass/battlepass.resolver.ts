@@ -7,6 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { BigNumber } from 'ethers';
 import { ContractCall } from 'pilum';
 import { ContractService } from 'src/contract/contract.service';
 import { RewardType } from 'src/graphql.schema';
@@ -178,8 +179,8 @@ export class BattlePassResolver {
       let contract = await this.battlePassService.getBattlePassContract(
         creatorId
       );
-      let seasonId = await contract.seasonId();
-      let maxLevel = await contract.getMaxLevel(seasonId);
+      let seasonId = (await contract.seasonId()).toNumber();
+      let maxLevel = (await contract.getMaxLevel(seasonId)).toNumber();
       let battlePassDB = await this.battlePassService.getBattlePassDB(
         contract.address
       );
@@ -239,8 +240,8 @@ export class BattlePassResolver {
       await contract.provider.waitForTransaction(tx.hash, 1);
 
       let rewardGiven = await contract.seasonInfo(seasonId, level);
-      let id;
-      let qty;
+      let id: BigNumber;
+      let qty: BigNumber;
       if (premium) {
         id = rewardGiven.premiumRewardId;
         qty = rewardGiven.premiumRewardQty;
@@ -249,7 +250,7 @@ export class BattlePassResolver {
         qty = rewardGiven.freeRewardQty;
       }
       let rewardTypeIdx = await contract.checkType(id);
-      let rewardType = await this.battlePassService.getRewardType(
+      let rewardType = this.battlePassService.getRewardType(
         rewardTypeIdx
       );
       if (rewardType === RewardType.REDEEMABLE && autoRedeem) {
@@ -264,7 +265,7 @@ export class BattlePassResolver {
         let rewards = await this.battlePassService.openLootbox(
           fee,
           contract,
-          id,
+          id.toNumber(),
           userAddress,
           creatorId
         );

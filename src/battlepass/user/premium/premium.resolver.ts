@@ -23,7 +23,7 @@ export class PremiumResolver {
     let unclaimedPrem = [];
     let calls: ContractCall[] = [];
 
-    for (let x = 0; x <= userLevel; x++) {
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
       calls.push({
         reference: 'isRewardClaimed',
         address: parent.contract.address,
@@ -37,7 +37,7 @@ export class PremiumResolver {
       calls,
       parent.contract.provider
     );
-    for (let x = 0; x <= userLevel; x++) {
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
       if (!parseInt(results[x].returnData[1])) unclaimedPrem.push(x);
     }
     return unclaimedPrem;

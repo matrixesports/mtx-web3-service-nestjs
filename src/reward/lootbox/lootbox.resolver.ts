@@ -24,7 +24,7 @@ export class LootboxResolver {
       let allOptions = [];
       let calls: ContractCall[] = [];
 
-      for (let x = 0; x < lengthOfOptions; x++) {
+      for (let x = 0; x < lengthOfOptions.toNumber(); x++) {
         calls.push({
           reference: 'getLootboxOptionByIdx',
           address: contract.address,
@@ -38,7 +38,7 @@ export class LootboxResolver {
         calls,
         contract.provider
       );
-      for (let x = 0; x < lengthOfOptions; x++) {
+      for (let x = 0; x < lengthOfOptions.toNumber(); x++) {
         //for some reason it return an array lol
         //arrays have len 1. keep an eye out for this
         let option = contract.interface.decodeFunctionResult(

@@ -31,7 +31,7 @@ export class UserResolver {
     let calls: ContractCall[] = [];
     let unclaimedFree = [];
 
-    for (let x = 0; x <= userLevel; x++) {
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
       calls.push({
         reference: 'isRewardClaimed',
         address: parent.contract.address,
@@ -45,7 +45,7 @@ export class UserResolver {
       calls,
       parent.contract.provider
     );
-    for (let x = 0; x <= userLevel; x++) {
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
       if (!parseInt(results[x].returnData[1])) unclaimedFree.push(x);
     }
     return unclaimedFree;

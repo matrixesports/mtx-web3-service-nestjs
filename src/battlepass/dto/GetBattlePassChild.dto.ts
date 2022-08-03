@@ -1,10 +1,10 @@
-import { Contract } from 'ethers';
-import { BattlePass } from '../battlepass.entity';
+import { BattlePass } from 'src/common/typechain';
+import { BattlePass as BattlePassEntity} from '../battlepass.entity';
 
 export class GetBattlePassChildDto {
-  contract: Contract;
+  contract: BattlePass;
   seasonId: number;
-  battlePassDB: BattlePass;
+  battlePassDB: BattlePassEntity;
   creatorId: number;
   maxLevel: number;
 }

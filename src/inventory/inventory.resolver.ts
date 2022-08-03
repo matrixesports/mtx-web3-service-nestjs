@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
+import { CreatorToken } from 'src/common/typechain';
 import { CtrType } from 'src/contract/contract.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { Redeemed, RedeemStatus, Reward, RewardType } from 'src/graphql.schema';
@@ -66,11 +67,11 @@ export class InventoryResolver {
             creator_id: allBattlePasses[x].creator_id,
           });
 
-          let tokenContract = await this.contractService.getProviderContract(
+          let tokenContract = this.contractService.getProviderContract(
             creatorTokenDB
-          );
+          ) as CreatorToken;
           let balance = await tokenContract.balanceOf(parent.userAddress);
-          if (balance == 0) continue;
+          if (balance.toNumber() == 0) continue;
           let tokenReward =
             await this.battlePassService.createRewardObjWithRewardType(
               await contract.CREATOR_TOKEN_ID(),
