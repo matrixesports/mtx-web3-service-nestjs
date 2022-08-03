@@ -25,11 +25,13 @@ export class InventoryService {
     token_contracts: Array<string>,
     user: string
   ): Promise<BaseNft[]> {
-    let res: GetNftsResponseWithoutMetadata = await this.web3.alchemy.getNfts({
-      owner: user,
-      contractAddresses: token_contracts,
-      withMetadata: false,
-    });
+    const res: GetNftsResponseWithoutMetadata = await this.web3.alchemy.getNfts(
+      {
+        owner: user,
+        contractAddresses: token_contracts,
+        withMetadata: false,
+      }
+    );
     return res.ownedNfts;
   }
 }

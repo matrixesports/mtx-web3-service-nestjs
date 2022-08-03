@@ -64,11 +64,11 @@ export class ContractService {
         method: 'get',
         url: 'https://gasstation-mainnet.matic.network/v2',
       });
-      let maxFeePerGas = ethers.utils.parseUnits(
+      const maxFeePerGas = ethers.utils.parseUnits(
         Math.ceil(data.fast.maxFee) + '',
         'gwei'
       );
-      let maxPriorityFeePerGas = ethers.utils.parseUnits(
+      const maxPriorityFeePerGas = ethers.utils.parseUnits(
         Math.ceil(data.fast.maxPriorityFee) + '',
         'gwei'
       );
@@ -90,7 +90,7 @@ export class ContractService {
   async multicall(calls: ContractCall[], provider: ethers.providers.Provider) {
     const multicall = new Multicall({ provider });
     const { chainId } = await provider.getNetwork();
-    let res = await multicall.call(calls, { network: chainId });
+    const res = await multicall.call(calls, { network: chainId });
     return res.results;
   }
 }

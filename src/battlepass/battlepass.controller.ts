@@ -14,12 +14,12 @@ export class BattlePassController {
   @Post('giveXp')
   async giveXp(@Body() giveXpDto: GiveXpDto) {
     try {
-      let contract = await this.battlePassService.getBattlePassContract(
+      const contract = await this.battlePassService.getBattlePassContract(
         giveXpDto.creatorId,
         true
       );
-      let seasonId = await contract.seasonId();
-      let fee = await this.contractService.getMaticFeeData();
+      const seasonId = await contract.seasonId();
+      const fee = await this.contractService.getMaticFeeData();
       await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
       return { success: true };
     } catch (e) {
@@ -30,12 +30,12 @@ export class BattlePassController {
   @Post('mint')
   async mintPremiumPass(@Body() mintPremiumPassDto: MintPremiumPassDto) {
     try {
-      let contract = await this.battlePassService.getBattlePassContract(
+      const contract = await this.battlePassService.getBattlePassContract(
         mintPremiumPassDto.creatorId,
         true
       );
-      let seasonId = await contract.seasonId();
-      let fee = await this.contractService.getMaticFeeData();
+      const seasonId = await contract.seasonId();
+      const fee = await this.contractService.getMaticFeeData();
       await contract.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee);
       return { success: true };
     } catch (e) {
@@ -45,11 +45,11 @@ export class BattlePassController {
 
   @Get('metadata/:creatorId')
   async getBattlePassDB(@Param('creatorId') creatorId: number) {
-    let contract = await this.battlePassService.getBattlePassContract(
+    const contract = await this.battlePassService.getBattlePassContract(
       creatorId
     );
-    let seasonId = await contract.seasonId();
-    let battlePassDB = await this.battlePassService.getBattlePassDB(
+    const seasonId = await contract.seasonId();
+    const battlePassDB = await this.battlePassService.getBattlePassDB(
       contract.address
     );
     return {

@@ -60,7 +60,7 @@ export class BattlePassResolver {
   @ResolveField()
   async levelInfo(@Parent() parent: GetBattlePassChildDto) {
     try {
-      let levelInfo = [];
+      const levelInfo = [];
       let calls: ContractCall[] = [];
       for (let x = 0; x <= parent.maxLevel; x++) {
         calls.push({
@@ -72,14 +72,14 @@ export class BattlePassResolver {
           value: 0,
         });
       }
-      let results = await this.contractService.multicall(
+      const results = await this.contractService.multicall(
         calls,
         parent.contract.provider
       );
 
       calls = [];
       for (let x = 0; x <= parent.maxLevel; x++) {
-        let seasonInfo = parent.contract.interface.decodeFunctionResult(
+        const seasonInfo = parent.contract.interface.decodeFunctionResult(
           'seasonInfo',
           results[x].returnData[1]
         );
@@ -106,7 +106,7 @@ export class BattlePassResolver {
         );
       }
 
-      let checkTypeResults = await this.contractService.multicall(
+      const checkTypeResults = await this.contractService.multicall(
         calls,
         parent.contract.provider
       );
@@ -120,7 +120,7 @@ export class BattlePassResolver {
           level = x / 2;
         }
 
-        let seasonInfo = parent.contract.interface.decodeFunctionResult(
+        const seasonInfo = parent.contract.interface.decodeFunctionResult(
           'seasonInfo',
           results[level].returnData[1]
         );
@@ -167,7 +167,7 @@ export class BattlePassResolver {
     @Parent() parent: GetBattlePassChildDto,
     @Context() context
   ): GetBattlePassUserInfoChildDto {
-    let userAddress: string = context.req.headers['user-address'];
+    const userAddress: string = context.req.headers['user-address'];
     return { ...parent, userAddress };
   }
 
@@ -176,12 +176,12 @@ export class BattlePassResolver {
     @Args('creatorId') creatorId: number
   ): Promise<GetBattlePassChildDto> {
     try {
-      let contract = await this.battlePassService.getBattlePassContract(
+      const contract = await this.battlePassService.getBattlePassContract(
         creatorId
       );
-      let seasonId = (await contract.seasonId()).toNumber();
-      let maxLevel = (await contract.getMaxLevel(seasonId)).toNumber();
-      let battlePassDB = await this.battlePassService.getBattlePassDB(
+      const seasonId = (await contract.seasonId()).toNumber();
+      const maxLevel = (await contract.getMaxLevel(seasonId)).toNumber();
+      const battlePassDB = await this.battlePassService.getBattlePassDB(
         contract.address
       );
       return { contract, seasonId, battlePassDB, creatorId, maxLevel };
@@ -207,14 +207,14 @@ export class BattlePassResolver {
     @Context() context
   ) {
     try {
-      let userAddress: string = context.req.headers['user-address'];
-      let contract = await this.battlePassService.getBattlePassContract(
+      const userAddress: string = context.req.headers['user-address'];
+      const contract = await this.battlePassService.getBattlePassContract(
         creatorId,
         true
       );
-      let seasonId = await contract.seasonId();
+      const seasonId = await contract.seasonId();
 
-      let missingFields = await this.battlePassService.checkRequiredFields(
+      const missingFields = await this.battlePassService.checkRequiredFields(
         userAddress,
         contract.address,
         level
@@ -229,8 +229,8 @@ export class BattlePassResolver {
         };
       }
 
-      let fee = await this.contractService.getMaticFeeData();
-      let tx = await contract.claimReward(
+      const fee = await this.contractService.getMaticFeeData();
+      const tx = await contract.claimReward(
         seasonId,
         userAddress,
         level,
@@ -239,7 +239,7 @@ export class BattlePassResolver {
       );
       await contract.provider.waitForTransaction(tx.hash, 1);
 
-      let rewardGiven = await contract.seasonInfo(seasonId, level);
+      const rewardGiven = await contract.seasonInfo(seasonId, level);
       let id: BigNumber;
       let qty: BigNumber;
       if (premium) {
@@ -249,10 +249,8 @@ export class BattlePassResolver {
         id = rewardGiven.freeRewardId;
         qty = rewardGiven.freeRewardQty;
       }
-      let rewardTypeIdx = await contract.checkType(id);
-      let rewardType = this.battlePassService.getRewardType(
-        rewardTypeIdx
-      );
+      const rewardTypeIdx = await contract.checkType(id);
+      const rewardType = this.battlePassService.getRewardType(rewardTypeIdx);
       if (rewardType === RewardType.REDEEMABLE && autoRedeem) {
         await this.battlePassService.redeemItemHelper(
           contract,
@@ -262,7 +260,7 @@ export class BattlePassResolver {
           contract.address
         );
       } else if (rewardType === RewardType.LOOTBOX) {
-        let rewards = await this.battlePassService.openLootbox(
+        const rewards = await this.battlePassService.openLootbox(
           fee,
           contract,
           id.toNumber(),
@@ -272,7 +270,7 @@ export class BattlePassResolver {
         return { success: true, reward: rewards };
       }
 
-      let reward = await this.battlePassService.createRewardObj(
+      const reward = await this.battlePassService.createRewardObj(
         contract,
         id,
         qty,
@@ -292,9 +290,9 @@ export class BattlePassResolver {
     @Context() context
   ) {
     try {
-      let userAddress: string = context.req.headers['user-address'];
+      const userAddress: string = context.req.headers['user-address'];
 
-      let contract = await this.battlePassService.getBattlePassContract(
+      const contract = await this.battlePassService.getBattlePassContract(
         creatorId,
         true
       );

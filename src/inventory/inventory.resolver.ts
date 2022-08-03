@@ -36,22 +36,22 @@ export class InventoryResolver {
    */
   async default(@Parent() parent: GetInventoryChildDto) {
     try {
-      let defaultRewards: Reward[] = [];
-      let allBattlePasses = await this.contractRepository.find({
+      const defaultRewards: Reward[] = [];
+      const allBattlePasses = await this.contractRepository.find({
         where: { ctr_type: CtrType.BATTLE_PASS },
       });
 
       for (let x = 0; x < allBattlePasses.length; x++) {
-        let contract = await this.battlePassService.getBattlePassContract(
+        const contract = await this.battlePassService.getBattlePassContract(
           allBattlePasses[x].creator_id
         );
-        let owned = await this.inventoryService.getNFTSOwnedForUser(
+        const owned = await this.inventoryService.getNFTSOwnedForUser(
           [allBattlePasses[x].address],
           parent.userAddress
         );
 
         for (let y = 0; y < owned.length; y++) {
-          let reward = await this.battlePassService.createRewardObj(
+          const reward = await this.battlePassService.createRewardObj(
             contract,
             ethers.BigNumber.from(owned[y].id.tokenId),
             ethers.BigNumber.from(owned[y].balance),
@@ -62,17 +62,17 @@ export class InventoryResolver {
 
         try {
           //handle creator token now
-          let creatorTokenDB = await this.contractService.findOne({
+          const creatorTokenDB = await this.contractService.findOne({
             ctr_type: CtrType.CREATOR_TOKEN,
             creator_id: allBattlePasses[x].creator_id,
           });
 
-          let tokenContract = this.contractService.getProviderContract(
+          const tokenContract = this.contractService.getProviderContract(
             creatorTokenDB
           ) as CreatorToken;
-          let balance = await tokenContract.balanceOf(parent.userAddress);
+          const balance = await tokenContract.balanceOf(parent.userAddress);
           if (balance.toNumber() == 0) continue;
-          let tokenReward =
+          const tokenReward =
             await this.battlePassService.createRewardObjWithRewardType(
               await contract.CREATOR_TOKEN_ID(),
               balance,
@@ -95,14 +95,14 @@ export class InventoryResolver {
   //get all tickets for a user
   async redeemed(@Parent() parent: GetInventoryChildDto) {
     try {
-      let res = await axios.get(
+      const res = await axios.get(
         `${this.configService.get('SERVICE').ticket}/api/ticket`,
         { params: { userAddress: parent.userAddress } }
       );
-      let userRedeemedInfo: UserRedeemedRes[] = res.data;
-      let redeemed: Redeemed[] = [];
+      const userRedeemedInfo: UserRedeemedRes[] = res.data;
+      const redeemed: Redeemed[] = [];
       //creatorid->itemId->statuses
-      let temp = {};
+      const temp = {};
 
       for (let x = 0; x < userRedeemedInfo.length; x++) {
         if (temp[userRedeemedInfo[x].creatorId] === undefined) {
@@ -122,7 +122,7 @@ export class InventoryResolver {
       for (const creatorId in temp) {
         for (const itemId in temp[creatorId]) {
           // qty is length of statuses to signify how many have been redeemed
-          let reward =
+          const reward =
             await this.battlePassService.createRewardObjWithRewardType(
               ethers.BigNumber.from(itemId),
               ethers.BigNumber.from(temp[creatorId][itemId].length),
@@ -141,7 +141,7 @@ export class InventoryResolver {
 
   @Query()
   getInventory(@Context() context): GetInventoryChildDto {
-    let userAddress: string = context.req.headers['user-address'];
+    const userAddress: string = context.req.headers['user-address'];
     return {
       userAddress,
     };

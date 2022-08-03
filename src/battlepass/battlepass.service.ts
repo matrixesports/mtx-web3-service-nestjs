@@ -39,16 +39,14 @@ export class BattlePassService {
    * @param isSigner true if connected to signer
    * @returns throws error if cannot find contract
    */
-  async getBattlePassContract(
-    creatorId: number,
-    isSigner?: boolean
-  ) {
-    let contractDB = await this.contractService.findOne({
+  async getBattlePassContract(creatorId: number, isSigner?: boolean) {
+    const contractDB = await this.contractService.findOne({
       creator_id: creatorId,
       ctr_type: CtrType.BATTLE_PASS,
     });
 
-    if (isSigner) return this.contractService.getSignerContract(contractDB) as BattlePass;
+    if (isSigner)
+      return this.contractService.getSignerContract(contractDB) as BattlePass;
     return this.contractService.getProviderContract(contractDB) as BattlePass;
   }
 
@@ -60,7 +58,7 @@ export class BattlePassService {
    */
   async getMetadata(creatorId: number, id: number): Promise<RewardMetadata> {
     try {
-      let metadata = await import(
+      const metadata = await import(
         `${process.cwd()}/creators/${creatorId}/metadata/${id}.json`
       );
       return metadata.default;
@@ -79,7 +77,7 @@ export class BattlePassService {
   }
 
   async getRewardTypeForId(contract: Contract, id: BigNumber) {
-    let rewardType = await contract.checkType(id);
+    const rewardType = await contract.checkType(id);
     return this.getRewardType(rewardType);
   }
 
@@ -98,8 +96,8 @@ export class BattlePassService {
     creatorId: number
   ): Promise<Reward> {
     if (id.isZero()) return null;
-    let metadata = await this.getMetadata(creatorId, id.toNumber());
-    let rewardType = await this.getRewardTypeForId(contract, id);
+    const metadata = await this.getMetadata(creatorId, id.toNumber());
+    const rewardType = await this.getRewardTypeForId(contract, id);
     return {
       id,
       qty,
@@ -116,8 +114,8 @@ export class BattlePassService {
     rewardTypeIdx: number
   ): Promise<Reward> {
     if (id.isZero()) return null;
-    let metadata = await this.getMetadata(creatorId, id.toNumber());
-    let rewardType = this.getRewardType(rewardTypeIdx);
+    const metadata = await this.getMetadata(creatorId, id.toNumber());
+    const rewardType = this.getRewardType(rewardTypeIdx);
     return {
       id,
       qty,
@@ -142,9 +140,9 @@ export class BattlePassService {
     creatorId: number,
     address: string
   ) {
-    let metadata = await this.getMetadata(creatorId, itemId);
+    const metadata = await this.getMetadata(creatorId, itemId);
 
-    let ticketRedeemBody: TicketRedeemBody = {
+    const ticketRedeemBody: TicketRedeemBody = {
       ...metadata,
       creatorId: creatorId,
       itemId: itemId,
@@ -156,7 +154,7 @@ export class BattlePassService {
       ticketRedeemBody
     );
 
-    let twitchRedeemBody: TwitchRedeemBody = {
+    const twitchRedeemBody: TwitchRedeemBody = {
       ...metadata,
       creatorId: creatorId,
       itemId: itemId,
@@ -168,7 +166,7 @@ export class BattlePassService {
       twitchRedeemBody
     );
 
-    let fee = await this.contractService.getMaticFeeData();
+    const fee = await this.contractService.getMaticFeeData();
     await contract.burn(userAddress, itemId, 1, fee);
   }
 
@@ -185,7 +183,7 @@ export class BattlePassService {
     level: number
   ): Promise<RequiredFieldsResponse> {
     if (level != 1) return;
-    let battlePassDB = await this.getBattlePassDB(address);
+    const battlePassDB = await this.getBattlePassDB(address);
     if (
       battlePassDB.required_user_social_options.length == 0 &&
       battlePassDB.required_user_payment_options.length == 0
@@ -193,21 +191,21 @@ export class BattlePassService {
       return;
 
     //convert string to array
-    let required_user_social_options = parse(
+    const required_user_social_options = parse(
       battlePassDB.required_user_social_options,
       value => value
     );
-    let required_user_payment_options = parse(
+    const required_user_payment_options = parse(
       battlePassDB.required_user_payment_options,
       value => value
     );
 
-    let requiredFieldsBody: RequiredFieldsBody = {
+    const requiredFieldsBody: RequiredFieldsBody = {
       userAddress,
       required_user_social_options,
       required_user_payment_options,
     };
-    let missingRedeemFields = await axios.post(
+    const missingRedeemFields = await axios.post(
       `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
       requiredFieldsBody
     );
@@ -235,14 +233,14 @@ export class BattlePassService {
     creatorId: number
   ): Promise<Reward[]> {
     fee['gasLimit'] = 1000000;
-    let tx = await contract.openLootbox(id, userAddress, fee);
-    let rc = await tx.wait();
-    let event = rc.events?.find(event => event.event === 'LootboxOpened');
+    const tx = await contract.openLootbox(id, userAddress, fee);
+    const rc = await tx.wait();
+    const event = rc.events?.find(event => event.event === 'LootboxOpened');
     const [idxOpened] = event.args;
-    let option = await contract.getLootboxOptionByIdx(id, idxOpened);
-    let rewards = [];
+    const option = await contract.getLootboxOptionByIdx(id, idxOpened);
+    const rewards = [];
     for (let y = 0; y < option[1].length; y++) {
-      let rewardType = await contract.checkType(option[1][y]);
+      const rewardType = await contract.checkType(option[1][y]);
       rewards.push(
         await this.createRewardObj(
           contract,

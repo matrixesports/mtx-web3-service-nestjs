@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 import { DateResolver } from './date.resolver';
 
 @Module({
-  providers: [DateResolver]
+  providers: [DateResolver],
 })
 export class DateModule {}

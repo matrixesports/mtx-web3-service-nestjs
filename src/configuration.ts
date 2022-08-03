@@ -16,7 +16,7 @@ export default () => {
     twitch = process.env.STAGING_TWITCH_SERVICE_URL;
   }
 
-  let config = {
+  const config = {
     PVT_KEY: process.env.PVT_KEY,
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     POLYGON: {
