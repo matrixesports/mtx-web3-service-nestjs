@@ -2,7 +2,7 @@
   "name": "mtx-web3-service",
   "version": "0.0.1",
   "description": "Graphql service for talking to the contracts",
-  "author": "rayquaza7",
+  "author": "rayquaza7, bomanev",
   "private": true,
   "license": "MIT",
   "scripts": {
