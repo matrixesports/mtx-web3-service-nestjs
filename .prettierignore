@@ -1,1 +1,3 @@
 src/common/typechain
+src/graphql.schema.ts
+contracts
