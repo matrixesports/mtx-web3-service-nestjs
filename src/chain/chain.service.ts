@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  BattlePassFactory,
+  BattlePassFactory__factory,
+  ERC1967Proxy,
+  ERC1967Proxy__factory,
+} from 'abi/typechain';
 import axios from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { ContractCall, Multicall } from 'pilum';
@@ -10,6 +16,8 @@ export class ChainService {
   chainId: number;
   multicallObj: Multicall;
   private signer: ethers.Signer;
+  battlePassFactory: BattlePassFactory;
+  craftingProxy: ERC1967Proxy;
 
   constructor(private configService: ConfigService) {
     let rpc = configService.get('rpc');
@@ -22,6 +30,14 @@ export class ChainService {
       this.provider,
     );
     let contracts = configService.get('contracts');
+    this.battlePassFactory = BattlePassFactory__factory.connect(
+      contracts.bpFactory,
+      this.provider,
+    );
+    this.craftingProxy = ERC1967Proxy__factory.connect(
+      contracts.craftingProxy,
+      this.provider,
+    );
   }
 
   async multicall(calls: ContractCall[]) {
