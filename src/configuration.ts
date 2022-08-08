@@ -18,11 +18,11 @@ export default () => {
 
   let config = {
     PVT_KEY: process.env.PVT_KEY,
-    ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
     rpc: {
       url: process.env.POLYGON_RPC,
       chainId: process.env.CHAIN_ID,
       name: process.env.CHAIN_NAME,
+      apiKey: process.env.ALCHEMY_API_KEY,
     },
     contracts: {
       bpFactory: process.env.BP_FACTORY,

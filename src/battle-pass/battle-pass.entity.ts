@@ -7,7 +7,7 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 @Entity('battlepass')
 export class BattlePassDB {
   @PrimaryColumn()
-  creatorId: number;
+  creator_id: number;
 
   @Column()
   name: string;

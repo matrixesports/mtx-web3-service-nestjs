@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  BattlePass,
+  BattlePass__factory,
   BattlePassFactory,
   BattlePassFactory__factory,
   ERC1967Proxy,
@@ -21,8 +23,7 @@ export class ChainService {
 
   constructor(private configService: ConfigService) {
     let rpc = configService.get('rpc');
-    console.log(rpc);
-    this.provider = new ethers.providers.AlchemyProvider(rpc.name, rpc.url);
+    this.provider = new ethers.providers.AlchemyProvider(rpc.name, rpc.apiKey);
     this.chainId = rpc.chainId;
     this.multicallObj = new Multicall({ provider: this.provider });
     this.signer = new ethers.Wallet(
@@ -42,6 +43,20 @@ export class ChainService {
 
   getSignerContract(contract: Contract): Contract {
     return contract.connect(this.signer);
+  }
+
+  /**
+   * will error if not deployed
+   * @param creatorId
+   * @returns
+   */
+  async getBattlePassContract(creatorId: number): Promise<BattlePass> {
+    let address = await this.battlePassFactory.getBattlePassFromUnderlying(
+      creatorId,
+    );
+    let exists = await this.battlePassFactory.isBattlePassDeployed(address);
+    if (!exists) throw new Error('BattlePass not deployed');
+    return BattlePass__factory.connect(address, this.provider);
   }
 
   async multicall(calls: ContractCall[]) {
