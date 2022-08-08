@@ -9,7 +9,12 @@ import { UserModule } from './user/user.module';
 
 @Module({
   providers: [BattlePassResolver, BattlePassService],
-  imports: [TypeOrmModule.forFeature([BattlePassDB]), MetadataModule, UserModule],
+  imports: [
+    TypeOrmModule.forFeature([BattlePassDB]),
+    MetadataModule,
+    UserModule,
+  ],
   controllers: [BattlePassController],
+  exports: [BattlePassService],
 })
 export class BattlePassModule {}

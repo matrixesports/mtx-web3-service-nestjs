@@ -28,6 +28,10 @@ export class BattlePassService {
     });
   }
 
+  async findAll(): Promise<BattlePassDB[]> {
+    return await this.battlePassRepository.find();
+  }
+
   async createRewardObj(
     creatorId: number,
     id: BigNumber,
@@ -142,28 +146,6 @@ export class BattlePassService {
       `${this.configService.get('SERVICE').twitch}/redemptions/redemption`,
       twitchRedeemBody,
     );
-  }
-
-  async openLootbox(
-    fee: any,
-    contract: Contract,
-    id: number,
-    userAddress: string,
-    creatorId: number,
-  ): Promise<Reward[]> {
-    fee['gasLimit'] = 1000000;
-    let tx = await contract.openLootbox(id, userAddress, fee);
-    let rc = await tx.wait();
-    let event = rc.events?.find((event) => event.event === 'LootboxOpened');
-    const [idxOpened] = event.args;
-    let option = await contract.getLootboxOptionByIdx(id, idxOpened);
-    let rewards = [];
-    for (let y = 0; y < option[1].length; y++) {
-      rewards.push(
-        await this.createRewardObj(creatorId, option[1][y], option[2][y]),
-      );
-    }
-    return rewards;
   }
 }
 

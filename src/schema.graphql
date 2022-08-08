@@ -55,8 +55,43 @@ type RewardMetadata {
   image: String!
 }
 
+type Recipe {
+  recipeId: BigInt!
+  isActive: Boolean!
+  inputIngredients: [Reward]!
+  outputIngredients: [Reward]!
+}
+
+# handle each reward type separately
+type Inventory {
+  #PREMIUM_PASS,SPECIAL, CREATOR_TOKEN, UNREDEEMED REDEEMABLE, LOOTBOX just check balance
+  default: [Reward]!
+  redeemed: [Redeemed]!
+}
+
+#group by same id in same contract since user can redeem multiple of same id
+type Redeemed {
+  reward: Reward!
+  status: [RedeemStatus]!
+}
+
+enum RedeemStatus {
+  REDEEMED
+  PROCESSING
+  REJECTED
+}
+
+type LootboxOption {
+  probability: Int!
+  reward: [Reward]!
+}
+
 type Query {
   getBattlePass(creatorId: Int!): BattlePass
+  getInventory: Inventory
+  getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
+  getRecipes(creatorId: Int!): [Recipe]
+  getRecipe(creatorId: Int!, recipeId: Int!): Recipe
 }
 
 type Mutation {
@@ -67,6 +102,7 @@ type Mutation {
     autoRedeem: Boolean!
   ): ClaimRewardResponse!
   redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
+  craft(recipeId: Int!): MutationResponse!
 }
 
 type ClaimRewardResponse {

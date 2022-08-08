@@ -15,6 +15,8 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { BattlePassModule } from './battle-pass/battle-pass.module';
 import { ChainModule } from './chain/chain.module';
 import { MetadataModule } from './metadata/metadata.module';
+import { LootboxModule } from './reward/lootbox/lootbox.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { MetadataModule } from './metadata/metadata.module';
     BattlePassModule,
     ChainModule,
     MetadataModule,
+    LootboxModule,
+    InventoryModule,
   ],
 })
 export class AppModule {}
