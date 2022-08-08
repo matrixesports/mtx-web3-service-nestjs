@@ -12,6 +12,7 @@ import { join } from 'path';
 import configuration from './configuration';
 import { ScalarModule } from './scalar/scalar.module';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
+import { BattlePassModule } from './battle-pass/battle-pass.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
       typePaths: ['**/*.graphql'],
     }),
     ScalarModule,
+    BattlePassModule,
   ],
 })
 export class AppModule {}
