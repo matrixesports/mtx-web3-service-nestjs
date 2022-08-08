@@ -17,6 +17,7 @@ import { ChainModule } from './chain/chain.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { LootboxModule } from './reward/lootbox/lootbox.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { InventoryModule } from './inventory/inventory.module';
     MetadataModule,
     LootboxModule,
     InventoryModule,
+    AdminModule,
   ],
 })
 export class AppModule {}
