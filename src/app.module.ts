@@ -13,6 +13,7 @@ import configuration from './configuration';
 import { ScalarModule } from './scalar/scalar.module';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { BattlePassModule } from './battle-pass/battle-pass.module';
+import { ChainModule } from './chain/chain.module';
 
 @Module({
   imports: [
@@ -22,6 +23,8 @@ import { BattlePassModule } from './battle-pass/battle-pass.module';
       load: [configuration],
       validationSchema: Joi.object({
         PVT_KEY: Joi.string().required(),
+        CHAIN_ID: Joi.number().required(),
+        CHAIN_NAME: Joi.string().required(),
         POLYGON_RPC: Joi.string().required(),
         DB_WEB3_SERVICE_URL: Joi.string().required(),
         DB_STAGING_WEB3_SERVICE_URL: Joi.string().required(),
@@ -67,6 +70,7 @@ import { BattlePassModule } from './battle-pass/battle-pass.module';
     }),
     ScalarModule,
     BattlePassModule,
+    ChainModule,
   ],
 })
 export class AppModule {}
