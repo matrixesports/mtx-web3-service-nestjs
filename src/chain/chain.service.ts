@@ -7,7 +7,7 @@ import {
   ERC1967Proxy__factory,
 } from 'abi/typechain';
 import axios from 'axios';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, Contract, ethers } from 'ethers';
 import { ContractCall, Multicall } from 'pilum';
 
 @Injectable()
@@ -38,6 +38,10 @@ export class ChainService {
       contracts.craftingProxy,
       this.provider,
     );
+  }
+
+  getSignerContract(contract: Contract): Contract {
+    return contract.connect(this.signer);
   }
 
   async multicall(calls: ContractCall[]) {

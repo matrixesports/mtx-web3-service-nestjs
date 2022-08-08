@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ChainService } from './chain.service';
 
 @Module({
-  providers: [ChainService]
+  providers: [ChainService],
 })
+@Global()
 export class ChainModule {}
