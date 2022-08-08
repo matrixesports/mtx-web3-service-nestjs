@@ -41,6 +41,8 @@ import { AdminModule } from './admin/admin.module';
         ALCHEMY_API_KEY: Joi.string().required(),
         CRAFTING_PROXY: Joi.string().required(),
         BP_FACTORY: Joi.string().required(),
+        TEST_CRAFTING_PROXY: Joi.string().required(),
+        TEST_BP_FACTORY: Joi.string().required(),
       }),
       validationOptions: {
         abortEarly: true,

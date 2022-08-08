@@ -3,17 +3,23 @@ export default () => {
   let ticketService;
   let userService;
   let twitchService;
+  let craftingProxy;
+  let bpFactory;
 
   if (process.env.ZEET_ENVIRONMENT == 'main') {
     db = process.env.DB_WEB3_SERVICE_URL;
     ticketService = process.env.TICKET_SERVICE_URL;
     userService = process.env.USER_SERVICE_URL;
     twitchService = process.env.TWITCH_SERVICE_URL;
+    craftingProxy = process.env.CRAFTING_PROXY;
+    bpFactory = process.env.BP_FACTORY;
   } else {
     db = process.env.DB_STAGING_WEB3_SERVICE_URL;
     ticketService = process.env.STAGING_TICKET_SERVICE_URL;
     userService = process.env.STAGING_USER_SERVICE_URL;
     twitchService = process.env.STAGING_TWITCH_SERVICE_URL;
+    craftingProxy = process.env.TEST_CRAFTING_PROXY;
+    bpFactory = process.env.TEST_BP_FACTORY;
   }
 
   let config = {
@@ -25,8 +31,8 @@ export default () => {
       apiKey: process.env.ALCHEMY_API_KEY,
     },
     contracts: {
-      bpFactory: process.env.BP_FACTORY,
-      craftingProxy: process.env.CRAFTING_PROXY,
+      bpFactory,
+      craftingProxy,
     },
     db,
     SERVICE: {
