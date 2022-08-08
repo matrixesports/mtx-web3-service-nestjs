@@ -8,7 +8,98 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export enum RewardType {
+    PREMIUM_PASS = "PREMIUM_PASS",
+    CREATOR_TOKEN = "CREATOR_TOKEN",
+    LOOTBOX = "LOOTBOX",
+    REDEEMABLE = "REDEEMABLE",
+    SPECIAL = "SPECIAL"
+}
+
+export enum RequiredUserSocialOptions {
+    INSTAGRAM_USERNAME = "INSTAGRAM_USERNAME",
+    TWITTER_USERNAME = "TWITTER_USERNAME",
+    TWITCH_USERNAME = "TWITCH_USERNAME",
+    CLASH_USERNAME = "CLASH_USERNAME",
+    PREFERRED_SOCIAL = "PREFERRED_SOCIAL"
+}
+
+export enum RequiredUserPaymentOptions {
+    CASHAPP = "CASHAPP",
+    PAYPAL_EMAIL = "PAYPAL_EMAIL",
+    VENMO_USERNAME = "VENMO_USERNAME"
+}
+
+export class BattlePass {
+    name: string;
+    description: string;
+    price: string;
+    currency: string;
+    endDate: Date;
+    seasonId: BigInt;
+    maxLevel: BigInt;
+    levelInfo: Nullable<LevelInfo>[];
+    userInfo?: Nullable<BattlePassUser>;
+}
+
+export class LevelInfo {
+    level: number;
+    xpToCompleteLevel: BigInt;
+    freeReward?: Nullable<Reward>;
+    premiumReward?: Nullable<Reward>;
+}
+
+export class BattlePassUser {
+    xp: BigInt;
+    level: BigInt;
+    unclaimedFreeRewards: Nullable<number>[];
+    premium?: Nullable<PremiumBattlePassUser>;
+}
+
+export class PremiumBattlePassUser {
+    owned: BigInt;
+    unclaimedPremiumRewards: Nullable<number>[];
+}
+
+export class Reward {
+    id?: Nullable<BigInt>;
+    qty: BigInt;
+    metadata?: Nullable<RewardMetadata>;
+    rewardType?: Nullable<RewardType>;
+    creatorId: number;
+}
+
+export class RewardMetadata {
+    name: string;
+    description: string;
+    image: string;
+}
+
 export abstract class IQuery {
+    abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
+}
+
+export abstract class IMutation {
+    abstract claimReward(creatorId: number, level: number, premium: boolean, autoRedeem: boolean): ClaimRewardResponse | Promise<ClaimRewardResponse>;
+
+    abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;
+}
+
+export class ClaimRewardResponse {
+    success: boolean;
+    reward?: Nullable<Nullable<Reward>[]>;
+    description?: Nullable<string>;
+    missingFields?: Nullable<UserMissingFields>;
+}
+
+export class UserMissingFields {
+    payment?: Nullable<Nullable<RequiredUserPaymentOptions>[]>;
+    social?: Nullable<Nullable<RequiredUserSocialOptions>[]>;
+}
+
+export class MutationResponse {
+    success: boolean;
+    description?: Nullable<string>;
 }
 
 export type BigInt = unknown;

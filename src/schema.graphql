@@ -1,2 +1,101 @@
 scalar Date
 scalar BigInt
+
+type BattlePass {
+  name: String!
+  description: String!
+  price: String!
+  currency: String!
+  endDate: Date!
+  seasonId: BigInt!
+  maxLevel: BigInt!
+  levelInfo: [LevelInfo]!
+  userInfo: BattlePassUser
+}
+
+type LevelInfo {
+  level: Int!
+  xpToCompleteLevel: BigInt!
+  freeReward: Reward
+  premiumReward: Reward
+}
+
+type BattlePassUser {
+  xp: BigInt!
+  level: BigInt!
+  unclaimedFreeRewards: [Int]!
+  premium: PremiumBattlePassUser
+}
+
+type PremiumBattlePassUser {
+  owned: BigInt!
+  unclaimedPremiumRewards: [Int]!
+}
+
+type Reward {
+  id: BigInt
+  qty: BigInt!
+  metadata: RewardMetadata
+  rewardType: RewardType
+  creatorId: Int!
+}
+
+# do not change order
+enum RewardType {
+  PREMIUM_PASS
+  CREATOR_TOKEN
+  LOOTBOX
+  REDEEMABLE
+  SPECIAL
+}
+
+type RewardMetadata {
+  name: String!
+  description: String!
+  image: String!
+}
+
+type Query {
+  getBattlePass(creatorId: Int!): BattlePass
+}
+
+type Mutation {
+  claimReward(
+    creatorId: Int!
+    level: Int!
+    premium: Boolean!
+    autoRedeem: Boolean!
+  ): ClaimRewardResponse!
+  redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
+}
+
+type ClaimRewardResponse {
+  success: Boolean!
+  reward: [Reward]
+  description: String
+  missingFields: UserMissingFields
+}
+
+type UserMissingFields {
+  payment: [RequiredUserPaymentOptions]
+  social: [RequiredUserSocialOptions]
+}
+
+enum RequiredUserSocialOptions {
+  INSTAGRAM_USERNAME
+  TWITTER_USERNAME
+  TWITCH_USERNAME
+  CLASH_USERNAME
+  PREFERRED_SOCIAL
+}
+
+enum RequiredUserPaymentOptions {
+  CASHAPP
+  PAYPAL_EMAIL
+  VENMO_USERNAME
+}
+
+type MutationResponse {
+  success: Boolean!
+  description: String
+}
