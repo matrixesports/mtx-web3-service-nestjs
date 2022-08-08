@@ -10,7 +10,7 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import { BattlePassService } from 'src/battle-pass/battle-pass.service';
 import { ChainService } from 'src/chain/chain.service';
-import { Reward, RewardType } from 'src/graphql.schema';
+import { Redeemed, RedeemStatus, Reward, RewardType } from 'src/graphql.schema';
 import { GetInventoryChildDto } from './dto/GetInventoryChild.dto';
 import { InventoryService } from './inventory.service';
 

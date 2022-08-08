@@ -16,6 +16,12 @@ export enum RewardType {
     SPECIAL = "SPECIAL"
 }
 
+export enum RedeemStatus {
+    REDEEMED = "REDEEMED",
+    PROCESSING = "PROCESSING",
+    REJECTED = "REJECTED"
+}
+
 export enum RequiredUserSocialOptions {
     INSTAGRAM_USERNAME = "INSTAGRAM_USERNAME",
     TWITTER_USERNAME = "TWITTER_USERNAME",
@@ -75,14 +81,46 @@ export class RewardMetadata {
     image: string;
 }
 
+export class Recipe {
+    recipeId: BigInt;
+    isActive: boolean;
+    inputIngredients: Nullable<Reward>[];
+    outputIngredients: Nullable<Reward>[];
+}
+
+export class Inventory {
+    default: Nullable<Reward>[];
+    redeemed: Nullable<Redeemed>[];
+}
+
+export class Redeemed {
+    reward: Reward;
+    status: Nullable<RedeemStatus>[];
+}
+
+export class LootboxOption {
+    probability: number;
+    reward: Nullable<Reward>[];
+}
+
 export abstract class IQuery {
     abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
+
+    abstract getInventory(): Nullable<Inventory> | Promise<Nullable<Inventory>>;
+
+    abstract getLootboxOptions(creatorId: number, lootboxId: number): Nullable<Nullable<LootboxOption>[]> | Promise<Nullable<Nullable<LootboxOption>[]>>;
+
+    abstract getRecipes(creatorId: number): Nullable<Nullable<Recipe>[]> | Promise<Nullable<Nullable<Recipe>[]>>;
+
+    abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
 }
 
 export abstract class IMutation {
     abstract claimReward(creatorId: number, level: number, premium: boolean, autoRedeem: boolean): ClaimRewardResponse | Promise<ClaimRewardResponse>;
 
     abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;
+
+    abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
 }
 
 export class ClaimRewardResponse {

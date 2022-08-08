@@ -235,9 +235,9 @@ export class BattlePassResolver {
           data: encodedCall,
           ...fee,
         };
-        tx = await signer.sendTransaction(txData);
-        let rc = await tx.wait();
-        let event = rc.events?.find((event) => event.event === 'LootboxOpened');
+        let tx = await signer.sendTransaction(txData);
+        let rc: any = await tx.wait();
+        let event = rc.events.find((event) => event.event === 'LootboxOpened');
         const [idxOpened] = event.args;
         let option = await contract.getLootboxOptionByIdx(id, idxOpened);
         let rewards = [];

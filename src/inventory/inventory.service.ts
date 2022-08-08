@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 export class InventoryService {
   web3: AlchemyWeb3;
   constructor(private configService: ConfigService) {
-    this.web3 = createAlchemyWeb3(this.configService.get('POLYGON').rpc);
+    this.web3 = createAlchemyWeb3(this.configService.get('rpc').url);
   }
 
   /**
