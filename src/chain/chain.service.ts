@@ -45,6 +45,10 @@ export class ChainService {
     return contract.connect(this.signer);
   }
 
+  getSigner(): ethers.Signer {
+    return this.signer;
+  }
+
   /**
    * will error if not deployed
    * @param creatorId

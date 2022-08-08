@@ -6,5 +6,5 @@ export class GetBattlePassChildDto {
   seasonId: BigNumber;
   battlePassDB: BattlePassDB;
   creatorId: number;
-  maxLevel: BigNumber;
+  maxLevel: number;
 }

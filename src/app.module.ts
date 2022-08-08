@@ -14,6 +14,7 @@ import { ScalarModule } from './scalar/scalar.module';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { BattlePassModule } from './battle-pass/battle-pass.module';
 import { ChainModule } from './chain/chain.module';
+import { MetadataModule } from './metadata/metadata.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { ChainModule } from './chain/chain.module';
     ScalarModule,
     BattlePassModule,
     ChainModule,
+    MetadataModule,
   ],
 })
 export class AppModule {}
