@@ -38,7 +38,7 @@ export class BattlePassService {
     qty: BigNumber,
   ): Promise<Reward> {
     if (id.isZero()) return null;
-    let metadata = await this.metadataService.getMetadata(
+    const metadata = await this.metadataService.getMetadata(
       creatorId,
       id.toNumber(),
     );
@@ -56,7 +56,7 @@ export class BattlePassService {
    * only called for level 1
    * @param creatorId
    * @param userAddress
-   * @param level 
+   * @param level
    */
   async checkRequiredFields(
     creatorId: number,
@@ -64,7 +64,7 @@ export class BattlePassService {
     level: number,
   ): Promise<RequiredFieldsResponse> {
     if (level != 1) return;
-    let battlePassDB = await this.getBattlePassDB(creatorId);
+    const battlePassDB = await this.getBattlePassDB(creatorId);
     if (
       battlePassDB.required_user_social_options.length == 0 &&
       battlePassDB.required_user_payment_options.length == 0
@@ -72,21 +72,21 @@ export class BattlePassService {
       return;
 
     //convert string to array
-    let required_user_social_options = parse(
+    const required_user_social_options = parse(
       battlePassDB.required_user_social_options,
       (value) => value,
     );
-    let required_user_payment_options = parse(
+    const required_user_payment_options = parse(
       battlePassDB.required_user_payment_options,
       (value) => value,
     );
 
-    let requiredFieldsBody: RequiredFieldsBody = {
+    const requiredFieldsBody: RequiredFieldsBody = {
       userAddress,
       required_user_social_options,
       required_user_payment_options,
     };
-    let missingRedeemFields = await axios.post(
+    const missingRedeemFields = await axios.post(
       `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
       requiredFieldsBody,
     );
@@ -121,7 +121,7 @@ export class BattlePassService {
     address: string,
     metadata: MetadataDB,
   ) {
-    let ticketRedeemBody: TicketRedeemBody = {
+    const ticketRedeemBody: TicketRedeemBody = {
       name: metadata.name,
       description: metadata.description,
       image: metadata.image,
@@ -135,7 +135,7 @@ export class BattlePassService {
       ticketRedeemBody,
     );
 
-    let twitchRedeemBody: TwitchRedeemBody = {
+    const twitchRedeemBody: TwitchRedeemBody = {
       ...metadata,
       creatorId: creatorId,
       itemId: itemId,

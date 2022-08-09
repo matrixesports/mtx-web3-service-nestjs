@@ -4,6 +4,6 @@ import { PremiumModule } from './premium/premium.module';
 
 @Module({
   providers: [UserResolver],
-  imports: [PremiumModule]
+  imports: [PremiumModule],
 })
 export class UserModule {}

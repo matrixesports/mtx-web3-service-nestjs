@@ -16,12 +16,12 @@ export class PremiumResolver {
   async unclaimedPremiumRewards(
     @Parent() parent: GetBattlePassUserInfoChildDto,
   ) {
-    let userLevel = await parent.contract.level(
+    const userLevel = await parent.contract.level(
       parent.userAddress,
       parent.seasonId,
     );
-    let unclaimedPrem = [];
-    let calls: ContractCall[] = [];
+    const unclaimedPrem = [];
+    const calls: ContractCall[] = [];
 
     for (let x = 0; x <= userLevel.toNumber(); x++) {
       calls.push({
@@ -33,7 +33,7 @@ export class PremiumResolver {
         value: 0,
       });
     }
-    let results = await this.chainService.multicall(calls);
+    const results = await this.chainService.multicall(calls);
     for (let x = 0; x <= userLevel.toNumber(); x++) {
       if (!parseInt(results[x].returnData[1])) unclaimedPrem.push(x);
     }

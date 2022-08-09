@@ -16,10 +16,10 @@ export class LootboxResolver {
     @Args('lootboxId') lootboxId: number,
   ) {
     try {
-      let contract = await this.chainService.getBattlePassContract(creatorId);
-      let lengthOfOptions = await contract.getLootboxOptionsLength(lootboxId);
-      let allOptions = [];
-      let calls: ContractCall[] = [];
+      const contract = await this.chainService.getBattlePassContract(creatorId);
+      const lengthOfOptions = await contract.getLootboxOptionsLength(lootboxId);
+      const allOptions = [];
+      const calls: ContractCall[] = [];
 
       for (let x = 0; x < lengthOfOptions.toNumber(); x++) {
         calls.push({
@@ -31,15 +31,15 @@ export class LootboxResolver {
           value: 0,
         });
       }
-      let results = await this.chainService.multicall(calls);
+      const results = await this.chainService.multicall(calls);
       for (let x = 0; x < lengthOfOptions.toNumber(); x++) {
         //for some reason it return an array lol
         //arrays have len 1. keep an eye out for this
-        let option = contract.interface.decodeFunctionResult(
+        const option = contract.interface.decodeFunctionResult(
           'getLootboxOptionByIdx',
           results[x].returnData[1],
         );
-        let rewardsInOption = [];
+        const rewardsInOption = [];
         for (let y = 0; y < option[0].ids.length; y++) {
           rewardsInOption.push(
             await this.battlePassService.createRewardObj(

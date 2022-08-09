@@ -14,12 +14,12 @@ export class BattlePassController {
   @Post('giveXp')
   async giveXp(@Body() giveXpDto: GiveXpDto) {
     try {
-      let contract = await this.chainService.getBattlePassContract(
+      const contract = await this.chainService.getBattlePassContract(
         giveXpDto.creatorId,
       );
-      let bp = this.chainService.getBPSignerContract(contract);
-      let seasonId = await bp.seasonId();
-      let fee = await this.chainService.getMaticFeeData();
+      const bp = this.chainService.getBPSignerContract(contract);
+      const seasonId = await bp.seasonId();
+      const fee = await this.chainService.getMaticFeeData();
       await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
       return { success: true };
     } catch (e) {
@@ -30,12 +30,12 @@ export class BattlePassController {
   @Post('mint')
   async mintPremiumPass(@Body() mintPremiumPassDto: MintPremiumPassDto) {
     try {
-      let contract = await this.chainService.getBattlePassContract(
+      const contract = await this.chainService.getBattlePassContract(
         mintPremiumPassDto.creatorId,
       );
-      let bp = this.chainService.getBPSignerContract(contract);
-      let seasonId = await bp.seasonId();
-      let fee = await this.chainService.getMaticFeeData();
+      const bp = this.chainService.getBPSignerContract(contract);
+      const seasonId = await bp.seasonId();
+      const fee = await this.chainService.getMaticFeeData();
       await bp.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee);
       return { success: true };
     } catch (e) {
@@ -45,9 +45,11 @@ export class BattlePassController {
 
   @Get('metadata/:creatorId')
   async getBattlePassDB(@Param('creatorId') creatorId: number) {
-    let contract = await this.chainService.getBattlePassContract(creatorId);
-    let seasonId = await contract.seasonId();
-    let battlePassDB = await this.battlePassService.getBattlePassDB(creatorId);
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const seasonId = await contract.seasonId();
+    const battlePassDB = await this.battlePassService.getBattlePassDB(
+      creatorId,
+    );
     return {
       price: battlePassDB.price,
       currency: battlePassDB.currency,
