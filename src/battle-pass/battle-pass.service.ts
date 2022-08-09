@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BigNumber, Contract } from 'ethers';
+import { BigNumber } from 'ethers';
 import { Reward } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
-import { QueryRunner, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { parse } from 'postgres-array';
 import { BattlePassDB } from './battle-pass.entity';
 import axios from 'axios';
@@ -54,9 +54,9 @@ export class BattlePassService {
   /**
    * check what contact info is needed for a season
    * only called for level 1
+   * @param creatorId
    * @param userAddress
-   * @param address of contract
-   * @returns
+   * @param level 
    */
   async checkRequiredFields(
     creatorId: number,
@@ -108,11 +108,11 @@ export class BattlePassService {
 
   /**
    * helper when item is redeemed
-   * @param contract
    * @param itemId
    * @param userAddress
    * @param creatorId
    * @param address
+   * @param metadata
    */
   async redeemItemHelper(
     itemId: number,

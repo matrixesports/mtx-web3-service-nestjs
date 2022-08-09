@@ -41,8 +41,12 @@ export class ChainService {
     );
   }
 
-  getSignerContract(contract: Contract): Contract {
+  getBPSignerContract(contract: BattlePass) {
     return contract.connect(this.signer);
+  }
+
+  getSignerContract(contract: Contract) {
+    return (contract.connect(this.signer)) as typeof contract;
   }
 
   getSigner(): ethers.Signer {

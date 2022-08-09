@@ -1,8 +1,9 @@
-import { BigNumber, Contract } from 'ethers';
+import { BattlePass } from 'abi/typechain';
+import { BigNumber } from 'ethers';
 import { BattlePassDB } from '../battle-pass.entity';
 
 export class GetBattlePassChildDto {
-  contract: Contract;
+  contract: BattlePass;
   seasonId: BigNumber;
   battlePassDB: BattlePassDB;
   creatorId: number;

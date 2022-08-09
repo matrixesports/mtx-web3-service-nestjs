@@ -7,7 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { RewardType } from 'src/graphql.schema';
@@ -160,8 +160,8 @@ export class BattlePassResolver {
     try {
       let userAddress: string = context.req.headers['user-address'];
       let contract = await this.chainService.getBattlePassContract(creatorId);
-      let bp = await this.chainService.getSignerContract(contract);
-      let signer = await this.chainService.getSigner();
+      let bp = this.chainService.getBPSignerContract(contract);
+      let signer = this.chainService.getSigner();
 
       let seasonId = await bp.seasonId();
 
@@ -198,17 +198,15 @@ export class BattlePassResolver {
       await bp.provider.waitForTransaction(tx.hash, 1);
 
       let rewardGiven = await bp.seasonInfo(seasonId, level);
-      let id;
-      let qty;
+      let id: number;
+      let qty: number;
       if (premium) {
-        id = rewardGiven.premium.id;
-        qty = rewardGiven.premium.qty;
+        id = rewardGiven.premiumRewardId.toNumber();
+        qty = rewardGiven.premiumRewardQty.toNumber();
       } else {
-        id = rewardGiven.free.id;
-        qty = rewardGiven.free.qty;
+        id = rewardGiven.freeRewardId.toNumber();
+        qty = rewardGiven.freeRewardQty.toNumber();
       }
-      id = id.toNumber();
-      qty = qty.toNumber();
 
       let metadata = await this.metadataService.getMetadata(creatorId, id);
 
@@ -237,7 +235,7 @@ export class BattlePassResolver {
         };
         let tx = await signer.sendTransaction(txData);
         let rc: any = await tx.wait();
-        let event = rc.events.find((event) => event.event === 'LootboxOpened');
+        let event = rc.events.find((event: any) => event.event === 'LootboxOpened');
         const [idxOpened] = event.args;
         let option = await contract.getLootboxOptionByIdx(id, idxOpened);
         let rewards = [];
@@ -250,14 +248,13 @@ export class BattlePassResolver {
             ),
           );
         }
-
         return { success: true, reward: rewards };
       }
 
       let reward = await this.battlePassService.createRewardObj(
         creatorId,
-        id,
-        qty,
+        BigNumber.from(id),
+        BigNumber.from(qty),
       );
       return { success: true, reward: [reward] };
     } catch (e) {
@@ -275,7 +272,7 @@ export class BattlePassResolver {
     try {
       let userAddress: string = context.req.headers['user-address'];
       let contract = await this.chainService.getBattlePassContract(creatorId);
-      let bp = await this.chainService.getSignerContract(contract);
+      let bp = this.chainService.getBPSignerContract(contract);
       let metadata = await this.metadataService.getMetadata(creatorId, itemId);
       await this.battlePassService.redeemItemHelper(
         itemId,

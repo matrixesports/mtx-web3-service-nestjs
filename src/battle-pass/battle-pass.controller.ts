@@ -17,7 +17,7 @@ export class BattlePassController {
       let contract = await this.chainService.getBattlePassContract(
         giveXpDto.creatorId,
       );
-      let bp = await this.chainService.getSignerContract(contract);
+      let bp = this.chainService.getBPSignerContract(contract);
       let seasonId = await bp.seasonId();
       let fee = await this.chainService.getMaticFeeData();
       await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
@@ -33,7 +33,7 @@ export class BattlePassController {
       let contract = await this.chainService.getBattlePassContract(
         mintPremiumPassDto.creatorId,
       );
-      let bp = await this.chainService.getSignerContract(contract);
+      let bp = this.chainService.getBPSignerContract(contract);
       let seasonId = await bp.seasonId();
       let fee = await this.chainService.getMaticFeeData();
       await bp.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee);
