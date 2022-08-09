@@ -22,7 +22,7 @@ export default () => {
     bpFactory = process.env.TEST_BP_FACTORY;
   }
 
-  let config = {
+  const config = {
     PVT_KEY: process.env.PVT_KEY,
     rpc: {
       url: process.env.POLYGON_RPC,

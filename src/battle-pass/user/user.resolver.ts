@@ -9,7 +9,7 @@ export class UserResolver {
 
   @ResolveField()
   async xp(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    let userInfo = await parent.contract.userInfo(
+    const userInfo = await parent.contract.userInfo(
       parent.userAddress,
       parent.seasonId,
     );
@@ -23,15 +23,15 @@ export class UserResolver {
 
   @ResolveField()
   async unclaimedFreeRewards(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    let userLevel = await parent.contract.level(
+    const userLevel = await parent.contract.level(
       parent.userAddress,
       parent.seasonId,
     );
 
-    let calls: ContractCall[] = [];
-    let unclaimedFree = [];
+    const calls: ContractCall[] = [];
+    const unclaimedFree = [];
 
-    for (let x = 0; x <= userLevel; x++) {
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
       calls.push({
         reference: 'isRewardClaimed',
         address: parent.contract.address,
@@ -41,8 +41,8 @@ export class UserResolver {
         value: 0,
       });
     }
-    let results = await this.chainService.multicall(calls);
-    for (let x = 0; x <= userLevel; x++) {
+    const results = await this.chainService.multicall(calls);
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
       if (!parseInt(results[x].returnData[1])) unclaimedFree.push(x);
     }
     return unclaimedFree;
@@ -53,7 +53,7 @@ export class UserResolver {
   async premium(
     @Parent() parent: GetBattlePassUserInfoChildDto,
   ): Promise<GetBattlePassUserInfoChildDto> {
-    let isPremium = await parent.contract.isUserPremium(
+    const isPremium = await parent.contract.isUserPremium(
       parent.userAddress,
       parent.seasonId,
     );

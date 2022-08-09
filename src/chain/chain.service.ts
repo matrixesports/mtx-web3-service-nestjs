@@ -22,7 +22,7 @@ export class ChainService {
   craftingProxy: ERC1967Proxy;
 
   constructor(private configService: ConfigService) {
-    let rpc = configService.get('rpc');
+    const rpc = configService.get('rpc');
     this.provider = new ethers.providers.AlchemyProvider(rpc.name, rpc.apiKey);
     this.chainId = rpc.chainId;
     this.multicallObj = new Multicall({ provider: this.provider });
@@ -30,7 +30,7 @@ export class ChainService {
       this.configService.get('PVT_KEY'),
       this.provider,
     );
-    let contracts = configService.get('contracts');
+    const contracts = configService.get('contracts');
     this.battlePassFactory = BattlePassFactory__factory.connect(
       contracts.bpFactory,
       this.provider,
@@ -41,8 +41,12 @@ export class ChainService {
     );
   }
 
-  getSignerContract(contract: Contract): Contract {
+  getBPSignerContract(contract: BattlePass) {
     return contract.connect(this.signer);
+  }
+
+  getSignerContract(contract: Contract) {
+    return contract.connect(this.signer) as typeof contract;
   }
 
   getSigner(): ethers.Signer {
@@ -55,16 +59,16 @@ export class ChainService {
    * @returns
    */
   async getBattlePassContract(creatorId: number): Promise<BattlePass> {
-    let address = await this.battlePassFactory.getBattlePassFromUnderlying(
+    const address = await this.battlePassFactory.getBattlePassFromUnderlying(
       creatorId,
     );
-    let exists = await this.battlePassFactory.isBattlePassDeployed(address);
+    const exists = await this.battlePassFactory.isBattlePassDeployed(address);
     if (!exists) throw new Error('BattlePass not deployed');
     return BattlePass__factory.connect(address, this.provider);
   }
 
   async multicall(calls: ContractCall[]) {
-    let res = await this.multicall.call(calls, { network: this.chainId });
+    const res = await this.multicall.call(calls, { network: this.chainId });
     return res.results;
   }
 
@@ -78,11 +82,11 @@ export class ChainService {
         method: 'get',
         url: 'https://gasstation-mainnet.matic.network/v2',
       });
-      let maxFeePerGas = ethers.utils.parseUnits(
+      const maxFeePerGas = ethers.utils.parseUnits(
         Math.ceil(data.fast.maxFee) + '',
         'gwei',
       );
-      let maxPriorityFeePerGas = ethers.utils.parseUnits(
+      const maxPriorityFeePerGas = ethers.utils.parseUnits(
         Math.ceil(data.fast.maxPriorityFee) + '',
         'gwei',
       );
