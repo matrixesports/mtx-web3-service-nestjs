@@ -68,7 +68,7 @@ export class ChainService {
   }
 
   async multicall(calls: ContractCall[]) {
-    const res = await this.multicall.call(calls, { network: this.chainId });
+    const res = await this.multicallObj.call(calls, { network: this.chainId });
     return res.results;
   }
 

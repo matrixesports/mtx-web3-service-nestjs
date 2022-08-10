@@ -3,7 +3,7 @@ import { ContractCall } from 'pilum';
 import { GetBattlePassUserInfoChildDto } from 'src/battle-pass/dto/GetBattlePassUserInfoChild.dto';
 import { ChainService } from 'src/chain/chain.service';
 
-@Resolver()
+@Resolver('PremiumBattlePassUser')
 export class PremiumResolver {
   constructor(private chainService: ChainService) {}
 
@@ -34,6 +34,7 @@ export class PremiumResolver {
       });
     }
     const results = await this.chainService.multicall(calls);
+    // returns true for empty rewards
     for (let x = 0; x <= userLevel.toNumber(); x++) {
       if (!parseInt(results[x].returnData[1])) unclaimedPrem.push(x);
     }

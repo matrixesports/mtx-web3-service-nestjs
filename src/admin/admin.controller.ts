@@ -91,7 +91,6 @@ export class AdminController {
       const lootboxOption: LootboxOptionStruct[] = [];
       for (let i = 0; i < newLootboxDto.lootboxInfo.length; i++) {
         const option = newLootboxDto.lootboxInfo[i];
-        console.log(option);
         if (option.ids.length != option.ids.length) {
           return {
             success: false,

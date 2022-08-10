@@ -64,7 +64,7 @@ export class BattlePassResolver {
     try {
       const levelInfo = [];
       const calls: ContractCall[] = [];
-      for (let x = 0; x <= parent.maxLevel; x++) {
+      for (let x = 0; x <= parent.maxLevel.toNumber(); x++) {
         calls.push({
           reference: 'seasonInfo',
           address: parent.contract.address,
@@ -75,13 +75,11 @@ export class BattlePassResolver {
         });
       }
       const results = await this.chainService.multicall(calls);
-
       for (let x = 0; x < results.length; x++) {
         const seasonInfo = parent.contract.interface.decodeFunctionResult(
           'seasonInfo',
           results[x].returnData[1],
         );
-
         const freeReward = await this.battlePassService.createRewardObj(
           parent.creatorId,
           seasonInfo.freeRewardId,
@@ -95,7 +93,7 @@ export class BattlePassResolver {
         );
 
         levelInfo.push({
-          x,
+          level: x,
           xpToCompleteLevel: seasonInfo.xpToCompleteLevel,
           freeReward,
           premiumReward,
@@ -134,7 +132,7 @@ export class BattlePassResolver {
         seasonId,
         battlePassDB,
         creatorId,
-        maxLevel: maxLevel.toNumber(),
+        maxLevel,
       };
     } catch (e) {
       console.log(e);
