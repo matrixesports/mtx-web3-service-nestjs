@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { LootboxOptionStruct } from 'abi/typechain/BattlePass';
+import { BattlePassFactory } from 'abi/typechain';
+import { LevelInfoStruct, LootboxOptionStruct } from 'abi/typechain/BattlePass';
 import { ChainService } from 'src/chain/chain.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
 import { NewLootboxDto } from './dto/NewLootboxDto';
@@ -38,35 +39,30 @@ export class AdminController {
   @Post('deploy')
   async deploy(@Body('creatorId') creatorId: number) {
     try {
-      const contract = await this.chainService.getBattlePassContract(creatorId);
-      if (contract) {
-        return {
-          success: false,
-          description: 'Battle Pass already exists!',
-        };
-      }
-      const fee = await this.chainService.getMaticFeeData();
-      const newbp = await this.chainService.battlePassFactory.deployBattlePass(
-        creatorId,
-        fee,
-      );
-      const rc = await newbp.wait();
-      const event = rc.events.find(
-        (event: any) => event.event === 'BattlePassDeployed',
-      );
-      if (!event) {
-        return {
-          success: false,
-          description: 'Deployment failed!',
-        };
-      }
+      await this.chainService.getBattlePassContract(creatorId);
       return {
-        success: true,
+        success: false,
+        description: 'Battle Pass already exists!',
       };
-    } catch (e) {
-      console.log(e);
-      throw e;
+    } catch (e) {}
+    const bpFactory = this.chainService.getSignerContract(
+      this.chainService.battlePassFactory,
+    ) as BattlePassFactory;
+    const fee = await this.chainService.getMaticFeeData();
+    const newbp = await bpFactory.deployBattlePass(creatorId, fee);
+    const rc = await newbp.wait();
+    const event = rc.events.find(
+      (event: any) => event.event === 'BattlePassDeployed',
+    );
+    if (!event) {
+      return {
+        success: false,
+        description: 'Deployment failed!',
+      };
     }
+    return {
+      success: true,
+    };
   }
 
   @Post('giveXp')
@@ -81,42 +77,88 @@ export class AdminController {
       await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
       return { success: true };
     } catch (e) {
+      console.log(e);
       return { success: false };
     }
   }
 
   @Post('newLootbox')
   async newLootbox(@Body() newLootboxDto: NewLootboxDto) {
+    let lootboxId;
     try {
-      const lootboxOptions: LootboxOptionStruct[] = [];
+      const jointprob = 0;
+      const maxprob = 100;
+      const lootboxOption: LootboxOptionStruct[] = [];
+      for (let i = 0; i < newLootboxDto.lootboxInfo.length; i++) {
+        const option = newLootboxDto.lootboxInfo[i];
+        console.log(option);
+        if (option.ids.length != option.ids.length) {
+          return {
+            success: false,
+            description: 'IDs != QTYs',
+          };
+        }
+        if (jointprob + option.rarity > maxprob) {
+          return {
+            success: false,
+            description: 'Max Probability Exceeded',
+          };
+        }
+        lootboxOption.push({
+          ids: option.ids,
+          qtys: option.qtys,
+          rarityRange: [jointprob, jointprob + option.rarity],
+        });
+      }
       const contract = await this.chainService.getBattlePassContract(
         newLootboxDto.creatorId,
       );
       const bp = this.chainService.getBPSignerContract(contract);
+      const fee = await this.chainService.getMaticFeeData();
+      await (await bp.newLootbox(lootboxOption, fee)).wait(1);
+      lootboxId = await bp.lootboxId();
     } catch (e) {
       console.log(e);
-      throw e;
+      return {
+        success: false,
+      };
     }
-    // return {
-    //   success: true,
-    //   lootboxId: 1001,
-    // };
+    return {
+      success: true,
+      lootboxId: lootboxId.toNumber(),
+    };
   }
 
   @Post('newSeason')
   async newSeason(@Body() newSeasonDto: NewSeasonDto) {
     try {
-      const lootboxOptions: LootboxOptionStruct[] = [];
+      const levelInfo: LevelInfoStruct[] = [];
+      for (let i = 0; i < newSeasonDto.levelDetails.length; i++) {
+        const info = newSeasonDto.levelDetails[i];
+        levelInfo.push({
+          xpToCompleteLevel:
+            i != newSeasonDto.levelDetails.length - 1 ? info.xp : 0,
+          freeRewardId: info.freeId,
+          freeRewardQty: info.freeQty,
+          premiumRewardId: info.premId,
+          premiumRewardQty: info.premQty,
+        });
+      }
+      console.log(levelInfo);
       const contract = await this.chainService.getBattlePassContract(
         newSeasonDto.creatorId,
       );
       const bp = this.chainService.getBPSignerContract(contract);
+      const fee = await this.chainService.getMaticFeeData();
+      await (await bp.newSeason(levelInfo, fee)).wait(1);
     } catch (e) {
       console.log(e);
-      throw e;
+      return {
+        success: false,
+      };
     }
-    // return {
-    //   success: true,
-    // };
+    return {
+      success: true,
+    };
   }
 }

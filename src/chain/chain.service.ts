@@ -46,7 +46,7 @@ export class ChainService {
   }
 
   getSignerContract(contract: Contract) {
-    return contract.connect(this.signer) as typeof contract;
+    return contract.connect(this.signer);
   }
 
   getSigner(): ethers.Signer {
