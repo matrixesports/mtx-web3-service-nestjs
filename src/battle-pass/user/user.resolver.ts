@@ -40,10 +40,22 @@ export class UserResolver {
       });
     }
     const results = await this.chainService.multicall(calls);
-    // returns true for empty rewards
     for (let x = 0; x <= userLevel.toNumber(); x++) {
-      if (!parseInt(results[x].returnData)) unclaimedFree.push(x);
+      if (!parseInt(results[x].returnData[1])) unclaimedFree.push(x);
     }
     return unclaimedFree;
+  }
+
+  @ResolveField()
+  // only show if user is premium
+  async premium(
+    @Parent() parent: GetBattlePassUserInfoChildDto,
+  ): Promise<GetBattlePassUserInfoChildDto> {
+    const isPremium = await parent.contract.isUserPremium(
+      parent.userAddress,
+      parent.seasonId,
+    );
+    if (!isPremium) return null;
+    return parent;
   }
 }
