@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChainService } from 'src/chain/chain.service';
 import { Repository } from 'typeorm';
 import { RecipeDB } from './crafting.entity';
 

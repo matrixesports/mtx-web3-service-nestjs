@@ -18,7 +18,6 @@ import { MetadataModule } from './metadata/metadata.module';
 import { LootboxModule } from './reward/lootbox/lootbox.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { AdminModule } from './admin/admin.module';
-import { PremiumModule } from './battle-pass/user/premium/premium.module';
 import { CraftingModule } from './crafting/crafting.module';
 
 @Module({
