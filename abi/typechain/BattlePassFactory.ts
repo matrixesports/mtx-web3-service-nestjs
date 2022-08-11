@@ -34,7 +34,6 @@ export interface BattlePassFactoryInterface extends utils.Interface {
     "getBattlePassFromUnderlying(uint256)": FunctionFragment;
     "isBattlePassDeployed(address)": FunctionFragment;
     "owner()": FunctionFragment;
-    "setOwner(address)": FunctionFragment;
   };
 
   getFunction(
@@ -44,7 +43,6 @@ export interface BattlePassFactoryInterface extends utils.Interface {
       | "getBattlePassFromUnderlying"
       | "isBattlePassDeployed"
       | "owner"
-      | "setOwner"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -64,10 +62,6 @@ export interface BattlePassFactoryInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "setOwner",
-    values: [PromiseOrValue<string>]
-  ): string;
 
   decodeFunctionResult(
     functionFragment: "craftingProxy",
@@ -86,15 +80,12 @@ export interface BattlePassFactoryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
 
   events: {
     "BattlePassDeployed(address,uint256)": EventFragment;
-    "OwnerUpdated(address,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "BattlePassDeployed"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnerUpdated"): EventFragment;
 }
 
 export interface BattlePassDeployedEventObject {
@@ -108,17 +99,6 @@ export type BattlePassDeployedEvent = TypedEvent<
 
 export type BattlePassDeployedEventFilter =
   TypedEventFilter<BattlePassDeployedEvent>;
-
-export interface OwnerUpdatedEventObject {
-  user: string;
-  newOwner: string;
-}
-export type OwnerUpdatedEvent = TypedEvent<
-  [string, string],
-  OwnerUpdatedEventObject
->;
-
-export type OwnerUpdatedEventFilter = TypedEventFilter<OwnerUpdatedEvent>;
 
 export interface BattlePassFactory extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -149,71 +129,36 @@ export interface BattlePassFactory extends BaseContract {
   functions: {
     craftingProxy(overrides?: CallOverrides): Promise<[string]>;
 
-    /**
-     * This will revert if a BattlePass that accepts the same underlying creatorId has already been deployed.
-     * Deploys a new BattlePass which supports a specific underlying creatorId.
-     * @param creatorId The creatorId that the BattlePass should accept.
-     */
     deployBattlePass(
       creatorId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * The BattlePass returned may not be deployed yet. Use isBattlePassDeployed to check.
-     * Computes a BattlePass's address from its accepted underlying creatorId
-     * @param creatorId The creatorId that the BattlePass should accept.
-     */
     getBattlePassFromUnderlying(
       creatorId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    /**
-     * This function is useful to check the return values of getBattlePassFromUnderlying, as it does not check that the BattlePass addresses it computes have been deployed yet.
-     * Returns if a BattlePass at an address has already been deployed.
-     * @param bp The address of a BattlePass which may not have been deployed yet.
-     */
     isBattlePassDeployed(
       bp: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
-
-    setOwner(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
   };
 
   craftingProxy(overrides?: CallOverrides): Promise<string>;
 
-  /**
-   * This will revert if a BattlePass that accepts the same underlying creatorId has already been deployed.
-   * Deploys a new BattlePass which supports a specific underlying creatorId.
-   * @param creatorId The creatorId that the BattlePass should accept.
-   */
   deployBattlePass(
     creatorId: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * The BattlePass returned may not be deployed yet. Use isBattlePassDeployed to check.
-   * Computes a BattlePass's address from its accepted underlying creatorId
-   * @param creatorId The creatorId that the BattlePass should accept.
-   */
   getBattlePassFromUnderlying(
     creatorId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<string>;
 
-  /**
-   * This function is useful to check the return values of getBattlePassFromUnderlying, as it does not check that the BattlePass addresses it computes have been deployed yet.
-   * Returns if a BattlePass at an address has already been deployed.
-   * @param bp The address of a BattlePass which may not have been deployed yet.
-   */
   isBattlePassDeployed(
     bp: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -221,50 +166,25 @@ export interface BattlePassFactory extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  setOwner(
-    newOwner: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     craftingProxy(overrides?: CallOverrides): Promise<string>;
 
-    /**
-     * This will revert if a BattlePass that accepts the same underlying creatorId has already been deployed.
-     * Deploys a new BattlePass which supports a specific underlying creatorId.
-     * @param creatorId The creatorId that the BattlePass should accept.
-     */
     deployBattlePass(
       creatorId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    /**
-     * The BattlePass returned may not be deployed yet. Use isBattlePassDeployed to check.
-     * Computes a BattlePass's address from its accepted underlying creatorId
-     * @param creatorId The creatorId that the BattlePass should accept.
-     */
     getBattlePassFromUnderlying(
       creatorId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    /**
-     * This function is useful to check the return values of getBattlePassFromUnderlying, as it does not check that the BattlePass addresses it computes have been deployed yet.
-     * Returns if a BattlePass at an address has already been deployed.
-     * @param bp The address of a BattlePass which may not have been deployed yet.
-     */
     isBattlePassDeployed(
       bp: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     owner(overrides?: CallOverrides): Promise<string>;
-
-    setOwner(
-      newOwner: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
   };
 
   filters: {
@@ -276,96 +196,47 @@ export interface BattlePassFactory extends BaseContract {
       bp?: null,
       creatorId?: null
     ): BattlePassDeployedEventFilter;
-
-    "OwnerUpdated(address,address)"(
-      user?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
-    ): OwnerUpdatedEventFilter;
-    OwnerUpdated(
-      user?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
-    ): OwnerUpdatedEventFilter;
   };
 
   estimateGas: {
     craftingProxy(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * This will revert if a BattlePass that accepts the same underlying creatorId has already been deployed.
-     * Deploys a new BattlePass which supports a specific underlying creatorId.
-     * @param creatorId The creatorId that the BattlePass should accept.
-     */
     deployBattlePass(
       creatorId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * The BattlePass returned may not be deployed yet. Use isBattlePassDeployed to check.
-     * Computes a BattlePass's address from its accepted underlying creatorId
-     * @param creatorId The creatorId that the BattlePass should accept.
-     */
     getBattlePassFromUnderlying(
       creatorId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * This function is useful to check the return values of getBattlePassFromUnderlying, as it does not check that the BattlePass addresses it computes have been deployed yet.
-     * Returns if a BattlePass at an address has already been deployed.
-     * @param bp The address of a BattlePass which may not have been deployed yet.
-     */
     isBattlePassDeployed(
       bp: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    setOwner(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     craftingProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    /**
-     * This will revert if a BattlePass that accepts the same underlying creatorId has already been deployed.
-     * Deploys a new BattlePass which supports a specific underlying creatorId.
-     * @param creatorId The creatorId that the BattlePass should accept.
-     */
     deployBattlePass(
       creatorId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * The BattlePass returned may not be deployed yet. Use isBattlePassDeployed to check.
-     * Computes a BattlePass's address from its accepted underlying creatorId
-     * @param creatorId The creatorId that the BattlePass should accept.
-     */
     getBattlePassFromUnderlying(
       creatorId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * This function is useful to check the return values of getBattlePassFromUnderlying, as it does not check that the BattlePass addresses it computes have been deployed yet.
-     * Returns if a BattlePass at an address has already been deployed.
-     * @param bp The address of a BattlePass which may not have been deployed yet.
-     */
     isBattlePassDeployed(
       bp: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    setOwner(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
   };
 }

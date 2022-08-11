@@ -195,27 +195,16 @@ export interface Crafting extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * reverts when: user does not own the input items recipe is not active
-     * crafts new items by recipeId
-     * @param _recipeId recipeId
-     */
     craft(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * gets input ingredients for a recipe id
-     */
     getInputIngredients(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[IngredientsStructOutput]>;
 
-    /**
-     * gets output ingredients for a recipe id
-     */
     getOutputIngredients(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -232,9 +221,6 @@ export interface Crafting extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    /**
-     * Implementation of the ERC1822 {proxiableUUID} function. This returns the storage slot used by the implementation. It is used to validate that the this implementation remains valid after an upgrade. IMPORTANT: A proxy pointing at a proxiable contract should not be considered proxiable itself, because this risks bricking a proxy that upgrades to it, by delegating to itself until out of gas. Thus it is critical that this function revert if invoked through a proxy. This is guaranteed by the `notDelegated` modifier.
-     */
     proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
 
     recipeId(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -244,9 +230,6 @@ export interface Crafting extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * toggles a recipe on or off
-     */
     toggleRecipe(
       _recipeId: PromiseOrValue<BigNumberish>,
       toggle: PromiseOrValue<boolean>,
@@ -265,27 +248,16 @@ export interface Crafting extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * reverts when: user does not own the input items recipe is not active
-   * crafts new items by recipeId
-   * @param _recipeId recipeId
-   */
   craft(
     _recipeId: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * gets input ingredients for a recipe id
-   */
   getInputIngredients(
     _recipeId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<IngredientsStructOutput>;
 
-  /**
-   * gets output ingredients for a recipe id
-   */
   getOutputIngredients(
     _recipeId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
@@ -302,9 +274,6 @@ export interface Crafting extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  /**
-   * Implementation of the ERC1822 {proxiableUUID} function. This returns the storage slot used by the implementation. It is used to validate that the this implementation remains valid after an upgrade. IMPORTANT: A proxy pointing at a proxiable contract should not be considered proxiable itself, because this risks bricking a proxy that upgrades to it, by delegating to itself until out of gas. Thus it is critical that this function revert if invoked through a proxy. This is guaranteed by the `notDelegated` modifier.
-   */
   proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
   recipeId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -314,9 +283,6 @@ export interface Crafting extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * toggles a recipe on or off
-   */
   toggleRecipe(
     _recipeId: PromiseOrValue<BigNumberish>,
     toggle: PromiseOrValue<boolean>,
@@ -335,27 +301,16 @@ export interface Crafting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * reverts when: user does not own the input items recipe is not active
-     * crafts new items by recipeId
-     * @param _recipeId recipeId
-     */
     craft(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    /**
-     * gets input ingredients for a recipe id
-     */
     getInputIngredients(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<IngredientsStructOutput>;
 
-    /**
-     * gets output ingredients for a recipe id
-     */
     getOutputIngredients(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -370,9 +325,6 @@ export interface Crafting extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    /**
-     * Implementation of the ERC1822 {proxiableUUID} function. This returns the storage slot used by the implementation. It is used to validate that the this implementation remains valid after an upgrade. IMPORTANT: A proxy pointing at a proxiable contract should not be considered proxiable itself, because this risks bricking a proxy that upgrades to it, by delegating to itself until out of gas. Thus it is critical that this function revert if invoked through a proxy. This is guaranteed by the `notDelegated` modifier.
-     */
     proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
     recipeId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -382,9 +334,6 @@ export interface Crafting extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    /**
-     * toggles a recipe on or off
-     */
     toggleRecipe(
       _recipeId: PromiseOrValue<BigNumberish>,
       toggle: PromiseOrValue<boolean>,
@@ -420,27 +369,16 @@ export interface Crafting extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * reverts when: user does not own the input items recipe is not active
-     * crafts new items by recipeId
-     * @param _recipeId recipeId
-     */
     craft(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * gets input ingredients for a recipe id
-     */
     getInputIngredients(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * gets output ingredients for a recipe id
-     */
     getOutputIngredients(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -457,9 +395,6 @@ export interface Crafting extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * Implementation of the ERC1822 {proxiableUUID} function. This returns the storage slot used by the implementation. It is used to validate that the this implementation remains valid after an upgrade. IMPORTANT: A proxy pointing at a proxiable contract should not be considered proxiable itself, because this risks bricking a proxy that upgrades to it, by delegating to itself until out of gas. Thus it is critical that this function revert if invoked through a proxy. This is guaranteed by the `notDelegated` modifier.
-     */
     proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
 
     recipeId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -469,9 +404,6 @@ export interface Crafting extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * toggles a recipe on or off
-     */
     toggleRecipe(
       _recipeId: PromiseOrValue<BigNumberish>,
       toggle: PromiseOrValue<boolean>,
@@ -491,27 +423,16 @@ export interface Crafting extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * reverts when: user does not own the input items recipe is not active
-     * crafts new items by recipeId
-     * @param _recipeId recipeId
-     */
     craft(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * gets input ingredients for a recipe id
-     */
     getInputIngredients(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * gets output ingredients for a recipe id
-     */
     getOutputIngredients(
       _recipeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -528,9 +449,6 @@ export interface Crafting extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    /**
-     * Implementation of the ERC1822 {proxiableUUID} function. This returns the storage slot used by the implementation. It is used to validate that the this implementation remains valid after an upgrade. IMPORTANT: A proxy pointing at a proxiable contract should not be considered proxiable itself, because this risks bricking a proxy that upgrades to it, by delegating to itself until out of gas. Thus it is critical that this function revert if invoked through a proxy. This is guaranteed by the `notDelegated` modifier.
-     */
     proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     recipeId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -540,9 +458,6 @@ export interface Crafting extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * toggles a recipe on or off
-     */
     toggleRecipe(
       _recipeId: PromiseOrValue<BigNumberish>,
       toggle: PromiseOrValue<boolean>,

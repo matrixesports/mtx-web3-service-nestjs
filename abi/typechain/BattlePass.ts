@@ -656,15 +656,6 @@ export interface BattlePass extends BaseContract {
 
     SPECIAL_STARTING_ID(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    /**
-     * only owner can set rewards
-     * sets a reward for a seasonId and at level
-     * @param _level level at which to change the reward
-     * @param _seasonId seasonId for which to change the reward
-     * @param id new reward id
-     * @param premium true when setting a premium reward
-     * @param qty new reward qty
-     */
     addReward(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -686,12 +677,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber[]] & { balances: BigNumber[] }>;
 
-    /**
-     * allows the owner/crafting contract to burn tokens
-     * @param amount burn amount
-     * @param id burn id
-     * @param to burn from address
-     */
     burn(
       to: PromiseOrValue<string>,
       id: PromiseOrValue<BigNumberish>,
@@ -699,29 +684,16 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * calculates a pseudorandom index between 0-99
-     */
     calculateRandom(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    /**
-     * checks a reward type by id; will revert for 0
-     */
     checkType(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[number]>;
 
-    /**
-     * reverts when: user claims a reward for a level at which they are NOT user claims an already claimed reward user claims a premium reward, but is NOT eligible for it when a user has a premium pass and it is their first time claiming a premium reward then burn 1 pass from their balance and set claimedPremiumPass to be true a user can own multiple premium passes just like any other reward it will NOT be burned if the user has already claimed a premium reward
-     * claims a reward for a seasonId and at level
-     * @param _level level at which to claim the reward
-     * @param _seasonId seasonId for which to claim the reward
-     * @param premium true when claiming a premium reward
-     */
     claimReward(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -733,21 +705,12 @@ export interface BattlePass extends BaseContract {
 
     creatorId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    /**
-     * revert if balance is insufficient
-     * delegates msg.sender's tokens to a delegatee
-     * @param amount the amount of tokens to delegate
-     * @param delegatee the address receiving the delegated tokens
-     */
     delegate(
       delegatee: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * tracks who delegates to whom and how much
-     */
     delegatedBy(
       arg0: PromiseOrValue<string>,
       arg1: PromiseOrValue<string>,
@@ -759,9 +722,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    /**
-     * gets a lootboxOption by lootboxId and index
-     */
     getLootboxOptionByIdx(
       id: PromiseOrValue<BigNumberish>,
       idx: PromiseOrValue<BigNumberish>,
@@ -770,30 +730,16 @@ export interface BattlePass extends BaseContract {
       [LootboxOptionStructOutput] & { option: LootboxOptionStructOutput }
     >;
 
-    /**
-     * gets a lootboxOptions length by lootboxId
-     */
     getLootboxOptionsLength(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    /**
-     * max level is reached when xpToCompleteLevel == 0
-     * gets the max level for a seasonId
-     */
     getMaxLevel(
       _seasonId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { maxLevel: BigNumber }>;
 
-    /**
-     * only owner can give xp
-     * gives xp to a user upon completion of quests
-     * @param _seasonId seasonId for which to give xp
-     * @param user user to give xp to
-     * @param xp amount of xp to give
-     */
     giveXp(
       _seasonId: PromiseOrValue<BigNumberish>,
       xp: PromiseOrValue<BigNumberish>,
@@ -807,13 +753,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    /**
-     * checks a user claim status on a reward for a seasonId and at level
-     * @param _level level at which to check
-     * @param _seasonId seasonId for which to check
-     * @param premium true when checking for premium rewards
-     * @param user user address for which to check
-     */
     isRewardClaimed(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
@@ -827,24 +766,12 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    /**
-     * user is considered premium when:     they own one premium pass or     they have already claimed a premium reward
-     * checks if a user has premium pass
-     * @param _seasonId seasonId for which to check for premium pass
-     * @param user user address
-     */
     isUserPremium(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    /**
-     * breaks at the last level, where xpToCompleteLevel is 0
-     * gets user level for a seasonId
-     * @param _seasonId seasonId for which to get level
-     * @param user user address for which to get level
-     */
     level(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
@@ -853,12 +780,6 @@ export interface BattlePass extends BaseContract {
 
     lootboxId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    /**
-     * allows the owner/crafting contract to mint tokens
-     * @param amount mint amount
-     * @param id mint id
-     * @param to mint to address
-     */
     mint(
       to: PromiseOrValue<string>,
       id: PromiseOrValue<BigNumberish>,
@@ -876,11 +797,6 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * upto user to not send a bad id here.
-     * opens a lootbox
-     * @param id lootboxId to open
-     */
     openLootbox(
       id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -928,11 +844,6 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * only owner can set it
-     * sets the crafting proxy address
-     * @param _crafting new address
-     */
     setCrafting(
       _crafting: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -943,22 +854,11 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * only owner can set it
-     * sets the uri
-     * @param _uri new string with the format https://<>/creatorId/id.json
-     */
     setURI(
       _uri: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * sets required xp to levelup
-     * @param _level level at which to change xp
-     * @param _seasonId seasonId for which to change xp
-     * @param xp new xp required to levelup
-     */
     setXp(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -973,21 +873,12 @@ export interface BattlePass extends BaseContract {
 
     tokenURI(overrides?: CallOverrides): Promise<[string]>;
 
-    /**
-     * revert if msg.sender tries to undelegate more tokens than they delegated
-     * undelegates the tokens from a delegatee
-     * @param amount the amount of tokens to undelegate
-     * @param delegatee the address who recevied the delegated tokens
-     */
     undelegate(
       delegatee: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    /**
-     * returns uri by id
-     */
     uri(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -1014,15 +905,6 @@ export interface BattlePass extends BaseContract {
 
   SPECIAL_STARTING_ID(overrides?: CallOverrides): Promise<BigNumber>;
 
-  /**
-   * only owner can set rewards
-   * sets a reward for a seasonId and at level
-   * @param _level level at which to change the reward
-   * @param _seasonId seasonId for which to change the reward
-   * @param id new reward id
-   * @param premium true when setting a premium reward
-   * @param qty new reward qty
-   */
   addReward(
     _seasonId: PromiseOrValue<BigNumberish>,
     _level: PromiseOrValue<BigNumberish>,
@@ -1044,12 +926,6 @@ export interface BattlePass extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber[]>;
 
-  /**
-   * allows the owner/crafting contract to burn tokens
-   * @param amount burn amount
-   * @param id burn id
-   * @param to burn from address
-   */
   burn(
     to: PromiseOrValue<string>,
     id: PromiseOrValue<BigNumberish>,
@@ -1057,29 +933,16 @@ export interface BattlePass extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * calculates a pseudorandom index between 0-99
-   */
   calculateRandom(
     id: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  /**
-   * checks a reward type by id; will revert for 0
-   */
   checkType(
     id: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<number>;
 
-  /**
-   * reverts when: user claims a reward for a level at which they are NOT user claims an already claimed reward user claims a premium reward, but is NOT eligible for it when a user has a premium pass and it is their first time claiming a premium reward then burn 1 pass from their balance and set claimedPremiumPass to be true a user can own multiple premium passes just like any other reward it will NOT be burned if the user has already claimed a premium reward
-   * claims a reward for a seasonId and at level
-   * @param _level level at which to claim the reward
-   * @param _seasonId seasonId for which to claim the reward
-   * @param premium true when claiming a premium reward
-   */
   claimReward(
     _seasonId: PromiseOrValue<BigNumberish>,
     _level: PromiseOrValue<BigNumberish>,
@@ -1091,21 +954,12 @@ export interface BattlePass extends BaseContract {
 
   creatorId(overrides?: CallOverrides): Promise<BigNumber>;
 
-  /**
-   * revert if balance is insufficient
-   * delegates msg.sender's tokens to a delegatee
-   * @param amount the amount of tokens to delegate
-   * @param delegatee the address receiving the delegated tokens
-   */
   delegate(
     delegatee: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * tracks who delegates to whom and how much
-   */
   delegatedBy(
     arg0: PromiseOrValue<string>,
     arg1: PromiseOrValue<string>,
@@ -1117,39 +971,22 @@ export interface BattlePass extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  /**
-   * gets a lootboxOption by lootboxId and index
-   */
   getLootboxOptionByIdx(
     id: PromiseOrValue<BigNumberish>,
     idx: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<LootboxOptionStructOutput>;
 
-  /**
-   * gets a lootboxOptions length by lootboxId
-   */
   getLootboxOptionsLength(
     id: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  /**
-   * max level is reached when xpToCompleteLevel == 0
-   * gets the max level for a seasonId
-   */
   getMaxLevel(
     _seasonId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  /**
-   * only owner can give xp
-   * gives xp to a user upon completion of quests
-   * @param _seasonId seasonId for which to give xp
-   * @param user user to give xp to
-   * @param xp amount of xp to give
-   */
   giveXp(
     _seasonId: PromiseOrValue<BigNumberish>,
     xp: PromiseOrValue<BigNumberish>,
@@ -1163,13 +1000,6 @@ export interface BattlePass extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  /**
-   * checks a user claim status on a reward for a seasonId and at level
-   * @param _level level at which to check
-   * @param _seasonId seasonId for which to check
-   * @param premium true when checking for premium rewards
-   * @param user user address for which to check
-   */
   isRewardClaimed(
     user: PromiseOrValue<string>,
     _seasonId: PromiseOrValue<BigNumberish>,
@@ -1183,24 +1013,12 @@ export interface BattlePass extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  /**
-   * user is considered premium when:     they own one premium pass or     they have already claimed a premium reward
-   * checks if a user has premium pass
-   * @param _seasonId seasonId for which to check for premium pass
-   * @param user user address
-   */
   isUserPremium(
     user: PromiseOrValue<string>,
     _seasonId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  /**
-   * breaks at the last level, where xpToCompleteLevel is 0
-   * gets user level for a seasonId
-   * @param _seasonId seasonId for which to get level
-   * @param user user address for which to get level
-   */
   level(
     user: PromiseOrValue<string>,
     _seasonId: PromiseOrValue<BigNumberish>,
@@ -1209,12 +1027,6 @@ export interface BattlePass extends BaseContract {
 
   lootboxId(overrides?: CallOverrides): Promise<BigNumber>;
 
-  /**
-   * allows the owner/crafting contract to mint tokens
-   * @param amount mint amount
-   * @param id mint id
-   * @param to mint to address
-   */
   mint(
     to: PromiseOrValue<string>,
     id: PromiseOrValue<BigNumberish>,
@@ -1232,11 +1044,6 @@ export interface BattlePass extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * upto user to not send a bad id here.
-   * opens a lootbox
-   * @param id lootboxId to open
-   */
   openLootbox(
     id: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1284,11 +1091,6 @@ export interface BattlePass extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * only owner can set it
-   * sets the crafting proxy address
-   * @param _crafting new address
-   */
   setCrafting(
     _crafting: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1299,22 +1101,11 @@ export interface BattlePass extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * only owner can set it
-   * sets the uri
-   * @param _uri new string with the format https://<>/creatorId/id.json
-   */
   setURI(
     _uri: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * sets required xp to levelup
-   * @param _level level at which to change xp
-   * @param _seasonId seasonId for which to change xp
-   * @param xp new xp required to levelup
-   */
   setXp(
     _seasonId: PromiseOrValue<BigNumberish>,
     _level: PromiseOrValue<BigNumberish>,
@@ -1329,21 +1120,12 @@ export interface BattlePass extends BaseContract {
 
   tokenURI(overrides?: CallOverrides): Promise<string>;
 
-  /**
-   * revert if msg.sender tries to undelegate more tokens than they delegated
-   * undelegates the tokens from a delegatee
-   * @param amount the amount of tokens to undelegate
-   * @param delegatee the address who recevied the delegated tokens
-   */
   undelegate(
     delegatee: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  /**
-   * returns uri by id
-   */
   uri(
     id: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
@@ -1370,15 +1152,6 @@ export interface BattlePass extends BaseContract {
 
     SPECIAL_STARTING_ID(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * only owner can set rewards
-     * sets a reward for a seasonId and at level
-     * @param _level level at which to change the reward
-     * @param _seasonId seasonId for which to change the reward
-     * @param id new reward id
-     * @param premium true when setting a premium reward
-     * @param qty new reward qty
-     */
     addReward(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -1400,12 +1173,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber[]>;
 
-    /**
-     * allows the owner/crafting contract to burn tokens
-     * @param amount burn amount
-     * @param id burn id
-     * @param to burn from address
-     */
     burn(
       to: PromiseOrValue<string>,
       id: PromiseOrValue<BigNumberish>,
@@ -1413,29 +1180,16 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    /**
-     * calculates a pseudorandom index between 0-99
-     */
     calculateRandom(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * checks a reward type by id; will revert for 0
-     */
     checkType(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<number>;
 
-    /**
-     * reverts when: user claims a reward for a level at which they are NOT user claims an already claimed reward user claims a premium reward, but is NOT eligible for it when a user has a premium pass and it is their first time claiming a premium reward then burn 1 pass from their balance and set claimedPremiumPass to be true a user can own multiple premium passes just like any other reward it will NOT be burned if the user has already claimed a premium reward
-     * claims a reward for a seasonId and at level
-     * @param _level level at which to claim the reward
-     * @param _seasonId seasonId for which to claim the reward
-     * @param premium true when claiming a premium reward
-     */
     claimReward(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -1447,21 +1201,12 @@ export interface BattlePass extends BaseContract {
 
     creatorId(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * revert if balance is insufficient
-     * delegates msg.sender's tokens to a delegatee
-     * @param amount the amount of tokens to delegate
-     * @param delegatee the address receiving the delegated tokens
-     */
     delegate(
       delegatee: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    /**
-     * tracks who delegates to whom and how much
-     */
     delegatedBy(
       arg0: PromiseOrValue<string>,
       arg1: PromiseOrValue<string>,
@@ -1473,39 +1218,22 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * gets a lootboxOption by lootboxId and index
-     */
     getLootboxOptionByIdx(
       id: PromiseOrValue<BigNumberish>,
       idx: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<LootboxOptionStructOutput>;
 
-    /**
-     * gets a lootboxOptions length by lootboxId
-     */
     getLootboxOptionsLength(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * max level is reached when xpToCompleteLevel == 0
-     * gets the max level for a seasonId
-     */
     getMaxLevel(
       _seasonId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * only owner can give xp
-     * gives xp to a user upon completion of quests
-     * @param _seasonId seasonId for which to give xp
-     * @param user user to give xp to
-     * @param xp amount of xp to give
-     */
     giveXp(
       _seasonId: PromiseOrValue<BigNumberish>,
       xp: PromiseOrValue<BigNumberish>,
@@ -1519,13 +1247,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    /**
-     * checks a user claim status on a reward for a seasonId and at level
-     * @param _level level at which to check
-     * @param _seasonId seasonId for which to check
-     * @param premium true when checking for premium rewards
-     * @param user user address for which to check
-     */
     isRewardClaimed(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
@@ -1539,24 +1260,12 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    /**
-     * user is considered premium when:     they own one premium pass or     they have already claimed a premium reward
-     * checks if a user has premium pass
-     * @param _seasonId seasonId for which to check for premium pass
-     * @param user user address
-     */
     isUserPremium(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    /**
-     * breaks at the last level, where xpToCompleteLevel is 0
-     * gets user level for a seasonId
-     * @param _seasonId seasonId for which to get level
-     * @param user user address for which to get level
-     */
     level(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
@@ -1565,12 +1274,6 @@ export interface BattlePass extends BaseContract {
 
     lootboxId(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * allows the owner/crafting contract to mint tokens
-     * @param amount mint amount
-     * @param id mint id
-     * @param to mint to address
-     */
     mint(
       to: PromiseOrValue<string>,
       id: PromiseOrValue<BigNumberish>,
@@ -1588,11 +1291,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * upto user to not send a bad id here.
-     * opens a lootbox
-     * @param id lootboxId to open
-     */
     openLootbox(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -1640,11 +1338,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    /**
-     * only owner can set it
-     * sets the crafting proxy address
-     * @param _crafting new address
-     */
     setCrafting(
       _crafting: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -1655,22 +1348,11 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    /**
-     * only owner can set it
-     * sets the uri
-     * @param _uri new string with the format https://<>/creatorId/id.json
-     */
     setURI(
       _uri: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    /**
-     * sets required xp to levelup
-     * @param _level level at which to change xp
-     * @param _seasonId seasonId for which to change xp
-     * @param xp new xp required to levelup
-     */
     setXp(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -1685,21 +1367,12 @@ export interface BattlePass extends BaseContract {
 
     tokenURI(overrides?: CallOverrides): Promise<string>;
 
-    /**
-     * revert if msg.sender tries to undelegate more tokens than they delegated
-     * undelegates the tokens from a delegatee
-     * @param amount the amount of tokens to undelegate
-     * @param delegatee the address who recevied the delegated tokens
-     */
     undelegate(
       delegatee: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    /**
-     * returns uri by id
-     */
     uri(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -1818,15 +1491,6 @@ export interface BattlePass extends BaseContract {
 
     SPECIAL_STARTING_ID(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * only owner can set rewards
-     * sets a reward for a seasonId and at level
-     * @param _level level at which to change the reward
-     * @param _seasonId seasonId for which to change the reward
-     * @param id new reward id
-     * @param premium true when setting a premium reward
-     * @param qty new reward qty
-     */
     addReward(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -1848,12 +1512,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * allows the owner/crafting contract to burn tokens
-     * @param amount burn amount
-     * @param id burn id
-     * @param to burn from address
-     */
     burn(
       to: PromiseOrValue<string>,
       id: PromiseOrValue<BigNumberish>,
@@ -1861,29 +1519,16 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * calculates a pseudorandom index between 0-99
-     */
     calculateRandom(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * checks a reward type by id; will revert for 0
-     */
     checkType(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * reverts when: user claims a reward for a level at which they are NOT user claims an already claimed reward user claims a premium reward, but is NOT eligible for it when a user has a premium pass and it is their first time claiming a premium reward then burn 1 pass from their balance and set claimedPremiumPass to be true a user can own multiple premium passes just like any other reward it will NOT be burned if the user has already claimed a premium reward
-     * claims a reward for a seasonId and at level
-     * @param _level level at which to claim the reward
-     * @param _seasonId seasonId for which to claim the reward
-     * @param premium true when claiming a premium reward
-     */
     claimReward(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -1895,21 +1540,12 @@ export interface BattlePass extends BaseContract {
 
     creatorId(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * revert if balance is insufficient
-     * delegates msg.sender's tokens to a delegatee
-     * @param amount the amount of tokens to delegate
-     * @param delegatee the address receiving the delegated tokens
-     */
     delegate(
       delegatee: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * tracks who delegates to whom and how much
-     */
     delegatedBy(
       arg0: PromiseOrValue<string>,
       arg1: PromiseOrValue<string>,
@@ -1921,39 +1557,22 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * gets a lootboxOption by lootboxId and index
-     */
     getLootboxOptionByIdx(
       id: PromiseOrValue<BigNumberish>,
       idx: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * gets a lootboxOptions length by lootboxId
-     */
     getLootboxOptionsLength(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * max level is reached when xpToCompleteLevel == 0
-     * gets the max level for a seasonId
-     */
     getMaxLevel(
       _seasonId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * only owner can give xp
-     * gives xp to a user upon completion of quests
-     * @param _seasonId seasonId for which to give xp
-     * @param user user to give xp to
-     * @param xp amount of xp to give
-     */
     giveXp(
       _seasonId: PromiseOrValue<BigNumberish>,
       xp: PromiseOrValue<BigNumberish>,
@@ -1967,13 +1586,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * checks a user claim status on a reward for a seasonId and at level
-     * @param _level level at which to check
-     * @param _seasonId seasonId for which to check
-     * @param premium true when checking for premium rewards
-     * @param user user address for which to check
-     */
     isRewardClaimed(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
@@ -1987,24 +1599,12 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * user is considered premium when:     they own one premium pass or     they have already claimed a premium reward
-     * checks if a user has premium pass
-     * @param _seasonId seasonId for which to check for premium pass
-     * @param user user address
-     */
     isUserPremium(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    /**
-     * breaks at the last level, where xpToCompleteLevel is 0
-     * gets user level for a seasonId
-     * @param _seasonId seasonId for which to get level
-     * @param user user address for which to get level
-     */
     level(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
@@ -2013,12 +1613,6 @@ export interface BattlePass extends BaseContract {
 
     lootboxId(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * allows the owner/crafting contract to mint tokens
-     * @param amount mint amount
-     * @param id mint id
-     * @param to mint to address
-     */
     mint(
       to: PromiseOrValue<string>,
       id: PromiseOrValue<BigNumberish>,
@@ -2036,11 +1630,6 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * upto user to not send a bad id here.
-     * opens a lootbox
-     * @param id lootboxId to open
-     */
     openLootbox(
       id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -2080,11 +1669,6 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * only owner can set it
-     * sets the crafting proxy address
-     * @param _crafting new address
-     */
     setCrafting(
       _crafting: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -2095,22 +1679,11 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * only owner can set it
-     * sets the uri
-     * @param _uri new string with the format https://<>/creatorId/id.json
-     */
     setURI(
       _uri: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * sets required xp to levelup
-     * @param _level level at which to change xp
-     * @param _seasonId seasonId for which to change xp
-     * @param xp new xp required to levelup
-     */
     setXp(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -2125,21 +1698,12 @@ export interface BattlePass extends BaseContract {
 
     tokenURI(overrides?: CallOverrides): Promise<BigNumber>;
 
-    /**
-     * revert if msg.sender tries to undelegate more tokens than they delegated
-     * undelegates the tokens from a delegatee
-     * @param amount the amount of tokens to undelegate
-     * @param delegatee the address who recevied the delegated tokens
-     */
     undelegate(
       delegatee: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    /**
-     * returns uri by id
-     */
     uri(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -2175,15 +1739,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * only owner can set rewards
-     * sets a reward for a seasonId and at level
-     * @param _level level at which to change the reward
-     * @param _seasonId seasonId for which to change the reward
-     * @param id new reward id
-     * @param premium true when setting a premium reward
-     * @param qty new reward qty
-     */
     addReward(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -2205,12 +1760,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * allows the owner/crafting contract to burn tokens
-     * @param amount burn amount
-     * @param id burn id
-     * @param to burn from address
-     */
     burn(
       to: PromiseOrValue<string>,
       id: PromiseOrValue<BigNumberish>,
@@ -2218,29 +1767,16 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * calculates a pseudorandom index between 0-99
-     */
     calculateRandom(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * checks a reward type by id; will revert for 0
-     */
     checkType(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * reverts when: user claims a reward for a level at which they are NOT user claims an already claimed reward user claims a premium reward, but is NOT eligible for it when a user has a premium pass and it is their first time claiming a premium reward then burn 1 pass from their balance and set claimedPremiumPass to be true a user can own multiple premium passes just like any other reward it will NOT be burned if the user has already claimed a premium reward
-     * claims a reward for a seasonId and at level
-     * @param _level level at which to claim the reward
-     * @param _seasonId seasonId for which to claim the reward
-     * @param premium true when claiming a premium reward
-     */
     claimReward(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -2252,21 +1788,12 @@ export interface BattlePass extends BaseContract {
 
     creatorId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    /**
-     * revert if balance is insufficient
-     * delegates msg.sender's tokens to a delegatee
-     * @param amount the amount of tokens to delegate
-     * @param delegatee the address receiving the delegated tokens
-     */
     delegate(
       delegatee: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * tracks who delegates to whom and how much
-     */
     delegatedBy(
       arg0: PromiseOrValue<string>,
       arg1: PromiseOrValue<string>,
@@ -2278,39 +1805,22 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * gets a lootboxOption by lootboxId and index
-     */
     getLootboxOptionByIdx(
       id: PromiseOrValue<BigNumberish>,
       idx: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * gets a lootboxOptions length by lootboxId
-     */
     getLootboxOptionsLength(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * max level is reached when xpToCompleteLevel == 0
-     * gets the max level for a seasonId
-     */
     getMaxLevel(
       _seasonId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * only owner can give xp
-     * gives xp to a user upon completion of quests
-     * @param _seasonId seasonId for which to give xp
-     * @param user user to give xp to
-     * @param xp amount of xp to give
-     */
     giveXp(
       _seasonId: PromiseOrValue<BigNumberish>,
       xp: PromiseOrValue<BigNumberish>,
@@ -2324,13 +1834,6 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * checks a user claim status on a reward for a seasonId and at level
-     * @param _level level at which to check
-     * @param _seasonId seasonId for which to check
-     * @param premium true when checking for premium rewards
-     * @param user user address for which to check
-     */
     isRewardClaimed(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
@@ -2344,24 +1847,12 @@ export interface BattlePass extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * user is considered premium when:     they own one premium pass or     they have already claimed a premium reward
-     * checks if a user has premium pass
-     * @param _seasonId seasonId for which to check for premium pass
-     * @param user user address
-     */
     isUserPremium(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * breaks at the last level, where xpToCompleteLevel is 0
-     * gets user level for a seasonId
-     * @param _seasonId seasonId for which to get level
-     * @param user user address for which to get level
-     */
     level(
       user: PromiseOrValue<string>,
       _seasonId: PromiseOrValue<BigNumberish>,
@@ -2370,12 +1861,6 @@ export interface BattlePass extends BaseContract {
 
     lootboxId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    /**
-     * allows the owner/crafting contract to mint tokens
-     * @param amount mint amount
-     * @param id mint id
-     * @param to mint to address
-     */
     mint(
       to: PromiseOrValue<string>,
       id: PromiseOrValue<BigNumberish>,
@@ -2393,11 +1878,6 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * upto user to not send a bad id here.
-     * opens a lootbox
-     * @param id lootboxId to open
-     */
     openLootbox(
       id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -2437,11 +1917,6 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * only owner can set it
-     * sets the crafting proxy address
-     * @param _crafting new address
-     */
     setCrafting(
       _crafting: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -2452,22 +1927,11 @@ export interface BattlePass extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * only owner can set it
-     * sets the uri
-     * @param _uri new string with the format https://<>/creatorId/id.json
-     */
     setURI(
       _uri: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * sets required xp to levelup
-     * @param _level level at which to change xp
-     * @param _seasonId seasonId for which to change xp
-     * @param xp new xp required to levelup
-     */
     setXp(
       _seasonId: PromiseOrValue<BigNumberish>,
       _level: PromiseOrValue<BigNumberish>,
@@ -2482,21 +1946,12 @@ export interface BattlePass extends BaseContract {
 
     tokenURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    /**
-     * revert if msg.sender tries to undelegate more tokens than they delegated
-     * undelegates the tokens from a delegatee
-     * @param amount the amount of tokens to undelegate
-     * @param delegatee the address who recevied the delegated tokens
-     */
     undelegate(
       delegatee: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    /**
-     * returns uri by id
-     */
     uri(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
