@@ -1,6 +1,6 @@
 import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { ContractCall } from 'pilum';
-import { GetBattlePassUserInfoChildDto } from 'src/battle-pass/dto/GetBattlePassUserInfoChild.dto';
+import { GetBattlePassUserInfoChildDto } from 'src/battle-pass/dto/getBattlePassUserInfoChild.dto';
 import { ChainService } from 'src/chain/chain.service';
 
 @Resolver('PremiumBattlePassUser')

@@ -1,14 +1,33 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { BattlePassFactory } from 'abi/typechain';
-import { LevelInfoStruct, LootboxOptionStruct } from 'abi/typechain/BattlePass';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Headers,
+  Header,
+} from '@nestjs/common';
+import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
+import {
+  BattlePass,
+  LevelInfoStruct,
+  LootboxOptionStruct,
+} from 'abi/typechain/BattlePass';
+import { Crafting, IngredientsStruct } from 'abi/typechain/Crafting';
+import { ethers } from 'ethers';
 import { ChainService } from 'src/chain/chain.service';
+import { CraftingService } from 'src/crafting/crafting.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
-import { NewLootboxDto } from './dto/NewLootboxDto';
-import { NewSeasonDto } from './dto/NewSeasonDto';
+import { NewLootboxDto } from './dto/NewLootbox.dto';
+import { NewRecipeDto } from './dto/NewRecipe.dto';
+import { NewSeasonDto } from './dto/NewSeason.dto';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private chainService: ChainService) {}
+  constructor(
+    private chainService: ChainService,
+    private craftingService: CraftingService,
+  ) {}
   @Get('check/:creatorId')
   async check(@Param('creatorId') creatorId: number) {
     try {
@@ -71,7 +90,7 @@ export class AdminController {
       const contract = await this.chainService.getBattlePassContract(
         giveXpDto.creatorId,
       );
-      const bp = this.chainService.getBPSignerContract(contract);
+      const bp = this.chainService.getSignerContract(contract) as BattlePass;
       const seasonId = await bp.seasonId();
       const fee = await this.chainService.getMaticFeeData();
       await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
@@ -112,7 +131,7 @@ export class AdminController {
       const contract = await this.chainService.getBattlePassContract(
         newLootboxDto.creatorId,
       );
-      const bp = this.chainService.getBPSignerContract(contract);
+      const bp = this.chainService.getSignerContract(contract) as BattlePass;
       const fee = await this.chainService.getMaticFeeData();
       await (await bp.newLootbox(lootboxOption, fee)).wait(1);
       lootboxId = await bp.lootboxId();
@@ -143,11 +162,10 @@ export class AdminController {
           premiumRewardQty: info.premQty,
         });
       }
-      console.log(levelInfo);
       const contract = await this.chainService.getBattlePassContract(
         newSeasonDto.creatorId,
       );
-      const bp = this.chainService.getBPSignerContract(contract);
+      const bp = this.chainService.getSignerContract(contract) as BattlePass;
       const fee = await this.chainService.getMaticFeeData();
       await (await bp.newSeason(levelInfo, fee)).wait(1);
     } catch (e) {
@@ -159,5 +177,53 @@ export class AdminController {
     return {
       success: true,
     };
+  }
+
+  @Post('newRecipe')
+  async newRecipe(@Body() newRecipeDto: NewRecipeDto) {
+    //assume creatorIDs exists (retool)
+    try {
+      const inputIngredients: IngredientsStruct = {
+        battlePasses: [],
+        ids: [],
+        qtys: [],
+      };
+      for (let i = 0; i < newRecipeDto.inputIngredients.length; i++) {
+        const ingredient = newRecipeDto.inputIngredients[i];
+        const address = await this.chainService.getBattlePassAddress(
+          ingredient.creatorId,
+        );
+        inputIngredients.battlePasses.push(address);
+        inputIngredients.ids.push(ingredient.id);
+        inputIngredients.qtys.push(ingredient.qty);
+      }
+      const outputIngredients: IngredientsStruct = {
+        battlePasses: [],
+        ids: [],
+        qtys: [],
+      };
+      for (let i = 0; i < newRecipeDto.outputIngredients.length; i++) {
+        const ingredient = newRecipeDto.outputIngredients[i];
+        const address = await this.chainService.getBattlePassAddress(
+          ingredient.creatorId,
+        );
+        outputIngredients.battlePasses.push(address);
+        outputIngredients.ids.push(ingredient.id);
+        outputIngredients.qtys.push(ingredient.qty);
+      }
+      const rc = (await this.chainService.callCrafting(
+        'addRecipe',
+        [inputIngredients, outputIngredients],
+        null,
+        true,
+      )) as ethers.providers.TransactionReceipt;
+      const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
+      const recipeId = event.args['recipeId'].toNumber();
+      this.craftingService.addRecipe(newRecipeDto.creatorId, recipeId);
+    } catch (e) {
+      console.log(e);
+      return { success: false };
+    }
+    return { success: true };
   }
 }

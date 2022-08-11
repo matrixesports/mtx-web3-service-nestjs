@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { BattlePass } from 'abi/typechain';
 import { ChainService } from 'src/chain/chain.service';
 import { BattlePassService } from './battle-pass.service';
-import { MintPremiumPassDto } from './dto/MintPremiumPass.dto';
+import { MintPremiumPassDto } from './dto/mintPremiumPass.dto';
 
 @Controller('battlepass')
 export class BattlePassController {
@@ -16,7 +17,7 @@ export class BattlePassController {
       const contract = await this.chainService.getBattlePassContract(
         mintPremiumPassDto.creatorId,
       );
-      const bp = this.chainService.getBPSignerContract(contract);
+      const bp = this.chainService.getSignerContract(contract) as BattlePass;
       const seasonId = await bp.seasonId();
       const fee = await this.chainService.getMaticFeeData();
       await bp.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee);

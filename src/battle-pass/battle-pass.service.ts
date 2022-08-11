@@ -37,7 +37,7 @@ export class BattlePassService {
     id: BigNumber,
     qty: BigNumber,
   ): Promise<Reward> {
-    if (id.isZero()) return null;
+    if (!id || id.isZero()) return null;
     const metadata = await this.metadataService.getMetadata(
       creatorId,
       id.toNumber(),

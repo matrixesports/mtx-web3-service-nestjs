@@ -7,6 +7,7 @@ import {
   BattlePassFactory__factory,
   ERC1967Proxy,
   ERC1967Proxy__factory,
+  Crafting__factory,
 } from 'abi/typechain';
 import axios from 'axios';
 import { BigNumber, Contract, ethers } from 'ethers';
@@ -41,11 +42,8 @@ export class ChainService {
     );
   }
 
-  getBPSignerContract(contract: BattlePass) {
-    return contract.connect(this.signer);
-  }
-
   getSignerContract(contract: Contract) {
+    // cast after call
     return contract.connect(this.signer);
   }
 
@@ -65,6 +63,52 @@ export class ChainService {
     const exists = await this.battlePassFactory.isBattlePassDeployed(address);
     if (!exists) throw new Error('BattlePass not deployed');
     return BattlePass__factory.connect(address, this.provider);
+  }
+
+  /**
+   * will error if not deployed
+   * @param creatorId
+   * @returns
+   */
+  async getBattlePassAddress(creatorId: number) {
+    const address = await this.battlePassFactory.getBattlePassFromUnderlying(
+      creatorId,
+    );
+    const exists = await this.battlePassFactory.isBattlePassDeployed(address);
+    if (!exists) throw new Error('BattlePass not deployed');
+    return address;
+  }
+
+  async callCrafting(
+    func: any,
+    args: any,
+    userAddress: string,
+    isSigner: boolean,
+  ) {
+    try {
+      const abi = [Crafting__factory.createInterface().getFunction(func)];
+      const iface = new ethers.utils.Interface(abi);
+      let encodedCall = iface.encodeFunctionData(func, args);
+      if (userAddress) encodedCall += userAddress.substring(2);
+      const fee = await this.getMaticFeeData();
+      const txData = {
+        to: this.craftingProxy.address,
+        data: encodedCall,
+        ...fee,
+      };
+      const tx = await (isSigner
+        ? this.signer.sendTransaction(txData)
+        : this.provider.call(txData));
+      if (isSigner)
+        return this.signer.provider.waitForTransaction(
+          (tx as ethers.providers.TransactionResponse).hash,
+          1,
+        );
+      return iface.decodeFunctionResult(abi[0], tx as string);
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
   }
 
   async multicall(calls: ContractCall[]) {

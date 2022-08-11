@@ -7,14 +7,15 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { BattlePass } from 'abi/typechain';
 import { BigNumber, ethers } from 'ethers';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { BattlePassService } from './battle-pass.service';
-import { GetBattlePassChildDto } from './dto/GetBattlePassChild.dto';
-import { GetBattlePassUserInfoChildDto } from './dto/GetBattlePassUserInfoChild.dto';
+import { GetBattlePassChildDto } from './dto/getBattlePassChild.dto';
+import { GetBattlePassUserInfoChildDto } from './dto/getBattlePassUserInfoChild.dto';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
@@ -158,7 +159,7 @@ export class BattlePassResolver {
     try {
       const userAddress: string = context.req.headers['user-address'];
       const contract = await this.chainService.getBattlePassContract(creatorId);
-      const bp = this.chainService.getBPSignerContract(contract);
+      const bp = this.chainService.getSignerContract(contract) as BattlePass;
       const signer = this.chainService.getSigner();
 
       const seasonId = await bp.seasonId();
@@ -207,7 +208,6 @@ export class BattlePassResolver {
       }
 
       const metadata = await this.metadataService.getMetadata(creatorId, id);
-
       if (metadata.reward_type === RewardType.REDEEMABLE && autoRedeem) {
         await this.battlePassService.redeemItemHelper(
           id,
@@ -272,7 +272,7 @@ export class BattlePassResolver {
     try {
       const userAddress: string = context.req.headers['user-address'];
       const contract = await this.chainService.getBattlePassContract(creatorId);
-      const bp = this.chainService.getBPSignerContract(contract);
+      const bp = this.chainService.getSignerContract(contract) as BattlePass;
       const metadata = await this.metadataService.getMetadata(
         creatorId,
         itemId,
@@ -288,6 +288,7 @@ export class BattlePassResolver {
       await bp.burn(userAddress, itemId, 1, fee);
       return { success: true };
     } catch (e) {
+      console.log(e);
       return { success: false };
     }
   }
