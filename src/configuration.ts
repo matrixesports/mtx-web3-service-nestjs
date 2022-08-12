@@ -1,33 +1,44 @@
 export default () => {
-  let WEB3_DATABASE;
-  let ticket;
-  let user;
-  let twitch;
+  let db;
+  let ticketService;
+  let userService;
+  let twitchService;
+  let craftingProxy;
+  let bpFactory;
 
   if (process.env.ZEET_ENVIRONMENT == 'main') {
-    WEB3_DATABASE = process.env.DB_WEB3_SERVICE_URL;
-    ticket = process.env.TICKET_SERVICE_URL;
-    user = process.env.USER_SERVICE_URL;
-    twitch = process.env.TWITCH_SERVICE_URL;
+    db = process.env.DB_WEB3_SERVICE_URL;
+    ticketService = process.env.TICKET_SERVICE_URL;
+    userService = process.env.USER_SERVICE_URL;
+    twitchService = process.env.TWITCH_SERVICE_URL;
+    craftingProxy = process.env.CRAFTING_PROXY;
+    bpFactory = process.env.BP_FACTORY;
   } else {
-    WEB3_DATABASE = process.env.DB_STAGING_WEB3_SERVICE_URL;
-    ticket = process.env.STAGING_TICKET_SERVICE_URL;
-    user = process.env.STAGING_USER_SERVICE_URL;
-    twitch = process.env.STAGING_TWITCH_SERVICE_URL;
+    db = process.env.DB_STAGING_WEB3_SERVICE_URL;
+    ticketService = process.env.STAGING_TICKET_SERVICE_URL;
+    userService = process.env.STAGING_USER_SERVICE_URL;
+    twitchService = process.env.STAGING_TWITCH_SERVICE_URL;
+    craftingProxy = process.env.TEST_CRAFTING_PROXY;
+    bpFactory = process.env.TEST_BP_FACTORY;
   }
 
-  let config = {
+  const config = {
     PVT_KEY: process.env.PVT_KEY,
-    ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
-    POLYGON: {
-      polygonscan: process.env.POLYGONSCAN_API_KEY,
-      rpc: process.env.POLYGON_RPC,
+    rpc: {
+      url: process.env.POLYGON_RPC,
+      chainId: process.env.CHAIN_ID,
+      name: process.env.CHAIN_NAME,
+      apiKey: process.env.ALCHEMY_API_KEY,
     },
-    WEB3_DATABASE,
+    contracts: {
+      bpFactory,
+      craftingProxy,
+    },
+    db,
     SERVICE: {
-      ticket,
-      user,
-      twitch,
+      ticketService,
+      userService,
+      twitchService,
     },
   };
   return config;

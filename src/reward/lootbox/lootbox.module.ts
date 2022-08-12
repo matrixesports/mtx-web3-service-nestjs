@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BattlePassModule } from 'src/battlepass/battlepass.module';
+import { BattlePassModule } from 'src/battle-pass/battle-pass.module';
 import { LootboxResolver } from './lootbox.resolver';
 
 @Module({

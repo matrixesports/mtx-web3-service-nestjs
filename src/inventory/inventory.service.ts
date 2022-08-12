@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 export class InventoryService {
   web3: AlchemyWeb3;
   constructor(private configService: ConfigService) {
-    this.web3 = createAlchemyWeb3(this.configService.get('POLYGON').rpc);
+    this.web3 = createAlchemyWeb3(this.configService.get('rpc').url);
   }
 
   /**
@@ -23,13 +23,15 @@ export class InventoryService {
    */
   async getNFTSOwnedForUser(
     token_contracts: Array<string>,
-    user: string
+    user: string,
   ): Promise<BaseNft[]> {
-    let res: GetNftsResponseWithoutMetadata = await this.web3.alchemy.getNfts({
-      owner: user,
-      contractAddresses: token_contracts,
-      withMetadata: false,
-    });
+    const res: GetNftsResponseWithoutMetadata = await this.web3.alchemy.getNfts(
+      {
+        owner: user,
+        contractAddresses: token_contracts,
+        withMetadata: false,
+      },
+    );
     return res.ownedNfts;
   }
 }

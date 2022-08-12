@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { DateModule } from './date/date.module';
-import { BigintModule } from './bigint/bigint.module';
+import { DateResolver, BigIntResolver } from './scalar.resolver';
 
 @Module({
-  imports: [DateModule, BigintModule]
+  providers: [DateResolver, BigIntResolver],
 })
 export class ScalarModule {}

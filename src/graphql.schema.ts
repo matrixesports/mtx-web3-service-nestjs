@@ -1,4 +1,3 @@
-
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -7,6 +6,7 @@
 
 /* tslint:disable */
 /* eslint-disable */
+
 export enum RewardType {
     PREMIUM_PASS = "PREMIUM_PASS",
     CREATOR_TOKEN = "CREATOR_TOKEN",
@@ -33,11 +33,6 @@ export enum RequiredUserPaymentOptions {
     CASHAPP = "CASHAPP",
     PAYPAL_EMAIL = "PAYPAL_EMAIL",
     VENMO_USERNAME = "VENMO_USERNAME"
-}
-
-export enum CacheControlScope {
-    PUBLIC = "PUBLIC",
-    PRIVATE = "PRIVATE"
 }
 
 export class BattlePass {
