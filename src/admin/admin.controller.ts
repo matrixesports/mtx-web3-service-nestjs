@@ -13,8 +13,9 @@ import {
   LevelInfoStruct,
   LootboxOptionStruct,
 } from 'abi/typechain/BattlePass';
-import { Crafting, IngredientsStruct } from 'abi/typechain/Crafting';
+import { IngredientsStruct } from 'abi/typechain/Crafting';
 import { ethers } from 'ethers';
+import { BattlePassService } from 'src/battle-pass/battle-pass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { CraftingService } from 'src/crafting/crafting.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
@@ -27,6 +28,7 @@ export class AdminController {
   constructor(
     private chainService: ChainService,
     private craftingService: CraftingService,
+    private battlePassService: BattlePassService,
   ) {}
   @Get('check/:creatorId')
   async check(@Param('creatorId') creatorId: number) {
@@ -58,25 +60,33 @@ export class AdminController {
   @Post('deploy')
   async deploy(@Body('creatorId') creatorId: number) {
     try {
-      await this.chainService.getBattlePassContract(creatorId);
+      try {
+        await this.chainService.getBattlePassContract(creatorId);
+        return {
+          success: false,
+          description: 'Battle Pass already exists!',
+        };
+      } catch (e) {}
+      const bpFactory = this.chainService.getSignerContract(
+        this.chainService.battlePassFactory,
+      ) as BattlePassFactory;
+      const fee = await this.chainService.getMaticFeeData();
+      const newbp = await bpFactory.deployBattlePass(creatorId, fee);
+      const rc = await newbp.wait();
+      const event = rc.events.find(
+        (event: any) => event.event === 'BattlePassDeployed',
+      );
+      if (!event) {
+        return {
+          success: false,
+          description: 'Deployment failed!',
+        };
+      }
+      this.battlePassService.addBattlePassDB(creatorId);
+    } catch (e) {
+      console.log(e);
       return {
         success: false,
-        description: 'Battle Pass already exists!',
-      };
-    } catch (e) {}
-    const bpFactory = this.chainService.getSignerContract(
-      this.chainService.battlePassFactory,
-    ) as BattlePassFactory;
-    const fee = await this.chainService.getMaticFeeData();
-    const newbp = await bpFactory.deployBattlePass(creatorId, fee);
-    const rc = await newbp.wait();
-    const event = rc.events.find(
-      (event: any) => event.event === 'BattlePassDeployed',
-    );
-    if (!event) {
-      return {
-        success: false,
-        description: 'Deployment failed!',
       };
     }
     return {

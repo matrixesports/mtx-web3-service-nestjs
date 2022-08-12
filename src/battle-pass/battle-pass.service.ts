@@ -9,6 +9,7 @@ import { parse } from 'postgres-array';
 import { BattlePassDB } from './battle-pass.entity';
 import axios from 'axios';
 import { MetadataDB } from 'src/metadata/metadata.entity';
+import { Description } from '@ethersproject/properties';
 
 @Injectable()
 export class BattlePassService {
@@ -26,6 +27,24 @@ export class BattlePassService {
     return await this.battlePassRepository.findOneByOrFail({
       creator_id: creatorId,
     });
+  }
+
+  async addBattlePassDB(creatorId: number) {
+    try {
+      await this.battlePassRepository.insert({
+        creator_id: creatorId,
+        name: 'TODO',
+        description: 'TODO',
+        price: 'TODO',
+        currency: 'TODO',
+        end_date: new Date().toISOString(),
+        required_user_payment_options: null,
+        required_user_social_options: null,
+      });
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
   }
 
   async findAll(): Promise<BattlePassDB[]> {
