@@ -105,7 +105,6 @@ export class AdminController {
 
   @Post('newLootbox')
   async newLootbox(@Body() newLootboxDto: NewLootboxDto) {
-    console.log(newLootboxDto);
     let lootboxId;
     try {
       const jointprob = 0;
