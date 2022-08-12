@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Headers,
-  Header,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
 import {
   BattlePass,
@@ -113,6 +105,7 @@ export class AdminController {
 
   @Post('newLootbox')
   async newLootbox(@Body() newLootboxDto: NewLootboxDto) {
+    console.log(newLootboxDto);
     let lootboxId;
     try {
       const jointprob = 0;
@@ -120,21 +113,22 @@ export class AdminController {
       const lootboxOption: LootboxOptionStruct[] = [];
       for (let i = 0; i < newLootboxDto.lootboxInfo.length; i++) {
         const option = newLootboxDto.lootboxInfo[i];
-        if (option.ids.length != option.ids.length) {
-          return {
-            success: false,
-            description: 'IDs != QTYs',
-          };
-        }
         if (jointprob + option.rarity > maxprob) {
           return {
             success: false,
             description: 'Max Probability Exceeded',
           };
         }
+        const ids = [];
+        const qtys = [];
+        for (let j = 0; j < option.rewards.length; j++) {
+          const reward = option.rewards[j];
+          ids.push(reward.id);
+          qtys.push(reward.qty);
+        }
         lootboxOption.push({
-          ids: option.ids,
-          qtys: option.qtys,
+          ids: ids,
+          qtys: qtys,
           rarityRange: [jointprob, jointprob + option.rarity],
         });
       }

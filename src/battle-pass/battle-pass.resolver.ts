@@ -10,6 +10,7 @@ import {
 import { BattlePass } from 'abi/typechain';
 import { BigNumber, ethers } from 'ethers';
 import { ContractCall } from 'pilum';
+import { refCount } from 'rxjs';
 import { ChainService } from 'src/chain/chain.service';
 import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
@@ -221,10 +222,7 @@ export class BattlePassResolver {
         fee['gasLimit'] = 1000000;
         abi = [bp.interface.getFunction('openLootbox')];
         iface = new ethers.utils.Interface(abi);
-        encodedCall = iface.encodeFunctionData('openLootbox', [
-          id,
-          userAddress,
-        ]);
+        encodedCall = iface.encodeFunctionData('openLootbox', [id]);
         encodedCall += userAddress.substring(2);
         txData = {
           to: bp.address,
@@ -232,12 +230,19 @@ export class BattlePassResolver {
           ...fee,
         };
         const tx = await signer.sendTransaction(txData);
-        const rc: any = await tx.wait();
-        const event = rc.events.find(
-          (event: any) => event.event === 'LootboxOpened',
-        );
-        const [idxOpened] = event.args;
+        const rc = await bp.provider.waitForTransaction(tx.hash, 1);
+        const logs = [];
+        for (let i = 0; i < rc.logs.length; i++) {
+          try {
+            const log = rc.logs[i];
+            logs.push(bp.interface.parseLog(log));
+          } catch (e) {}
+        }
+        console.log(logs);
+        const log = logs.find((log: any) => log.name === 'LootboxOpened');
+        const idxOpened = log.args.idxOpened.toNumber();
         const option = await contract.getLootboxOptionByIdx(id, idxOpened);
+        console.log(option);
         const rewards = [];
         for (let y = 0; y < option[1].length; y++) {
           rewards.push(
