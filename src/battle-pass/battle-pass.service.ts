@@ -9,7 +9,6 @@ import { parse } from 'postgres-array';
 import { BattlePassDB } from './battle-pass.entity';
 import axios from 'axios';
 import { MetadataDB } from 'src/metadata/metadata.entity';
-import { Description } from '@ethersproject/properties';
 
 @Injectable()
 export class BattlePassService {
@@ -106,7 +105,9 @@ export class BattlePassService {
       required_user_payment_options,
     };
     const missingRedeemFields = await axios.post(
-      `${this.configService.get('SERVICE').user}/api/user/missingRedeemFields`,
+      `${
+        this.configService.get('SERVICE').userService
+      }/api/user/missingRedeemFields`,
       requiredFieldsBody,
     );
 
@@ -150,7 +151,9 @@ export class BattlePassService {
       itemAddress: address,
     };
     await axios.post(
-      `${this.configService.get('SERVICE').ticket}/api/ticket/redemption`,
+      `${
+        this.configService.get('SERVICE').ticketService
+      }/api/ticket/redemption`,
       ticketRedeemBody,
     );
 
@@ -162,7 +165,9 @@ export class BattlePassService {
       itemAddress: address,
     };
     await axios.post(
-      `${this.configService.get('SERVICE').twitch}/redemptions/redemption`,
+      `${
+        this.configService.get('SERVICE').twitchService
+      }/redemptions/redemption`,
       twitchRedeemBody,
     );
   }
