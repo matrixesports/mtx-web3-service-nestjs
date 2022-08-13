@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { BattlePass } from 'abi/typechain';
 import { ChainService } from 'src/chain/chain.service';
 import { BattlePassService } from './battle-pass.service';
+import { GiveXpDto } from './dto/giveXp.dto';
 import { MintPremiumPassDto } from './dto/mintPremiumPass.dto';
 
 @Controller('battlepass')
@@ -42,5 +43,19 @@ export class BattlePassController {
       seasonId: seasonId.toNumber(),
       address: contract.address,
     };
+  }
+
+  @Post('giveXp') async giveXp(@Body() giveXpDto: GiveXpDto) {
+    try {
+      const contract = await this.chainService.getBattlePassContract(
+        giveXpDto.creatorId,
+      );
+      const seasonId = await contract.seasonId();
+      const fee = await this.chainService.getMaticFeeData();
+      await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
+      return { success: true };
+    } catch (e) {
+      return { success: false };
+    }
   }
 }
