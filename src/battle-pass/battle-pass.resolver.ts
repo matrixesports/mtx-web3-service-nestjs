@@ -196,7 +196,7 @@ export class BattlePassResolver {
       };
       const tx = await signer.sendTransaction(txData);
       await bp.provider.waitForTransaction(tx.hash, 1);
-
+      console.log('claim tx' + tx);
       const rewardGiven = await bp.seasonInfo(seasonId, level);
       let id: number;
       let qty: number;
@@ -230,7 +230,9 @@ export class BattlePassResolver {
           ...fee,
         };
         const tx = await signer.sendTransaction(txData);
+        console.log('openLoot' + tx);
         const rc = await bp.provider.waitForTransaction(tx.hash, 1);
+        console.log('receipt' + rc);
         const logs = [];
         for (let i = 0; i < rc.logs.length; i++) {
           try {
@@ -238,11 +240,11 @@ export class BattlePassResolver {
             logs.push(bp.interface.parseLog(log));
           } catch (e) {}
         }
-        console.log(logs);
+        console.log('logs' + logs);
         const log = logs.find((log: any) => log.name === 'LootboxOpened');
         const idxOpened = log.args.idxOpened.toNumber();
         const option = await contract.getLootboxOptionByIdx(id, idxOpened);
-        console.log(option);
+        console.log('option' + option);
         const rewards = [];
         for (let y = 0; y < option[1].length; y++) {
           rewards.push(

@@ -105,8 +105,16 @@ export class BattlePassService {
       required_user_social_options,
       required_user_payment_options,
     };
+    console.log(
+      'path' +
+        `${
+          this.configService.get('SERVICE').userService
+        }/api/user/missingRedeemFields`,
+    );
     const missingRedeemFields = await axios.post(
-      `${this.configService.get('SERVICE').userService}/api/user/missingRedeemFields`,
+      `${
+        this.configService.get('SERVICE').userService
+      }/api/user/missingRedeemFields`,
       requiredFieldsBody,
     );
 
@@ -150,7 +158,9 @@ export class BattlePassService {
       itemAddress: address,
     };
     await axios.post(
-      `${this.configService.get('SERVICE').ticketService}/api/ticket/redemption`,
+      `${
+        this.configService.get('SERVICE').ticketService
+      }/api/ticket/redemption`,
       ticketRedeemBody,
     );
 
@@ -162,7 +172,9 @@ export class BattlePassService {
       itemAddress: address,
     };
     await axios.post(
-      `${this.configService.get('SERVICE').twitchService}/redemptions/redemption`,
+      `${
+        this.configService.get('SERVICE').twitchService
+      }/redemptions/redemption`,
       twitchRedeemBody,
     );
   }
