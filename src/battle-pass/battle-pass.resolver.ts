@@ -179,7 +179,7 @@ export class BattlePassResolver {
           },
         };
       }
-
+      console.log(missingFields);
       let abi = [bp.interface.getFunction('claimReward')];
       let iface = new ethers.utils.Interface(abi);
       let encodedCall = iface.encodeFunctionData('claimReward', [
@@ -230,9 +230,9 @@ export class BattlePassResolver {
           ...fee,
         };
         const tx = await signer.sendTransaction(txData);
-        console.log('openLoot' + tx);
+        console.log('openLoot' + JSON.stringify(tx));
         const rc = await bp.provider.waitForTransaction(tx.hash, 1);
-        console.log('receipt' + rc);
+        console.log('receipt' + JSON.stringify(tx));
         const logs = [];
         for (let i = 0; i < rc.logs.length; i++) {
           try {

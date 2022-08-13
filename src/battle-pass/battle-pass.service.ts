@@ -83,6 +83,12 @@ export class BattlePassService {
     level: number,
   ): Promise<RequiredFieldsResponse> {
     if (level != 1) return;
+    console.log(
+      'path' +
+        `${
+          this.configService.get('SERVICE').userService
+        }/api/user/missingRedeemFields`,
+    );
     const battlePassDB = await this.getBattlePassDB(creatorId);
     if (
       battlePassDB.required_user_social_options.length == 0 &&
@@ -105,12 +111,7 @@ export class BattlePassService {
       required_user_social_options,
       required_user_payment_options,
     };
-    console.log(
-      'path' +
-        `${
-          this.configService.get('SERVICE').userService
-        }/api/user/missingRedeemFields`,
-    );
+
     const missingRedeemFields = await axios.post(
       `${
         this.configService.get('SERVICE').userService
