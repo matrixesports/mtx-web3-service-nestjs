@@ -233,29 +233,29 @@ export class BattlePassResolver {
         console.log('openLoot' + JSON.stringify(tx));
         const rc = await bp.provider.waitForTransaction(tx.hash, 1);
         console.log('receipt' + JSON.stringify(tx));
-        const logs = [];
-        for (let i = 0; i < rc.logs.length; i++) {
-          try {
-            const log = rc.logs[i];
-            logs.push(bp.interface.parseLog(log));
-          } catch (e) {}
-        }
-        console.log('logs' + logs);
-        const log = logs.find((log: any) => log.name === 'LootboxOpened');
-        const idxOpened = log.args.idxOpened.toNumber();
-        const option = await contract.getLootboxOptionByIdx(id, idxOpened);
-        console.log('option' + option);
-        const rewards = [];
-        for (let y = 0; y < option[1].length; y++) {
-          rewards.push(
-            await this.battlePassService.createRewardObj(
-              creatorId,
-              option[1][y],
-              option[2][y],
-            ),
-          );
-        }
-        return { success: true, reward: rewards };
+        // const logs = [];
+        // for (let i = 0; i < rc.logs.length; i++) {
+        //   try {
+        //     const log = rc.logs[i];
+        //     logs.push(bp.interface.parseLog(log));
+        //   } catch (e) {}
+        // }
+        // console.log('logs' + logs);
+        // const log = logs.find((log: any) => log.name === 'LootboxOpened');
+        // const idxOpened = log.args.idxOpened.toNumber();
+        // const option = await contract.getLootboxOptionByIdx(id, idxOpened);
+        // console.log('option' + option);
+        // const rewards = [];
+        // for (let y = 0; y < option[1].length; y++) {
+        //   rewards.push(
+        //     await this.battlePassService.createRewardObj(
+        //       creatorId,
+        //       option[1][y],
+        //       option[2][y],
+        //     ),
+        //   );
+        // }
+        // return { success: true, reward: rewards };
       }
 
       const reward = await this.battlePassService.createRewardObj(
