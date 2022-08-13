@@ -196,7 +196,7 @@ export class BattlePassResolver {
       };
       const tx = await signer.sendTransaction(txData);
       await bp.provider.waitForTransaction(tx.hash, 1);
-      console.log('claim tx' + tx);
+      console.log('claim tx' + JSON.stringify(tx));
       const rewardGiven = await bp.seasonInfo(seasonId, level);
       let id: number;
       let qty: number;
