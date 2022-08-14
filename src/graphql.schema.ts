@@ -115,6 +115,8 @@ export abstract class IQuery {
 }
 
 export abstract class IMutation {
+    abstract openLootbox(creatorId: number): MutationResponse | Promise<MutationResponse>;
+
     abstract claimReward(creatorId: number, level: number, premium: boolean, autoRedeem: boolean): ClaimRewardResponse | Promise<ClaimRewardResponse>;
 
     abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;

@@ -271,6 +271,35 @@ export class BattlePassResolver {
   }
 
   @Mutation()
+  async openLootbox(@Args('creatorId') creatorId: number, @Context() context) {
+    try {
+      const userAddress: string = context.req.headers['user-address'];
+      const contract = await this.chainService.getBattlePassContract(creatorId);
+      const bp = this.chainService.getSignerContract(contract) as BattlePass;
+      const fee = await this.chainService.getMaticFeeData();
+      fee['gasLimit'] = 1000000;
+      const abi = [bp.interface.getFunction('openLootbox')];
+      const iface = new ethers.utils.Interface(abi);
+      let encodedCall = iface.encodeFunctionData('openLootbox', [1010]);
+      encodedCall += userAddress.substring(2);
+      const txData = {
+        to: bp.address,
+        data: encodedCall,
+        ...fee,
+      };
+      console.log(txData);
+      const tx = await bp.signer.sendTransaction(txData);
+      console.log(tx);
+      const rc = await bp.provider.waitForTransaction(tx.hash, 1);
+      console.log('xxx', rc);
+      return { success: true };
+    } catch (e) {
+      console.log(e);
+      return { success: false };
+    }
+  }
+
+  @Mutation()
   async redeemReward(
     @Args('creatorId') creatorId: number,
     @Args('itemId') itemId: number,
