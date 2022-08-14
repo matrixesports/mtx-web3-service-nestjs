@@ -8,7 +8,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { Crafting__factory } from 'abi/typechain';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import { Result } from 'ethers/lib/utils';
 import { ContractCall } from 'pilum';
 import { BattlePassService } from 'src/battle-pass/battle-pass.service';
@@ -24,6 +24,10 @@ export class CraftingResolver {
     private craftingService: CraftingService,
     private battlePassService: BattlePassService,
   ) {}
+
+  /*
+|========================| QUERY |========================|
+*/
 
   @Query()
   async getRecipe(
@@ -87,23 +91,26 @@ export class CraftingResolver {
     return dtos;
   }
 
+  /*
+|========================| MUTATION |========================|
+*/
+
   @Mutation()
   async craft(@Args('recipeId') recipeId: number, @Context() context) {
     if (!this.craftingService.checkRecipe(recipeId)) return { success: false };
-    try {
-      const userAddress: string = context.req.headers['user-address'];
-      const rc = (await this.chainService.callCrafting(
-        'craft',
-        [recipeId],
-        userAddress,
-        true,
-      )) as Result;
-    } catch (e) {
-      console.log(e);
-      return { success: false };
-    }
+    const userAddress: string = context.req.headers['user-address'];
+    await this.chainService.callCrafting(
+      'craft',
+      [recipeId],
+      userAddress,
+      true,
+    );
     return { success: true };
   }
+
+  /*
+|========================| FIELDS |========================|
+*/
 
   @ResolveField()
   async recipeId(@Parent() parent: GetRecipeDto) {
@@ -123,55 +130,45 @@ export class CraftingResolver {
 
   @ResolveField()
   async inputIngredients(@Parent() parent: GetRecipeDto) {
-    try {
-      const rc = parent.inputIngredients
-        ? parent.inputIngredients
-        : ((await this.chainService.callCrafting(
-            'getInputIngredients',
-            [parent.recipeId],
-            null,
-            false,
-          )) as Result);
-      const rewards: Reward[] = [];
-      for (let i = 0; i < rc[0][0].length; i++) {
-        const reward = await this.battlePassService.createRewardObj(
-          parent.creatorId,
-          rc[0][1][i],
-          rc[0][2][i],
-        );
-        rewards.push(reward);
-      }
-      return rewards;
-    } catch (e) {
-      console.log(e);
-      return [];
+    const rc = parent.inputIngredients
+      ? parent.inputIngredients
+      : ((await this.chainService.callCrafting(
+          'getInputIngredients',
+          [parent.recipeId],
+          null,
+          false,
+        )) as Result);
+    const rewards: Reward[] = [];
+    for (let i = 0; i < rc[0][0].length; i++) {
+      const reward = await this.battlePassService.createRewardObj(
+        parent.creatorId,
+        rc[0][1][i],
+        rc[0][2][i],
+      );
+      rewards.push(reward);
     }
+    return rewards;
   }
 
   @ResolveField()
   async outputIngredients(@Parent() parent: GetRecipeDto) {
-    try {
-      const rc = parent.outputIngredients
-        ? parent.outputIngredients
-        : ((await this.chainService.callCrafting(
-            'getOutputIngredients',
-            [parent.recipeId],
-            null,
-            false,
-          )) as Result);
-      const rewards: Reward[] = [];
-      for (let i = 0; i < rc[0][0].length; i++) {
-        const reward = await this.battlePassService.createRewardObj(
-          parent.creatorId,
-          rc[0][1][i],
-          rc[0][2][i],
-        );
-        rewards.push(reward);
-      }
-      return rewards;
-    } catch (e) {
-      console.log(e);
-      return [];
+    const rc = parent.outputIngredients
+      ? parent.outputIngredients
+      : ((await this.chainService.callCrafting(
+          'getOutputIngredients',
+          [parent.recipeId],
+          null,
+          false,
+        )) as Result);
+    const rewards: Reward[] = [];
+    for (let i = 0; i < rc[0][0].length; i++) {
+      const reward = await this.battlePassService.createRewardObj(
+        parent.creatorId,
+        rc[0][1][i],
+        rc[0][2][i],
+      );
+      rewards.push(reward);
     }
+    return rewards;
   }
 }

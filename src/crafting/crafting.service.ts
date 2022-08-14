@@ -11,41 +11,26 @@ export class CraftingService {
   ) {}
 
   async addRecipe(creatorId: number, recipeId: number) {
-    try {
-      return await this.recipeRepository.insert({
-        creator_id: creatorId,
-        id: recipeId,
-      });
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
+    return await this.recipeRepository.insert({
+      creator_id: creatorId,
+      id: recipeId,
+    });
   }
 
   async getRecipes(creatorId: number) {
-    try {
-      return await this.recipeRepository.find({
-        where: {
-          creator_id: creatorId,
-        },
-      });
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
+    return await this.recipeRepository.find({
+      where: {
+        creator_id: creatorId,
+      },
+    });
   }
 
   async checkRecipe(recipeId: number) {
-    try {
-      await this.recipeRepository.find({
-        where: {
-          id: recipeId,
-        },
-      });
-      return true;
-    } catch (e) {
-      console.log(e);
-      return false;
-    }
+    await this.recipeRepository.find({
+      where: {
+        id: recipeId,
+      },
+    });
+    return true;
   }
 }

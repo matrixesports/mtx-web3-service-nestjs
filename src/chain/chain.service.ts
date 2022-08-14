@@ -79,36 +79,39 @@ export class ChainService {
     return address;
   }
 
+  async isBattlePassDeployed(creatorId: number) {
+    const address = await this.battlePassFactory.getBattlePassFromUnderlying(
+      creatorId,
+    );
+    const exists = await this.battlePassFactory.isBattlePassDeployed(address);
+    return exists ? true : false;
+  }
+
   async callCrafting(
     func: any,
     args: any,
     userAddress: string,
     isSigner: boolean,
   ) {
-    try {
-      const abi = [Crafting__factory.createInterface().getFunction(func)];
-      const iface = new ethers.utils.Interface(abi);
-      let encodedCall = iface.encodeFunctionData(func, args);
-      if (userAddress) encodedCall += userAddress.substring(2);
-      const fee = await this.getMaticFeeData();
-      const txData = {
-        to: this.craftingProxy.address,
-        data: encodedCall,
-        ...fee,
-      };
-      const tx = await (isSigner
-        ? this.signer.sendTransaction(txData)
-        : this.provider.call(txData));
-      if (isSigner)
-        return this.signer.provider.waitForTransaction(
-          (tx as ethers.providers.TransactionResponse).hash,
-          1,
-        );
-      return iface.decodeFunctionResult(abi[0], tx as string);
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
+    const abi = [Crafting__factory.createInterface().getFunction(func)];
+    const iface = new ethers.utils.Interface(abi);
+    let encodedCall = iface.encodeFunctionData(func, args);
+    if (userAddress) encodedCall += userAddress.substring(2);
+    const fee = await this.getMaticFeeData();
+    const txData = {
+      to: this.craftingProxy.address,
+      data: encodedCall,
+      ...fee,
+    };
+    const tx = await (isSigner
+      ? this.signer.sendTransaction(txData)
+      : this.provider.call(txData));
+    if (isSigner)
+      return this.signer.provider.waitForTransaction(
+        (tx as ethers.providers.TransactionResponse).hash,
+        1,
+      );
+    return iface.decodeFunctionResult(abi[0], tx as string);
   }
 
   async multicall(calls: ContractCall[]) {

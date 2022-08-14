@@ -9,7 +9,6 @@ import { parse } from 'postgres-array';
 import { BattlePassDB } from './battle-pass.entity';
 import axios from 'axios';
 import { MetadataDB } from 'src/metadata/metadata.entity';
-import { Description } from '@ethersproject/properties';
 
 @Injectable()
 export class BattlePassService {
@@ -19,9 +18,6 @@ export class BattlePassService {
     private battlePassRepository: Repository<BattlePassDB>,
     private metadataService: MetadataService,
   ) {}
-  /**
-   * use rollback when updating shit
-   */
 
   async getBattlePassDB(creatorId: number): Promise<BattlePassDB> {
     return await this.battlePassRepository.findOneByOrFail({
@@ -29,22 +25,20 @@ export class BattlePassService {
     });
   }
 
+  /**
+   * use rollback when updating shit
+   */
   async addBattlePassDB(creatorId: number) {
-    try {
-      await this.battlePassRepository.insert({
-        creator_id: creatorId,
-        name: 'TODO',
-        description: 'TODO',
-        price: 'TODO',
-        currency: 'TODO',
-        end_date: new Date().toISOString(),
-        required_user_payment_options: null,
-        required_user_social_options: null,
-      });
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
+    await this.battlePassRepository.insert({
+      creator_id: creatorId,
+      name: 'TODO',
+      description: 'TODO',
+      price: 'TODO',
+      currency: 'TODO',
+      end_date: new Date().toISOString(),
+      required_user_payment_options: null,
+      required_user_social_options: null,
+    });
   }
 
   async findAll(): Promise<BattlePassDB[]> {
@@ -82,57 +76,49 @@ export class BattlePassService {
     userAddress: string,
     level: number,
   ): Promise<RequiredFieldsResponse> {
-    //if (level != 1) return;
-    console.log(
-      'path' +
-        `${
-          this.configService.get('SERVICE').userService
-        }/api/user/missingRedeemFields`,
+    if (level != 1) return null;
+    const battlePassDB = await this.getBattlePassDB(creatorId);
+    if (
+      battlePassDB.required_user_social_options.length == 0 &&
+      battlePassDB.required_user_payment_options.length == 0
+    )
+      return;
+
+    //convert string to array
+    const required_user_social_options = parse(
+      battlePassDB.required_user_social_options,
+      (value) => value,
     );
-    // const battlePassDB = await this.getBattlePassDB(creatorId);
-    // if (
-    //   battlePassDB.required_user_social_options.length == 0 &&
-    //   battlePassDB.required_user_payment_options.length == 0
-    // )
-    //   return;
+    const required_user_payment_options = parse(
+      battlePassDB.required_user_payment_options,
+      (value) => value,
+    );
 
-    // //convert string to array
-    // const required_user_social_options = parse(
-    //   battlePassDB.required_user_social_options,
-    //   (value) => value,
-    // );
-    // const required_user_payment_options = parse(
-    //   battlePassDB.required_user_payment_options,
-    //   (value) => value,
-    // );
+    const requiredFieldsBody: RequiredFieldsBody = {
+      userAddress,
+      required_user_social_options,
+      required_user_payment_options,
+    };
 
-    // const requiredFieldsBody: RequiredFieldsBody = {
-    //   userAddress,
-    //   required_user_social_options,
-    //   required_user_payment_options,
-    // };
+    const missingRedeemFields = await axios.post(
+      `${
+        this.configService.get('SERVICE').userService
+      }/api/user/missingRedeemFields`,
+      requiredFieldsBody,
+    );
 
-    // const missingRedeemFields = await axios.post(
-    //   `${
-    //     this.configService.get('SERVICE').userService
-    //   }/api/user/missingRedeemFields`,
-    //   requiredFieldsBody,
-    // );
-
-    // if (
-    //   missingRedeemFields.data.missing_user_payment_options.length != 0 ||
-    //   missingRedeemFields.data.missing_user_social_options.length != 0
-    // ) {
-    //   return {
-    //     missing_user_payment_options:
-    //       missingRedeemFields.data.missing_user_payment_options,
-    //     missing_user_social_options:
-    //       missingRedeemFields.data.missing_user_social_options,
-    //   };
-    // } else {
-    //   return;
-    // }
-    return;
+    if (
+      missingRedeemFields.data.missing_user_payment_options.length != 0 ||
+      missingRedeemFields.data.missing_user_social_options.length != 0
+    ) {
+      return {
+        missing_user_payment_options:
+          missingRedeemFields.data.missing_user_payment_options,
+        missing_user_social_options:
+          missingRedeemFields.data.missing_user_social_options,
+      };
+    }
+    return null;
   }
 
   /**

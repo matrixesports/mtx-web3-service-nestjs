@@ -11,13 +11,9 @@ export class MetadataService {
   ) {}
 
   async getMetadata(creatorId: number, id: number): Promise<MetadataDB> {
-    try {
-      return await this.metadataRepository.findOneByOrFail({
-        creator_id: creatorId,
-        id,
-      });
-    } catch (e) {
-      return null;
-    }
+    return await this.metadataRepository.findOneByOrFail({
+      creator_id: creatorId,
+      id,
+    });
   }
 }
