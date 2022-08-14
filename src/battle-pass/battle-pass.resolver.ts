@@ -180,8 +180,8 @@ export class BattlePassResolver {
         };
       }
       console.log(missingFields);
-      let abi = [bp.interface.getFunction('claimReward')];
-      let iface = new ethers.utils.Interface(abi);
+      const abi = [bp.interface.getFunction('claimReward')];
+      const iface = new ethers.utils.Interface(abi);
       let encodedCall = iface.encodeFunctionData('claimReward', [
         seasonId,
         level,
@@ -189,7 +189,7 @@ export class BattlePassResolver {
       ]);
       encodedCall += userAddress.substring(2);
       const fee = await this.chainService.getMaticFeeData();
-      let txData = {
+      const txData = {
         to: bp.address,
         data: encodedCall,
         ...fee,
@@ -220,11 +220,11 @@ export class BattlePassResolver {
         await bp.burn(userAddress, id, 1, fee);
       } else if (metadata.reward_type === RewardType.LOOTBOX) {
         fee['gasLimit'] = 1000000;
-        abi = [bp.interface.getFunction('openLootbox')];
-        iface = new ethers.utils.Interface(abi);
-        encodedCall = iface.encodeFunctionData('openLootbox', [id]);
+        const abi = [bp.interface.getFunction('openLootbox')];
+        const iface = new ethers.utils.Interface(abi);
+        let encodedCall = iface.encodeFunctionData('openLootbox', [id]);
         encodedCall += userAddress.substring(2);
-        txData = {
+        const txData = {
           to: bp.address,
           data: encodedCall,
           ...fee,
