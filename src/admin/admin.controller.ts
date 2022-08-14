@@ -107,7 +107,7 @@ export class AdminController {
   async newLootbox(@Body() newLootboxDto: NewLootboxDto) {
     let lootboxId;
     try {
-      const jointprob = 0;
+      let jointprob = 0;
       const maxprob = 100;
       const lootboxOption: LootboxOptionStruct[] = [];
       for (let i = 0; i < newLootboxDto.lootboxInfo.length; i++) {
@@ -130,6 +130,7 @@ export class AdminController {
           qtys: qtys,
           rarityRange: [jointprob, jointprob + option.rarity],
         });
+        jointprob += option.rarity;
       }
       const contract = await this.chainService.getBattlePassContract(
         newLootboxDto.creatorId,
