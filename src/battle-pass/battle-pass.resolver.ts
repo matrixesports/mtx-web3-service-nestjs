@@ -10,7 +10,6 @@ import {
 import { BattlePass } from 'abi/typechain';
 import { BigNumber, ethers } from 'ethers';
 import { ContractCall } from 'pilum';
-import { refCount } from 'rxjs';
 import { ChainService } from 'src/chain/chain.service';
 import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
