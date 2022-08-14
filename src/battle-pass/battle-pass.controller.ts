@@ -55,9 +55,10 @@ export class BattlePassController {
     const contract = await this.chainService.getBattlePassContract(
       giveXpDto.creatorId,
     );
-    const seasonId = await contract.seasonId();
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const seasonId = await bp.seasonId();
     const fee = await this.chainService.getMaticFeeData();
-    await contract.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
+    await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
     return { success: true };
   }
 }

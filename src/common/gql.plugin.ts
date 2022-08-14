@@ -41,7 +41,7 @@ class Listener<T = unknown>
     if (gqlCtx?.errors && gqlCtx.operation.operation === 'mutation') {
       gqlCtx.response.data = { success: false };
     }
-    this.logData['response'] = gqlCtx.response.data; // logging response may expose sensitive info ?
+    // this.logData['response'] = gqlCtx.response.data; // logging response may expose sensitive info
     gqlCtx.logger.info({
       graphql: this.logData,
       responseTime: Date.now() - this.start,
