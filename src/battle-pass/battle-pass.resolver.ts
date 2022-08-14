@@ -221,7 +221,7 @@ export class BattlePassResolver {
         fee['gasLimit'] = 1000000;
         const abi = [bp.interface.getFunction('openLootbox')];
         const iface = new ethers.utils.Interface(abi);
-        let encodedCall = iface.encodeFunctionData('openLootbox', [1010]);
+        let encodedCall = iface.encodeFunctionData('openLootbox', [id]);
         encodedCall += userAddress.substring(2);
         const txData = {
           to: bp.address,
