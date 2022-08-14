@@ -95,7 +95,6 @@ type Query {
 }
 
 type Mutation {
-  openLootbox(creatorId: Int!): MutationResponse!
   claimReward(
     creatorId: Int!
     level: Int!
