@@ -56,7 +56,7 @@ export class AdminController {
 
   @Post('deploy')
   async deploy(@Body('creatorId') creatorId: number) {
-    if (this.chainService.isBattlePassDeployed(creatorId)) {
+    if (await this.chainService.isBattlePassDeployed(creatorId)) {
       return {
         success: false,
         message: 'Battle Pass already exists!',

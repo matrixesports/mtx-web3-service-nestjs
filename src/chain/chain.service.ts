@@ -83,8 +83,7 @@ export class ChainService {
     const address = await this.battlePassFactory.getBattlePassFromUnderlying(
       creatorId,
     );
-    const exists = await this.battlePassFactory.isBattlePassDeployed(address);
-    return exists ? true : false;
+    return await this.battlePassFactory.isBattlePassDeployed(address);
   }
 
   async callCrafting(
