@@ -38,8 +38,15 @@ class Listener<T = unknown>
   }
 
   async willSendResponse(gqlCtx: GraphQLRequestContext): Promise<void> {
-    if (gqlCtx?.errors && gqlCtx.operation.operation === 'mutation') {
-      gqlCtx.response.data = { success: false };
+    if (gqlCtx?.errors) {
+      if (gqlCtx.operation.operation === 'mutation')
+        gqlCtx.response.data = { success: false };
+      gqlCtx.logger.error({
+        graphql: this.logData,
+        responseTime: Date.now() - this.start,
+        error: gqlCtx.errors,
+      });
+      return;
     }
     // this.logData['response'] = gqlCtx.response.data; // logging response may expose sensitive info
     gqlCtx.logger.info({

@@ -7,7 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { Crafting__factory } from 'abi/typechain';
+import { BattlePass__factory, Crafting__factory } from 'abi/typechain';
 import { BigNumber } from 'ethers';
 import { Result } from 'ethers/lib/utils';
 import { ContractCall } from 'pilum';
@@ -91,6 +91,16 @@ export class CraftingResolver {
     return dtos;
   }
 
+  @Query()
+  async getAllRecipes() {
+    const recipes = await this.craftingService.getAllRecipes();
+    return [
+      ...[...new Set(recipes.map((recipe) => recipe.creator_id))].map(
+        (creator_id) => this.getRecipes(creator_id),
+      ),
+    ];
+  }
+
   /*
 |========================| MUTATION |========================|
 */
@@ -140,8 +150,12 @@ export class CraftingResolver {
         )) as Result);
     const rewards: Reward[] = [];
     for (let i = 0; i < rc[0][0].length; i++) {
+      const bp = BattlePass__factory.connect(
+        rc[0][0][i],
+        this.chainService.provider,
+      );
       const reward = await this.battlePassService.createRewardObj(
-        parent.creatorId,
+        (await bp.creatorId()).toNumber(),
         rc[0][1][i],
         rc[0][2][i],
       );
@@ -162,8 +176,12 @@ export class CraftingResolver {
         )) as Result);
     const rewards: Reward[] = [];
     for (let i = 0; i < rc[0][0].length; i++) {
+      const bp = BattlePass__factory.connect(
+        rc[0][0][i],
+        this.chainService.provider,
+      );
       const reward = await this.battlePassService.createRewardObj(
-        parent.creatorId,
+        (await bp.creatorId()).toNumber(),
         rc[0][1][i],
         rc[0][2][i],
       );
