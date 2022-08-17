@@ -109,6 +109,8 @@ export abstract class IQuery {
 
     abstract getLootboxOptions(creatorId: number, lootboxId: number): Nullable<Nullable<LootboxOption>[]> | Promise<Nullable<Nullable<LootboxOption>[]>>;
 
+    abstract getAllRecipes(): Nullable<Nullable<Nullable<Recipe>[]>[]> | Promise<Nullable<Nullable<Nullable<Recipe>[]>[]>>;
+
     abstract getRecipes(creatorId: number): Nullable<Nullable<Recipe>[]> | Promise<Nullable<Nullable<Recipe>[]>>;
 
     abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;

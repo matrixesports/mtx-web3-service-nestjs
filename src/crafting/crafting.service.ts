@@ -33,4 +33,8 @@ export class CraftingService {
     });
     return true;
   }
+
+  async getAllRecipes() {
+    return await this.recipeRepository.find();
+  }
 }
