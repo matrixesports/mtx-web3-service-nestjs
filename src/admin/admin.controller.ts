@@ -16,6 +16,7 @@ import {
 } from 'src/common/filters';
 import { CraftingService } from 'src/crafting/crafting.service';
 import { GiveXpDto } from './dto/GiveXp.dto';
+import { MintTokenDto } from './dto/MintToken.dto';
 import { NewLootboxDto } from './dto/NewLootbox.dto';
 import { NewRecipeDto } from './dto/NewRecipe.dto';
 import { NewSeasonDto } from './dto/NewSeason.dto';
@@ -198,6 +199,23 @@ export class AdminController {
     const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
     const recipeId = event.args['recipeId'].toNumber();
     this.craftingService.addRecipe(newRecipeDto.creatorId, recipeId);
+    return { success: true };
+  }
+
+  @Post('mint')
+  async mintPremiumPass(@Body() mintTokenDto: MintTokenDto) {
+    const CREATOR_TOKEN = 1000;
+    const contract = await this.chainService.getBattlePassContract(
+      mintTokenDto.creatorId,
+    );
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const fee = await this.chainService.getMaticFeeData();
+    await bp.mint(
+      mintTokenDto.userAddress,
+      CREATOR_TOKEN,
+      mintTokenDto.amount,
+      fee,
+    );
     return { success: true };
   }
 }

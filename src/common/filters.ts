@@ -63,6 +63,7 @@ export class EthersFilter implements ExceptionFilter {
     // const req = ctx.getRequest<Request>();
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       message: 'on-chain error', // more info can be given base on error type
+      success: false,
     } as IResponseError);
   }
 }
