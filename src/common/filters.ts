@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 import { GqlContextType } from '@nestjs/graphql';
 import { Request, Response } from 'express';
-import { EntityNotFoundError, QueryFailedError } from 'typeorm';
+import { EntityNotFoundError, QueryFailedError, TypeORMError } from 'typeorm';
 
-export interface IResponseError {
+export type IResponseError = {
   message: string;
-  success?: boolean;
-}
+  success: boolean;
+};
 
 export class EthersException extends Error {
   constructor(
@@ -45,9 +45,11 @@ export class GlobalFilter implements ExceptionFilter {
           status = HttpStatus.INTERNAL_SERVER_ERROR;
           message = 'unregistered error!';
       }
-      res.status(status).json({
-        message: message,
-      } as IResponseError);
+      const errres: IResponseError = {
+        message,
+        success: false,
+      };
+      res.status(status).json(errres);
     } else if (host.getType<GqlContextType>() === 'graphql') {
       // stops nest built-in error logger
       return error;
@@ -64,14 +66,14 @@ export class EthersFilter implements ExceptionFilter {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       message: 'on-chain error', // more info can be given base on error type
       success: false,
-    } as IResponseError);
+    });
   }
 }
 
 // full list of error https://github.com/typeorm/typeorm/tree/master/src/error
-@Catch(QueryFailedError, EntityNotFoundError)
+@Catch(TypeORMError)
 export class TypeORMFilter implements ExceptionFilter {
-  catch(error: Error, host: ArgumentsHost) {
+  catch(error: TypeORMError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
     // const req = ctx.getRequest<Request>();
@@ -88,10 +90,12 @@ export class TypeORMFilter implements ExceptionFilter {
         break;
       default:
         status = HttpStatus.INTERNAL_SERVER_ERROR;
-        message = 'unregistered error!';
+        message = 'unregistered typeorm error!';
     }
-    res.status(status).json({
-      message,
-    } as IResponseError);
+    const errres: IResponseError = {
+      message: (error as HttpException).message,
+      success: false,
+    };
+    res.status(status).json(errres);
   }
 }

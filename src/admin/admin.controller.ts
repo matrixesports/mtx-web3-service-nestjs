@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseFilters } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Param,
+  Post,
+  UseFilters,
+} from '@nestjs/common';
 import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
 import {
   BattlePass,
@@ -15,11 +23,11 @@ import {
   TypeORMFilter,
 } from 'src/common/filters';
 import { CraftingService } from 'src/crafting/crafting.service';
-import { GiveXpDto } from './dto/GiveXp.dto';
-import { MintTokenDto } from './dto/MintToken.dto';
-import { NewLootboxDto } from './dto/NewLootbox.dto';
-import { NewRecipeDto } from './dto/NewRecipe.dto';
-import { NewSeasonDto } from './dto/NewSeason.dto';
+import { GiveXpDto } from './dto/giveXp.dto';
+import { MintTokenDto } from './dto/mintToken.dto';
+import { NewLootboxDto } from './dto/newLootbox.dto';
+import { NewRecipeDto } from './dto/newRecipe.dto';
+import { NewSeasonDto } from './dto/newSeason.dto';
 
 @Controller('admin')
 @UseFilters(TypeORMFilter, EthersFilter)
