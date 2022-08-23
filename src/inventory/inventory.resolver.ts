@@ -39,12 +39,15 @@ export class InventoryResolver {
       );
 
       for (let y = 0; y < owned.length; y++) {
-        const reward = await this.battlePassService.createRewardObj(
-          allBattlePasses[x].creator_id,
-          ethers.BigNumber.from(owned[y].id.tokenId),
-          ethers.BigNumber.from(owned[y].balance),
-        );
-        defaultRewards.push(reward);
+        let reward: Reward;
+        try {
+          reward = await this.battlePassService.createRewardObj(
+            allBattlePasses[x].creator_id,
+            ethers.BigNumber.from(owned[y].id.tokenId),
+            ethers.BigNumber.from(owned[y].balance),
+          );
+          defaultRewards.push(reward);
+        } catch (e) {}
       }
     }
     return defaultRewards;

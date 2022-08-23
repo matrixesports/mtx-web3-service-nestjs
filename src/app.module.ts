@@ -49,6 +49,7 @@ import { GraphQLError } from 'graphql';
         serializers: {
           req: (req: any) => {
             req['user-address'] = req['headers']['user-address'];
+            req.body = req.raw.body;
             delete req['headers']; //GDPR compliant
             return req;
           },
