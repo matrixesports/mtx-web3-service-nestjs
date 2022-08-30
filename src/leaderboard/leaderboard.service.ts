@@ -27,7 +27,7 @@ export class LeaderboardService {
     const res = await axios.get(
       `${
         this.configService.get('SERVICE').userService
-      }/creator/${creatorId}/followers`,
+      }/creator?id=${creatorId}/followers`,
     );
     logData.external['0'] = {
       path: '/redemptions/redemption',
