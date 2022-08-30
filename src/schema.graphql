@@ -10,9 +10,9 @@ type Query {
   getAllRecipes: [[Recipe]]
   getRecipes(creatorId: Int!): [Recipe]
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
-  getSeasonXpRanking(creatorId: Int!, seasonId: Int!): Ranking!
-  getAllXpRanking(creatorId: Int!): Ranking!
-  getReputationRanking(creatorId: Int!): Ranking!
+  getSeasonXpRanking(creatorId: Int!, seasonId: Int!): [Ranking]!
+  getAllXpRanking(creatorId: Int!): [Ranking]!
+  getReputationRanking(creatorId: Int!): [Ranking]!
 }
 
 # |========================| MUTATION |========================|
@@ -159,16 +159,11 @@ enum RequiredUserPaymentOptions {
 type Ranking {
   rank: Int!
   topPercent: Int!
-  user: User! 
-  reputation: Int
-  seasonXp: Int
-  allXp: Int
-}
-
-type User {
   id: Int!
   pfp: String
   name: String
+  total: Int!
 }
+
 
 

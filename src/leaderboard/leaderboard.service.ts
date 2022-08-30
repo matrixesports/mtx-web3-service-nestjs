@@ -7,6 +7,20 @@ export class LeaderboardService {
   constructor(private configService: ConfigService) {}
 
   async getFollowers(creatorId: number) {
+    // const res = { data: [] };
+    // res.data.push({
+    //   userAddress: 'E0c788889AaBeAd8D4181d14b2868E7720AE1c26',
+    //   id: 10,
+    //   pfp: 'pfp',
+    //   name: 'name',
+    // });
+    // res.data.push({
+    //   userAddress: '0000000000000000000000000000000000000001',
+    //   id: 11,
+    //   pfp: 'pfp1',
+    //   name: 'name1',
+    // });
+    // return res;
     const logger = new Logger(this.getFollowers.name);
     const logData = { external: {} };
     const start = Date.now();

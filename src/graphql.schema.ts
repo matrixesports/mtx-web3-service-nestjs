@@ -48,11 +48,11 @@ export abstract class IQuery {
 
     abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
 
-    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Ranking | Promise<Ranking>;
+    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
 
-    abstract getAllXpRanking(creatorId: number): Ranking | Promise<Ranking>;
+    abstract getAllXpRanking(creatorId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
 
-    abstract getReputationRanking(creatorId: number): Ranking | Promise<Ranking>;
+    abstract getReputationRanking(creatorId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
 }
 
 export abstract class IMutation {
@@ -150,16 +150,10 @@ export class UserMissingFields {
 export class Ranking {
     rank: number;
     topPercent: number;
-    user: User;
-    reputation?: Nullable<number>;
-    seasonXp?: Nullable<number>;
-    allXp?: Nullable<number>;
-}
-
-export class User {
     id: number;
     pfp?: Nullable<string>;
     name?: Nullable<string>;
+    total: number;
 }
 
 export type BigInt = unknown;
