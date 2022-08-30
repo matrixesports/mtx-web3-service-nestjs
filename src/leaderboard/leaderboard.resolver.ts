@@ -68,31 +68,31 @@ export class LeaderboardResolver {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const res = await this.leaderboardService.getFollowers(creatorId);
     console.log(res.data);
-    // const addresses = [];
-    // const ids = [];
-    // for (let i = 0; i < res.data.length; i++) {
-    //   const follower = res.data[i];
-    //   addresses.push(follower.userAddress);
-    //   ids.push(1000);
-    // }
-    // const results = await contract.balanceOfBatch(addresses, ids);
-    // const dtos: GetSeasonXpRankingDto[] = [];
-    // const others: number[] = [];
-    // for (let i = 0; i < results.length; i++) {
-    //   const follower = res.data[i];
-    //   others.push(results[i].toNumber());
-    //   dtos.push({
-    //     id: follower.id,
-    //     userAddress: follower.userAddress,
-    //     pfp: follower?.pfp,
-    //     name: follower?.name,
-    //     total: results[i].toNumber(),
-    //     others,
-    //   });
-    // }
-    // others.sort();
-    // others.reverse();
-    // return dtos;
+    const addresses = [];
+    const ids = [];
+    for (let i = 0; i < res.data.length; i++) {
+      const follower = res.data[i];
+      addresses.push(follower.userAddress);
+      ids.push(1000);
+    }
+    const results = await contract.balanceOfBatch(addresses, ids);
+    const dtos: GetSeasonXpRankingDto[] = [];
+    const others: number[] = [];
+    for (let i = 0; i < results.length; i++) {
+      const follower = res.data[i];
+      others.push(results[i].toNumber());
+      dtos.push({
+        id: follower.id,
+        userAddress: follower.userAddress,
+        pfp: follower?.pfp,
+        name: follower?.name,
+        total: results[i].toNumber(),
+        others,
+      });
+    }
+    others.sort();
+    others.reverse();
+    return dtos;
   }
 
   @Query()
