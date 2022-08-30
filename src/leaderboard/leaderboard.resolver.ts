@@ -37,18 +37,20 @@ export class LeaderboardResolver {
         value: 0,
       });
     }
-
     const results = await this.chainService.multicall(calls);
     if (!results) return null;
     const dtos: GetSeasonXpRankingDto[] = [];
-    const others = [];
+    const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < results.length; i++) {
       const follower = res.data[i];
       const userInfo = iface.decodeFunctionResult(
         'userInfo',
         results[i].returnData[1],
       );
-      others.push(userInfo.xp.toNumber());
+      others.push({
+        total: userInfo.xp.toNumber(),
+        userAddress: follower.userAddress,
+      });
       dtos.push({
         id: follower.id,
         userAddress: follower.userAddress,
@@ -79,10 +81,13 @@ export class LeaderboardResolver {
     const results = await contract.balanceOfBatch(addresses, ids);
     console.log(results);
     const dtos: GetSeasonXpRankingDto[] = [];
-    const others: number[] = [];
+    const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < results.length; i++) {
       const follower = res.data[i];
-      others.push(results[i].toNumber());
+      others.push({
+        total: results[i].toNumber(),
+        userAddress: follower.userAddress,
+      });
       dtos.push({
         id: follower.id,
         userAddress: follower.userAddress,
@@ -122,7 +127,7 @@ export class LeaderboardResolver {
     if (!results) return null;
     console.log(results);
     const dtos: GetSeasonXpRankingDto[] = [];
-    const others: number[] = [];
+    const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < res.data.length; i++) {
       const follower = res.data[i];
       let total = 0;
@@ -133,7 +138,7 @@ export class LeaderboardResolver {
         );
         total += userInfo.xp.toNumber();
       }
-      others.push(total);
+      others.push({ total, userAddress: follower.userAddress });
       dtos.push({
         id: follower.id,
         userAddress: follower.userAddress,
@@ -164,11 +169,17 @@ export class LeaderboardResolver {
 
   @ResolveField()
   rank(@Parent() parent: GetSeasonXpRankingDto) {
-    return parent.others.findIndex((other) => other == parent.total) + 1;
+    return (
+      parent.others.findIndex(
+        (other) => other.userAddress == parent.userAddress,
+      ) + 1
+    );
   }
   @ResolveField()
   topPercent(@Parent() parent: GetSeasonXpRankingDto) {
-    const index = parent.others.findIndex((other) => other == parent.total);
+    const index = parent.others.findIndex(
+      (other) => other.userAddress == parent.userAddress,
+    );
     return (userInfo.length - index / userInfo.length) * 100;
   }
 }

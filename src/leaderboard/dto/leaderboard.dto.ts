@@ -4,5 +4,5 @@ export class GetSeasonXpRankingDto {
   pfp: string;
   name: string;
   total: number;
-  others?: number[];
+  others: { total: number; userAddress: string }[];
 }
