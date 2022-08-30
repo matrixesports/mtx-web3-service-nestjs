@@ -207,6 +207,7 @@ interface TwitchRedeemBody {
   userAddress: string;
   itemAddress: string;
 }
+
 interface RequiredFieldsBody {
   userAddress: string;
   required_user_social_options: string[];

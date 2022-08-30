@@ -22,6 +22,7 @@ import { CraftingModule } from './crafting/crafting.module';
 import { LoggerModule } from 'nestjs-pino';
 import { GraphQLPlugin } from './common/gql.plugin';
 import { GraphQLError } from 'graphql';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 
 @Module({
   imports: [
@@ -132,6 +133,7 @@ import { GraphQLError } from 'graphql';
     InventoryModule,
     CraftingModule,
     AdminModule,
+    LeaderboardModule,
   ],
   providers: [GraphQLPlugin],
 })
