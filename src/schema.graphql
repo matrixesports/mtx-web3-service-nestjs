@@ -1,6 +1,40 @@
 scalar Date
 scalar BigInt
 
+# |========================| QUERY |========================|
+
+type Query {
+  getBattlePass(creatorId: Int!): BattlePass
+  getInventory: Inventory
+  getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
+  getAllRecipes: [[Recipe]]
+  getRecipes(creatorId: Int!): [Recipe]
+  getRecipe(creatorId: Int!, recipeId: Int!): Recipe
+  getSeasonXpRanking(creatorId: Int!, seasonId: Int!): [Ranking]!
+  getAllXpRanking(creatorId: Int!): [Ranking]!
+  getReputationRanking(creatorId: Int!): [Ranking]!
+}
+
+# |========================| MUTATION |========================|
+
+type Mutation {
+  claimReward(
+    creatorId: Int!
+    level: Int!
+    premium: Boolean!
+    autoRedeem: Boolean!
+  ): ClaimRewardResponse!
+  redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
+  craft(recipeId: Int!): MutationResponse!
+}
+
+type MutationResponse {
+  success: Boolean!
+  description: String
+}
+
+# |========================| BattlePass |========================|
+
 type BattlePass {
   name: String!
   description: String!
@@ -55,12 +89,7 @@ type RewardMetadata {
   image: String!
 }
 
-type Recipe {
-  recipeId: BigInt!
-  isActive: Boolean!
-  inputIngredients: [Reward]!
-  outputIngredients: [Reward]!
-}
+# |========================| INVENTORY |========================|
 
 # handle each reward type separately
 type Inventory {
@@ -69,7 +98,7 @@ type Inventory {
   redeemed: [Redeemed]!
 }
 
-#group by same id in same contract since user can redeem multiple of same id
+# group by same id in same contract since user can redeem multiple of same id
 type Redeemed {
   reward: Reward!
   status: [RedeemStatus]!
@@ -81,30 +110,23 @@ enum RedeemStatus {
   REJECTED
 }
 
+# |========================| LOOTBOX |========================|
+
 type LootboxOption {
   probability: Int!
   reward: [Reward]!
 }
 
-type Query {
-  getBattlePass(creatorId: Int!): BattlePass
-  getInventory: Inventory
-  getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
-  getAllRecipes: [[Recipe]]
-  getRecipes(creatorId: Int!): [Recipe]
-  getRecipe(creatorId: Int!, recipeId: Int!): Recipe
+# |========================| CRAFTING |========================|
+
+type Recipe {
+  recipeId: BigInt!
+  isActive: Boolean!
+  inputIngredients: [Reward]!
+  outputIngredients: [Reward]!
 }
 
-type Mutation {
-  claimReward(
-    creatorId: Int!
-    level: Int!
-    premium: Boolean!
-    autoRedeem: Boolean!
-  ): ClaimRewardResponse!
-  redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
-  craft(recipeId: Int!): MutationResponse!
-}
+# |========================| CLAIM |========================|
 
 type ClaimRewardResponse {
   success: Boolean!
@@ -132,7 +154,16 @@ enum RequiredUserPaymentOptions {
   VENMO_USERNAME
 }
 
-type MutationResponse {
-  success: Boolean!
-  description: String
+# |========================| LEADERBOARD |========================|
+
+type Ranking {
+  rank: Int!
+  topPercent: Int!
+  id: Int!
+  pfp: String
+  name: String
+  total: Int!
 }
+
+
+
