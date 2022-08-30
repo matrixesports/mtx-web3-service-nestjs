@@ -75,7 +75,9 @@ export class LeaderboardResolver {
       addresses.push(follower.userAddress);
       ids.push(1000);
     }
+    console.log(addresses);
     const results = await contract.balanceOfBatch(addresses, ids);
+    console.log(results);
     const dtos: GetSeasonXpRankingDto[] = [];
     const others: number[] = [];
     for (let i = 0; i < results.length; i++) {
@@ -162,7 +164,6 @@ export class LeaderboardResolver {
 
   @ResolveField()
   rank(@Parent() parent: GetSeasonXpRankingDto) {
-    console.log(parent.others);
     return parent.others.findIndex((other) => other == parent.total) + 1;
   }
   @ResolveField()

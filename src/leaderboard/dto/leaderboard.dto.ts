@@ -1,8 +1,6 @@
-import { Result } from 'ethers/lib/utils';
-
 export class GetSeasonXpRankingDto {
   userAddress: string;
-  id: number;
+  id: string;
   pfp: string;
   name: string;
   total: number;
