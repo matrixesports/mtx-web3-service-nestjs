@@ -35,6 +35,39 @@ export enum RequiredUserPaymentOptions {
     VENMO_USERNAME = "VENMO_USERNAME"
 }
 
+export abstract class IQuery {
+    abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
+
+    abstract getInventory(): Nullable<Inventory> | Promise<Nullable<Inventory>>;
+
+    abstract getLootboxOptions(creatorId: number, lootboxId: number): Nullable<Nullable<LootboxOption>[]> | Promise<Nullable<Nullable<LootboxOption>[]>>;
+
+    abstract getAllRecipes(): Nullable<Nullable<Nullable<Recipe>[]>[]> | Promise<Nullable<Nullable<Nullable<Recipe>[]>[]>>;
+
+    abstract getRecipes(creatorId: number): Nullable<Nullable<Recipe>[]> | Promise<Nullable<Nullable<Recipe>[]>>;
+
+    abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
+
+    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Ranking | Promise<Ranking>;
+
+    abstract getAllXpRanking(creatorId: number): Ranking | Promise<Ranking>;
+
+    abstract getReputationRanking(creatorId: number): Ranking | Promise<Ranking>;
+}
+
+export abstract class IMutation {
+    abstract claimReward(creatorId: number, level: number, premium: boolean, autoRedeem: boolean): ClaimRewardResponse | Promise<ClaimRewardResponse>;
+
+    abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;
+
+    abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
+}
+
+export class MutationResponse {
+    success: boolean;
+    description?: Nullable<string>;
+}
+
 export class BattlePass {
     name: string;
     description: string;
@@ -80,13 +113,6 @@ export class RewardMetadata {
     image: string;
 }
 
-export class Recipe {
-    recipeId: BigInt;
-    isActive: boolean;
-    inputIngredients: Nullable<Reward>[];
-    outputIngredients: Nullable<Reward>[];
-}
-
 export class Inventory {
     default: Nullable<Reward>[];
     redeemed: Nullable<Redeemed>[];
@@ -102,26 +128,11 @@ export class LootboxOption {
     reward: Nullable<Reward>[];
 }
 
-export abstract class IQuery {
-    abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
-
-    abstract getInventory(): Nullable<Inventory> | Promise<Nullable<Inventory>>;
-
-    abstract getLootboxOptions(creatorId: number, lootboxId: number): Nullable<Nullable<LootboxOption>[]> | Promise<Nullable<Nullable<LootboxOption>[]>>;
-
-    abstract getAllRecipes(): Nullable<Nullable<Nullable<Recipe>[]>[]> | Promise<Nullable<Nullable<Nullable<Recipe>[]>[]>>;
-
-    abstract getRecipes(creatorId: number): Nullable<Nullable<Recipe>[]> | Promise<Nullable<Nullable<Recipe>[]>>;
-
-    abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
-}
-
-export abstract class IMutation {
-    abstract claimReward(creatorId: number, level: number, premium: boolean, autoRedeem: boolean): ClaimRewardResponse | Promise<ClaimRewardResponse>;
-
-    abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;
-
-    abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
+export class Recipe {
+    recipeId: BigInt;
+    isActive: boolean;
+    inputIngredients: Nullable<Reward>[];
+    outputIngredients: Nullable<Reward>[];
 }
 
 export class ClaimRewardResponse {
@@ -136,9 +147,19 @@ export class UserMissingFields {
     social?: Nullable<Nullable<RequiredUserSocialOptions>[]>;
 }
 
-export class MutationResponse {
-    success: boolean;
-    description?: Nullable<string>;
+export class Ranking {
+    rank: number;
+    topPercent: number;
+    user: User;
+    reputation?: Nullable<number>;
+    seasonXp?: Nullable<number>;
+    allXp?: Nullable<number>;
+}
+
+export class User {
+    id: number;
+    pfp?: Nullable<string>;
+    name?: Nullable<string>;
 }
 
 export type BigInt = unknown;

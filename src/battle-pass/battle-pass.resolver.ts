@@ -7,7 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { BattlePass } from 'abi/typechain';
+import { BattlePass, BattlePass__factory } from 'abi/typechain';
 import { BigNumber, ethers } from 'ethers';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
@@ -87,7 +87,6 @@ export class BattlePassResolver {
         },
       };
     }
-    console.log(missingFields);
     const abi = [bp.interface.getFunction('claimReward')];
     const iface = new ethers.utils.Interface(abi);
     let encodedCall = iface.encodeFunctionData('claimReward', [
