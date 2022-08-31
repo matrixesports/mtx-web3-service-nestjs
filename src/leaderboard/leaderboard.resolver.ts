@@ -76,7 +76,6 @@ export class LeaderboardResolver {
       ids.push(1000);
     }
     const results = await contract.balanceOfBatch(addresses, ids);
-    console.log(results);
     const dtos: GetSeasonXpRankingDto[] = [];
     const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < results.length; i++) {
@@ -165,15 +164,15 @@ export class LeaderboardResolver {
   rank(@Parent() parent: GetSeasonXpRankingDto) {
     return (
       parent.others.findIndex(
-        (other) => other.userAddress == parent.userAddress,
+        (other) => other.userAddress === parent.userAddress,
       ) + 1
     );
   }
   @ResolveField()
   topPercent(@Parent() parent: GetSeasonXpRankingDto) {
     const index = parent.others.findIndex(
-      (other) => other.userAddress == parent.userAddress,
+      (other) => other.userAddress === parent.userAddress,
     );
-    return ((userInfo.length - index) / userInfo.length) * 100;
+    return ((parent.others.length - index) / parent.others.length) * 100;
   }
 }
