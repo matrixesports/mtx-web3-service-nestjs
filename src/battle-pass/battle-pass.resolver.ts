@@ -8,7 +8,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { BattlePass } from 'abi/typechain';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { RewardType } from 'src/graphql.schema';
@@ -72,9 +72,7 @@ export class BattlePassResolver {
     const userAddress: string = context.req.headers['user-address'];
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
-
     const seasonId = await bp.seasonId();
-
     const missingFields = await this.battlePassService.checkRequiredFields(
       creatorId,
       userAddress,
@@ -89,22 +87,13 @@ export class BattlePassResolver {
         },
       };
     }
-    const abi = [bp.interface.getFunction('claimReward')];
-    const iface = new ethers.utils.Interface(abi);
-    let encodedCall = iface.encodeFunctionData('claimReward', [
-      seasonId,
-      level,
-      premium,
-    ]);
-    encodedCall += userAddress.substring(2);
-    const fee = await this.chainService.getMaticFeeData();
-    const txData = {
-      to: bp.address,
-      data: encodedCall,
-      ...fee,
-    };
-    const tx = await bp.signer.sendTransaction(txData);
-    await bp.provider.waitForTransaction(tx.hash, 1);
+    const abi = bp.interface.getFunction('claimReward');
+    this.chainService.metatx(
+      abi,
+      [seasonId, level, premium],
+      userAddress,
+      bp.address,
+    );
     const rewardGiven = await bp.seasonInfo(seasonId, level);
     let id: number;
     let qty: number;
@@ -115,7 +104,6 @@ export class BattlePassResolver {
       id = rewardGiven.freeRewardId.toNumber();
       qty = rewardGiven.freeRewardQty.toNumber();
     }
-
     const metadata = await this.metadataService.getMetadata(creatorId, id);
     if (metadata.reward_type === RewardType.REDEEMABLE && autoRedeem) {
       await this.battlePassService.redeemItemHelper(
@@ -125,22 +113,19 @@ export class BattlePassResolver {
         bp.address,
         metadata,
       );
+      const fee = await this.chainService.getMaticFeeData();
       await bp.burn(userAddress, id, 1, fee);
     } else if (metadata.reward_type === RewardType.LOOTBOX) {
+      const abi = bp.interface.getFunction('openLootbox');
       const fee = await this.chainService.getMaticFeeData();
       fee['gasLimit'] = 1000000;
-      const abi = [bp.interface.getFunction('openLootbox')];
-      const iface = new ethers.utils.Interface(abi);
-      let encodedCall = iface.encodeFunctionData('openLootbox', [id]);
-      encodedCall += userAddress.substring(2);
-      const txData = {
-        to: bp.address,
-        data: encodedCall,
-        ...fee,
-      };
-      const tx = await bp.signer.sendTransaction(txData);
-      await bp.provider.waitForTransaction(tx.hash, 1);
-      const rc = await bp.provider.getTransactionReceipt(tx.hash);
+      const rc = await this.chainService.metatx(
+        abi,
+        [id],
+        userAddress,
+        bp.address,
+        fee,
+      );
       const logs = [];
       for (let i = 0; i < rc.logs.length; i++) {
         try {

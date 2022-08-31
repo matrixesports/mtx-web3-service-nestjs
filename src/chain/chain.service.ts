@@ -11,6 +11,7 @@ import {
 } from 'abi/typechain';
 import axios from 'axios';
 import { BigNumber, Contract, ethers } from 'ethers';
+import { FunctionFragment } from 'ethers/lib/utils';
 import { ContractCall, Multicall } from 'pilum';
 
 @Injectable()
@@ -111,6 +112,31 @@ export class ChainService {
         1,
       );
     return iface.decodeFunctionResult(abi[0], tx as string);
+  }
+
+  async metatx(
+    abi: FunctionFragment,
+    args: any[],
+    userAddress: string,
+    contractAddress: string,
+    feeOverride: {
+      maxPriorityFeePerGas: BigNumber;
+      maxFeePerGas?: BigNumber;
+      gasLimit?: number;
+    } = null,
+  ) {
+    const iface = new ethers.utils.Interface([abi]);
+    let encodedCall = iface.encodeFunctionData(abi, args);
+    encodedCall += userAddress.substring(2);
+    let fee = feeOverride;
+    if (feeOverride == null) fee = fee = await this.getMaticFeeData();
+    const txData = {
+      to: contractAddress,
+      data: encodedCall,
+      ...fee,
+    };
+    const tx = await this.signer.sendTransaction(txData);
+    return await this.provider.waitForTransaction(tx.hash, 1);
   }
 
   async multicall(calls: ContractCall[]) {
