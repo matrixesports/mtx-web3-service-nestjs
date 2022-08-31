@@ -60,8 +60,7 @@ export class LeaderboardResolver {
         others,
       });
     }
-    others.sort();
-    others.reverse();
+    others.sort((a, b) => b.total - a.total);
     return dtos;
   }
 
@@ -69,7 +68,6 @@ export class LeaderboardResolver {
   async getReputationRanking(@Args('creatorId') creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const res = await this.leaderboardService.getFollowers(creatorId);
-    console.log(res.data);
     const addresses = [];
     const ids = [];
     for (let i = 0; i < res.data.length; i++) {
@@ -77,7 +75,6 @@ export class LeaderboardResolver {
       addresses.push(follower.userAddress);
       ids.push(1000);
     }
-    console.log(addresses);
     const results = await contract.balanceOfBatch(addresses, ids);
     console.log(results);
     const dtos: GetSeasonXpRankingDto[] = [];
@@ -97,8 +94,7 @@ export class LeaderboardResolver {
         others,
       });
     }
-    others.sort();
-    others.reverse();
+    others.sort((a, b) => b.total - a.total);
     return dtos;
   }
 
@@ -125,7 +121,6 @@ export class LeaderboardResolver {
     }
     const results = await this.chainService.multicall(calls);
     if (!results) return null;
-    console.log(results);
     const dtos: GetSeasonXpRankingDto[] = [];
     const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < res.data.length; i++) {
@@ -148,8 +143,7 @@ export class LeaderboardResolver {
         others,
       });
     }
-    others.sort();
-    others.reverse();
+    others.sort((a, b) => b.total - a.total);
     return dtos;
   }
 
