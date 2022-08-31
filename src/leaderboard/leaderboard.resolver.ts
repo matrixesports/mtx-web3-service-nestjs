@@ -1,9 +1,8 @@
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { BattlePass__factory } from 'abi/typechain';
-import { userInfo } from 'os';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
-import { GetSeasonXpRankingDto } from './dto/leaderboard.dto';
+import { GetSeasonXpRankingDto } from './leaderboard.dto';
 import { LeaderboardService } from './leaderboard.service';
 
 @Resolver('Ranking')

@@ -11,7 +11,7 @@ import { ethers } from 'ethers';
 import { BattlePassService } from 'src/battle-pass/battle-pass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Redeemed, RedeemStatus, Reward } from 'src/graphql.schema';
-import { GetInventoryChildDto } from './dto/GetInventoryChild.dto';
+import { GetInventoryChildDto } from './inventory.dto';
 import { InventoryService } from './inventory.service';
 
 @Resolver('Inventory')

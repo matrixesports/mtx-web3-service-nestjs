@@ -7,15 +7,17 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { BattlePass, BattlePass__factory } from 'abi/typechain';
+import { BattlePass } from 'abi/typechain';
 import { BigNumber, ethers } from 'ethers';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { BattlePassService } from './battle-pass.service';
-import { GetBattlePassChildDto } from './dto/getBattlePassChild.dto';
-import { GetBattlePassUserInfoChildDto } from './dto/getBattlePassUserInfoChild.dto';
+import {
+  GetBattlePassChildDto,
+  GetBattlePassUserInfoChildDto,
+} from './battle-pass.dto';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
@@ -103,7 +105,6 @@ export class BattlePassResolver {
     };
     const tx = await bp.signer.sendTransaction(txData);
     await bp.provider.waitForTransaction(tx.hash, 1);
-    console.log('claim tx' + JSON.stringify(tx));
     const rewardGiven = await bp.seasonInfo(seasonId, level);
     let id: number;
     let qty: number;
@@ -138,10 +139,8 @@ export class BattlePassResolver {
         ...fee,
       };
       const tx = await bp.signer.sendTransaction(txData);
-      console.log('openLoot' + JSON.stringify(tx));
       await bp.provider.waitForTransaction(tx.hash, 1);
       const rc = await bp.provider.getTransactionReceipt(tx.hash);
-      console.log('receipt' + JSON.stringify(rc));
       const logs = [];
       for (let i = 0; i < rc.logs.length; i++) {
         try {
@@ -149,11 +148,9 @@ export class BattlePassResolver {
           logs.push(bp.interface.parseLog(log));
         } catch (e) {}
       }
-      console.log('logs' + logs);
       const log = logs.find((log: any) => log.name === 'LootboxOpened');
       const idxOpened = log.args.idxOpened.toNumber();
       const option = await contract.getLootboxOptionByIdx(id, idxOpened);
-      console.log('option' + option);
       const rewards = [];
       for (let y = 0; y < option[1].length; y++) {
         rewards.push(

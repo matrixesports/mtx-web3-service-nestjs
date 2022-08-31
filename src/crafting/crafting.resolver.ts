@@ -15,7 +15,7 @@ import { BattlePassService } from 'src/battle-pass/battle-pass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Reward } from 'src/graphql.schema';
 import { CraftingService } from './crafting.service';
-import { GetRecipeDto } from './dto/getRecipe.dto';
+import { GetRecipeDto } from './crafting.dto';
 
 @Resolver('Recipe')
 export class CraftingResolver {
