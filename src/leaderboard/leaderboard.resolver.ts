@@ -174,6 +174,6 @@ export class LeaderboardResolver {
     const index = parent.others.findIndex(
       (other) => other.userAddress == parent.userAddress,
     );
-    return (userInfo.length - index / userInfo.length) * 100;
+    return (index / userInfo.length) * 100;
   }
 }
