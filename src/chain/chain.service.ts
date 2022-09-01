@@ -119,17 +119,15 @@ export class ChainService {
     args: any[],
     userAddress: string,
     contractAddress: string,
-    feeOverride: {
+    fee: {
       maxPriorityFeePerGas: BigNumber;
       maxFeePerGas?: BigNumber;
       gasLimit?: number;
-    } = null,
+    },
   ) {
     const iface = new ethers.utils.Interface([abi]);
     let encodedCall = iface.encodeFunctionData(abi, args);
     encodedCall += userAddress.substring(2);
-    let fee = feeOverride;
-    if (feeOverride == null) fee = fee = await this.getMaticFeeData();
     const txData = {
       to: contractAddress,
       data: encodedCall,

@@ -150,7 +150,7 @@ export class UserMissingFields {
 export class Ranking {
     rank: number;
     topPercent: number;
-    id: number;
+    id: string;
     pfp?: Nullable<string>;
     name?: Nullable<string>;
     total: number;

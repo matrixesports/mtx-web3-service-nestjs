@@ -88,11 +88,13 @@ export class BattlePassResolver {
       };
     }
     const abi = bp.interface.getFunction('claimReward');
+    const fee = await this.chainService.getMaticFeeData();
     this.chainService.metatx(
       abi,
       [seasonId, level, premium],
       userAddress,
       bp.address,
+      fee,
     );
     const rewardGiven = await bp.seasonInfo(seasonId, level);
     let id: number;
@@ -113,11 +115,9 @@ export class BattlePassResolver {
         bp.address,
         metadata,
       );
-      const fee = await this.chainService.getMaticFeeData();
       await bp.burn(userAddress, id, 1, fee);
     } else if (metadata.reward_type === RewardType.LOOTBOX) {
       const abi = bp.interface.getFunction('openLootbox');
-      const fee = await this.chainService.getMaticFeeData();
       fee['gasLimit'] = 1000000;
       const rc = await this.chainService.metatx(
         abi,
