@@ -115,9 +115,11 @@ export class BattlePassResolver {
         bp.address,
         metadata,
       );
+      const fee = await this.chainService.getMaticFeeData();
       await bp.burn(userAddress, id, 1, fee);
     } else if (metadata.reward_type === RewardType.LOOTBOX) {
       const abi = bp.interface.getFunction('openLootbox');
+      const fee = await this.chainService.getMaticFeeData();
       fee['gasLimit'] = 1000000;
       const rc = await this.chainService.metatx(
         abi,

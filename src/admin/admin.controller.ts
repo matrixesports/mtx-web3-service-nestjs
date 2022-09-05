@@ -127,6 +127,12 @@ export class AdminController {
       });
       jointprob += option.rarity;
     }
+    if (jointprob != maxprob) {
+      return {
+        success: false,
+        description: 'Joint Probability != Max Probability',
+      };
+    }
     const contract = await this.chainService.getBattlePassContract(
       newLootboxDto.creatorId,
     );
