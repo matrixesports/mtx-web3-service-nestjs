@@ -15,6 +15,8 @@ import {
   TypeORMFilter,
 } from 'src/common/filters';
 import { CraftingService } from 'src/crafting/crafting.service';
+import { RewardType } from 'src/graphql.schema';
+import { MetadataService } from 'src/metadata/metadata.service';
 import {
   GiveXpDto,
   MintTokenDto,
@@ -29,6 +31,7 @@ export class AdminController {
     private chainService: ChainService,
     private craftingService: CraftingService,
     private battlePassService: BattlePassService,
+    private metadataService: MetadataService,
   ) {}
 
   /*
@@ -131,6 +134,14 @@ export class AdminController {
     const fee = await this.chainService.getMaticFeeData();
     await (await bp.newLootbox(lootboxOption, fee)).wait(1);
     const lootboxId = await bp.lootboxId();
+    await this.metadataService.addMetadata(
+      newLootboxDto.creatorId,
+      lootboxId.toNumber(),
+      'TODO',
+      'TODO',
+      'TODO',
+      RewardType.LOOTBOX,
+    );
     return {
       success: true,
       lootboxId: lootboxId.toNumber(),
