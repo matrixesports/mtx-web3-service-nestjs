@@ -83,12 +83,15 @@ export class InventoryResolver {
     for (const creatorId in temp) {
       for (const itemId in temp[creatorId]) {
         // qty is length of statuses to signify how many have been redeemed
-        const reward = await this.battlePassService.createRewardObj(
-          parseInt(creatorId),
-          ethers.BigNumber.from(itemId),
-          ethers.BigNumber.from(temp[creatorId][itemId].length),
-        );
-        redeemed.push({ reward, status: temp[creatorId][itemId] });
+        let reward: Reward;
+        try {
+          reward = await this.battlePassService.createRewardObj(
+            parseInt(creatorId),
+            ethers.BigNumber.from(itemId),
+            ethers.BigNumber.from(temp[creatorId][itemId].length),
+          );
+          redeemed.push({ reward, status: temp[creatorId][itemId] });
+        } catch (e) {}
       }
     }
     return redeemed;
