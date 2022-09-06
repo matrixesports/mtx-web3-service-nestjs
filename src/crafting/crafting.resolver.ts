@@ -94,11 +94,54 @@ export class CraftingResolver {
   @Query()
   async getAllRecipes() {
     const recipes = await this.craftingService.getAllRecipes();
-    return [
-      ...[...new Set(recipes.map((recipe) => recipe.creator_id))].map(
-        (creator_id) => this.getRecipes(creator_id),
-      ),
-    ];
+    const dtos: GetRecipeDto[] = [];
+    const creators = [...new Set(recipes.map((recipe) => recipe.creator_id))];
+    const calls: ContractCall[] = [];
+    const iface = Crafting__factory.createInterface();
+    const infragment = iface.getFunction('getInputIngredients');
+    const outfragment = iface.getFunction('getOutputIngredients');
+    for (let i = 0; i < creators.length; i++) {
+      for (let k = 0; k < recipes.length; k++) {
+        calls.push({
+          reference: 'getInputIngredients',
+          address: this.chainService.craftingProxy.address,
+          abi: [infragment],
+          method: 'getInputIngredients',
+          params: [recipes[k].id],
+          value: 0,
+        });
+        calls.push({
+          reference: 'getOutputIngredients',
+          address: this.chainService.craftingProxy.address,
+          abi: [outfragment],
+          method: 'getOutputIngredients',
+          params: [recipes[k].id],
+          value: 0,
+        });
+        dtos.push({
+          creatorId: creators[i],
+          recipeId: recipes[k].id,
+        });
+      }
+    }
+    const results = await this.chainService.multicall(calls);
+    if (!results) return null;
+    for (let i = 0, j = 0; i < results.length - 1; i += 2, j++) {
+      const input = iface.decodeFunctionResult(
+        'getInputIngredients',
+        results[i].returnData[1],
+      );
+      const output = iface.decodeFunctionResult(
+        'getOutputIngredients',
+        results[i + 1].returnData[1],
+      );
+      dtos[j] = {
+        inputIngredients: input,
+        outputIngredients: output,
+        ...dtos[j],
+      };
+    }
+    return dtos;
   }
 
   /*

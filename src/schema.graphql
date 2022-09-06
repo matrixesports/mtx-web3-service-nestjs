@@ -7,7 +7,7 @@ type Query {
   getBattlePass(creatorId: Int!): BattlePass
   getInventory: Inventory
   getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
-  getAllRecipes: [[Recipe]]
+  getAllRecipes: [Recipe]
   getRecipes(creatorId: Int!): [Recipe]
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
   getSeasonXpRanking(creatorId: Int!, seasonId: Int!): [Ranking]!
