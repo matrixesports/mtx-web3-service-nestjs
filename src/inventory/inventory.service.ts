@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BattlePassDB } from 'src/battle-pass/battle-pass.entity';
 import { Repository } from 'typeorm';
 import { InventoryDB } from './inventory.entity';
 
@@ -8,7 +9,13 @@ export class InventoryService {
   constructor(
     @InjectRepository(InventoryDB)
     private inventoryRepository: Repository<InventoryDB>,
+    @InjectRepository(BattlePassDB)
+    private battlePassRepository: Repository<BattlePassDB>,
   ) {}
+
+  async getAllBattlePass() {
+    return await this.battlePassRepository.find();
+  }
 
   async getInventory(query: {
     user_address?: string;

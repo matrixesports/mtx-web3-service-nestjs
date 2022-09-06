@@ -1,13 +1,13 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { ContractCall } from 'pilum';
-import { BattlePassService } from 'src/battle-pass/battle-pass.service';
 import { ChainService } from 'src/chain/chain.service';
+import { MetadataService } from 'src/metadata/metadata.service';
 
 @Resolver('LootboxOption')
 export class LootboxResolver {
   constructor(
     private chainService: ChainService,
-    private battlePassService: BattlePassService,
+    private metadataService: MetadataService,
   ) {}
 
   @Query()
@@ -41,7 +41,7 @@ export class LootboxResolver {
       const rewardsInOption = [];
       for (let y = 0; y < option[0].ids.length; y++) {
         rewardsInOption.push(
-          await this.battlePassService.createRewardObj(
+          await this.metadataService.createRewardObj(
             creatorId,
             option[0].ids[y],
             option[0].qtys[y],

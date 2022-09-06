@@ -8,9 +8,9 @@ import {
 } from '@nestjs/graphql';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import { BattlePassService } from 'src/battle-pass/battle-pass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Redeemed, RedeemStatus, Reward } from 'src/graphql.schema';
+import { MetadataService } from 'src/metadata/metadata.service';
 import { GetInventoryChildDto } from './inventory.dto';
 import { InventoryService } from './inventory.service';
 
@@ -18,15 +18,15 @@ import { InventoryService } from './inventory.service';
 export class InventoryResolver {
   constructor(
     private inventoryService: InventoryService,
-    private battlePassService: BattlePassService,
     private configService: ConfigService,
     private chainService: ChainService,
+    private metadataService: MetadataService,
   ) {}
 
   @ResolveField()
   async default(@Parent() parent: GetInventoryChildDto) {
     const defaultRewards: Reward[] = [];
-    const allBattlePasses = await this.battlePassService.findAll();
+    const allBattlePasses = await this.inventoryService.getAllBattlePass();
 
     for (let x = 0; x < allBattlePasses.length; x++) {
       const contract = await this.chainService.getBattlePassContract(
@@ -40,7 +40,7 @@ export class InventoryResolver {
       for (let y = 0; y < owned.length; y++) {
         let reward: Reward;
         try {
-          reward = await this.battlePassService.createRewardObj(
+          reward = await this.metadataService.createRewardObj(
             allBattlePasses[x].creator_id,
             ethers.BigNumber.from(owned[y].id),
             ethers.BigNumber.from(owned[y].balance),
@@ -82,7 +82,7 @@ export class InventoryResolver {
     for (const creatorId in temp) {
       for (const itemId in temp[creatorId]) {
         // qty is length of statuses to signify how many have been redeemed
-        const reward = await this.battlePassService.createRewardObj(
+        const reward = await this.metadataService.createRewardObj(
           parseInt(creatorId),
           ethers.BigNumber.from(itemId),
           ethers.BigNumber.from(temp[creatorId][itemId].length),

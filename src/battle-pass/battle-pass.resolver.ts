@@ -139,7 +139,7 @@ export class BattlePassResolver {
           option[2][y].toNumber(),
         );
         rewards.push(
-          await this.battlePassService.createRewardObj(
+          await this.metadataService.createRewardObj(
             creatorId,
             option[1][y],
             option[2][y],
@@ -148,7 +148,7 @@ export class BattlePassResolver {
       }
       return { success: true, reward: rewards };
     }
-    const reward = await this.battlePassService.createRewardObj(
+    const reward = await this.metadataService.createRewardObj(
       creatorId,
       BigNumber.from(id),
       BigNumber.from(qty),
@@ -270,13 +270,13 @@ export class BattlePassResolver {
         'seasonInfo',
         results[x].returnData[1],
       );
-      const freeReward = await this.battlePassService.createRewardObj(
+      const freeReward = await this.metadataService.createRewardObj(
         parent.creatorId,
         seasonInfo.freeRewardId,
         seasonInfo.freeRewardQty,
       );
 
-      const premiumReward = await this.battlePassService.createRewardObj(
+      const premiumReward = await this.metadataService.createRewardObj(
         parent.creatorId,
         seasonInfo.premiumRewardId,
         seasonInfo.premiumRewardQty,

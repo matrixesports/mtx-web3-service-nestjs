@@ -11,18 +11,18 @@ import { BattlePass__factory, Crafting__factory } from 'abi/typechain';
 import { BigNumber } from 'ethers';
 import { Result } from 'ethers/lib/utils';
 import { ContractCall } from 'pilum';
-import { BattlePassService } from 'src/battle-pass/battle-pass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Reward } from 'src/graphql.schema';
 import { CraftingService } from './crafting.service';
 import { GetRecipeDto } from './crafting.dto';
+import { MetadataService } from 'src/metadata/metadata.service';
 
 @Resolver('Recipe')
 export class CraftingResolver {
   constructor(
     private chainService: ChainService,
     private craftingService: CraftingService,
-    private battlePassService: BattlePassService,
+    private metadataService: MetadataService,
   ) {}
 
   /*
@@ -154,7 +154,7 @@ export class CraftingResolver {
         rc[0][0][i],
         this.chainService.provider,
       );
-      const reward = await this.battlePassService.createRewardObj(
+      const reward = await this.metadataService.createRewardObj(
         (await bp.creatorId()).toNumber(),
         rc[0][1][i],
         rc[0][2][i],
@@ -180,7 +180,7 @@ export class CraftingResolver {
         rc[0][0][i],
         this.chainService.provider,
       );
-      const reward = await this.battlePassService.createRewardObj(
+      const reward = await this.metadataService.createRewardObj(
         (await bp.creatorId()).toNumber(),
         rc[0][1][i],
         rc[0][2][i],

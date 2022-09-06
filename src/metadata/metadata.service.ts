@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MetadataDB } from './metadata.entity';
-import { RewardType } from 'src/graphql.schema';
+import { Reward, RewardType } from 'src/graphql.schema';
+import { BigNumber } from 'ethers';
 
 @Injectable()
 export class MetadataService {
@@ -40,5 +41,21 @@ export class MetadataService {
       console.log(e);
       throw e;
     }
+  }
+
+  async createRewardObj(
+    creatorId: number,
+    id: BigNumber,
+    qty: BigNumber,
+  ): Promise<Reward> {
+    if (!id || id.isZero()) return null;
+    const metadata = await this.getMetadata(creatorId, id.toNumber());
+    return {
+      id,
+      qty,
+      metadata,
+      rewardType: metadata.reward_type,
+      creatorId,
+    };
   }
 }

@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BigNumber } from 'ethers';
-import { Reward } from 'src/graphql.schema';
-import { MetadataService } from 'src/metadata/metadata.service';
 import { Repository } from 'typeorm';
 import { parse } from 'postgres-array';
 import { BattlePassDB } from './battle-pass.entity';
@@ -16,7 +13,6 @@ export class BattlePassService {
     private configService: ConfigService,
     @InjectRepository(BattlePassDB)
     private battlePassRepository: Repository<BattlePassDB>,
-    private metadataService: MetadataService,
   ) {}
 
   async getBattlePassDB(creatorId: number): Promise<BattlePassDB> {
@@ -43,25 +39,6 @@ export class BattlePassService {
 
   async findAll(): Promise<BattlePassDB[]> {
     return await this.battlePassRepository.find();
-  }
-
-  async createRewardObj(
-    creatorId: number,
-    id: BigNumber,
-    qty: BigNumber,
-  ): Promise<Reward> {
-    if (!id || id.isZero()) return null;
-    const metadata = await this.metadataService.getMetadata(
-      creatorId,
-      id.toNumber(),
-    );
-    return {
-      id,
-      qty,
-      metadata,
-      rewardType: metadata.reward_type,
-      creatorId,
-    };
   }
 
   /**
