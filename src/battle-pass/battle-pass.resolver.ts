@@ -176,7 +176,7 @@ export class BattlePassResolver {
       metadata,
     );
     const fee = await this.chainService.getMaticFeeData();
-    await (await bp.burn(userAddress, itemId, 1, fee)).wait(1);
+    await bp.burn(userAddress, itemId, 1, fee);
     return { success: true };
   }
 
