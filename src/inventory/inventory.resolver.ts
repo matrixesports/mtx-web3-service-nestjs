@@ -33,17 +33,16 @@ export class InventoryResolver {
         allBattlePasses[x].creator_id,
       );
 
-      const owned = await this.inventoryService.getNFTSOwnedForUser(
-        [contract.address],
-        parent.userAddress,
-      );
-
+      const owned = await this.inventoryService.getInventory({
+        user_address: parent.userAddress,
+        contract_address: contract.address,
+      });
       for (let y = 0; y < owned.length; y++) {
         let reward: Reward;
         try {
           reward = await this.battlePassService.createRewardObj(
             allBattlePasses[x].creator_id,
-            ethers.BigNumber.from(owned[y].id.tokenId),
+            ethers.BigNumber.from(owned[y].id),
             ethers.BigNumber.from(owned[y].balance),
           );
           defaultRewards.push(reward);

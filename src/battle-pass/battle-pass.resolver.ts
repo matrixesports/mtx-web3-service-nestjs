@@ -18,6 +18,7 @@ import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
 } from './battle-pass.dto';
+import { InventoryService } from 'src/inventory/inventory.service';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
@@ -25,6 +26,7 @@ export class BattlePassResolver {
     private chainService: ChainService,
     private battlePassService: BattlePassService,
     private metadataService: MetadataService,
+    private inventoryService: InventoryService,
   ) {}
 
   /*
@@ -107,17 +109,7 @@ export class BattlePassResolver {
       qty = rewardGiven.freeRewardQty.toNumber();
     }
     const metadata = await this.metadataService.getMetadata(creatorId, id);
-    if (metadata.reward_type === RewardType.REDEEMABLE && autoRedeem) {
-      await this.battlePassService.redeemItemHelper(
-        id,
-        userAddress,
-        creatorId,
-        bp.address,
-        metadata,
-      );
-      const fee = await this.chainService.getMaticFeeData();
-      await bp.burn(userAddress, id, 1, fee);
-    } else if (metadata.reward_type === RewardType.LOOTBOX) {
+    if (metadata.reward_type === RewardType.LOOTBOX) {
       const abi = bp.interface.getFunction('openLootbox');
       const fee = await this.chainService.getMaticFeeData();
       fee['gasLimit'] = 1000000;
@@ -140,6 +132,12 @@ export class BattlePassResolver {
       const option = await contract.getLootboxOptionByIdx(id, idxOpened);
       const rewards = [];
       for (let y = 0; y < option[1].length; y++) {
+        await this.inventoryService.updateInventory(
+          userAddress,
+          contract.address,
+          option[1][y].toNumber(),
+          option[2][y].toNumber(),
+        );
         rewards.push(
           await this.battlePassService.createRewardObj(
             creatorId,
@@ -155,6 +153,24 @@ export class BattlePassResolver {
       BigNumber.from(id),
       BigNumber.from(qty),
     );
+    if (metadata.reward_type === RewardType.REDEEMABLE && autoRedeem) {
+      await this.battlePassService.redeemItemHelper(
+        id,
+        userAddress,
+        creatorId,
+        bp.address,
+        metadata,
+      );
+      const fee = await this.chainService.getMaticFeeData();
+      await bp.burn(userAddress, id, 1, fee);
+    } else {
+      await this.inventoryService.updateInventory(
+        userAddress,
+        contract.address,
+        id,
+        qty,
+      );
+    }
     return { success: true, reward: [reward] };
   }
 
@@ -177,6 +193,12 @@ export class BattlePassResolver {
     );
     const fee = await this.chainService.getMaticFeeData();
     await bp.burn(userAddress, itemId, 1, fee);
+    this.inventoryService.updateInventory(
+      userAddress,
+      contract.address,
+      itemId,
+      -1,
+    );
     return { success: true };
   }
 

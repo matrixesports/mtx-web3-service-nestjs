@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BattlePassDB } from './battle-pass.entity';
 import { MetadataModule } from 'src/metadata/metadata.module';
 import { UserModule } from './user/user.module';
+import { InventoryModule } from 'src/inventory/inventory.module';
 
 @Module({
   providers: [BattlePassResolver, BattlePassService],
@@ -13,6 +14,7 @@ import { UserModule } from './user/user.module';
     TypeOrmModule.forFeature([BattlePassDB]),
     MetadataModule,
     UserModule,
+    InventoryModule,
   ],
   controllers: [BattlePassController],
   exports: [BattlePassService],

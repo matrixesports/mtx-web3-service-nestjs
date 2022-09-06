@@ -38,6 +38,7 @@ export class MetadataService {
       return await this.metadataRepository.insert([entity]);
     } catch (e) {
       console.log(e);
+      throw e;
     }
   }
 }
