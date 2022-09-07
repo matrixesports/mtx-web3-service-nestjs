@@ -89,7 +89,7 @@ export class BattlePassResolver {
     }
     const abi = bp.interface.getFunction('claimReward');
     const fee = await this.chainService.getMaticFeeData();
-    this.chainService.metatx(
+    await this.chainService.metatx(
       abi,
       [seasonId, level, premium],
       userAddress,
@@ -116,7 +116,7 @@ export class BattlePassResolver {
         metadata,
       );
       const fee = await this.chainService.getMaticFeeData();
-      await bp.burn(userAddress, id, 1, fee);
+      await (await bp.burn(userAddress, id, 1, fee)).wait(1);
     } else if (metadata.reward_type === RewardType.LOOTBOX) {
       const abi = bp.interface.getFunction('openLootbox');
       const fee = await this.chainService.getMaticFeeData();
@@ -176,7 +176,7 @@ export class BattlePassResolver {
       metadata,
     );
     const fee = await this.chainService.getMaticFeeData();
-    await bp.burn(userAddress, itemId, 1, fee);
+    await (await bp.burn(userAddress, itemId, 1, fee)).wait(1);
     return { success: true };
   }
 

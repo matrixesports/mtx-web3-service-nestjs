@@ -134,7 +134,7 @@ export class ChainService {
       ...fee,
     };
     const tx = await this.signer.sendTransaction(txData);
-    return await this.provider.waitForTransaction(tx.hash, 1);
+    return this.provider.waitForTransaction(tx.hash, 1);
   }
 
   async multicall(calls: ContractCall[]) {
