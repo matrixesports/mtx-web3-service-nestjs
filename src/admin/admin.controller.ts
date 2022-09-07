@@ -71,8 +71,7 @@ export class AdminController {
       this.chainService.battlePassFactory,
     ) as BattlePassFactory;
     const fee = await this.chainService.getMaticFeeData();
-    const newbp = await bpFactory.deployBattlePass(creatorId, fee);
-    const rc = await newbp.wait();
+    const rc = await (await bpFactory.deployBattlePass(creatorId, fee)).wait(1);
     const event = rc.events.find(
       (event: any) => event.event === 'BattlePassDeployed',
     );
@@ -96,7 +95,9 @@ export class AdminController {
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const seasonId = await bp.seasonId();
     const fee = await this.chainService.getMaticFeeData();
-    await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
+    await (
+      await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee)
+    ).wait(1);
     return { success: true };
   }
 
@@ -228,12 +229,14 @@ export class AdminController {
     );
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
-    await bp.mint(
-      mintTokenDto.userAddress,
-      CREATOR_TOKEN,
-      mintTokenDto.amount,
-      fee,
-    );
+    await (
+      await bp.mint(
+        mintTokenDto.userAddress,
+        CREATOR_TOKEN,
+        mintTokenDto.amount,
+        fee,
+      )
+    ).wait(1);
     return { success: true };
   }
 }

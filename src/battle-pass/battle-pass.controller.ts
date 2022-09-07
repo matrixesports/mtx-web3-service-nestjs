@@ -46,7 +46,9 @@ export class BattlePassController {
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const seasonId = await bp.seasonId();
     const fee = await this.chainService.getMaticFeeData();
-    await bp.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee);
+    await (
+      await bp.mint(mintPremiumPassDto.userAddress, seasonId, 1, fee)
+    ).wait(1);
     return { success: true };
   }
 
@@ -57,7 +59,9 @@ export class BattlePassController {
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const seasonId = await bp.seasonId();
     const fee = await this.chainService.getMaticFeeData();
-    await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee);
+    await (
+      await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee)
+    ).wait(1);
     return { success: true };
   }
 }
