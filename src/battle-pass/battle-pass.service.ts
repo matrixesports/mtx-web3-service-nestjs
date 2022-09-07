@@ -185,7 +185,9 @@ export class BattlePassService {
         body: twitchRedeemBody,
         responseTime: Date.now() - start,
       };
-    } catch (e) {}
+    } catch (e) {
+      console.log('Twitch Service Failed');
+    }
     logger.log(logData);
   }
 }
