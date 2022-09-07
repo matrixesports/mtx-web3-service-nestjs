@@ -172,18 +172,20 @@ export class BattlePassService {
       userAddress: userAddress,
       itemAddress: address,
     };
-    start = Date.now();
-    await axios.post(
-      `${
-        this.configService.get('SERVICE').twitchService
-      }/redemptions/redemption`,
-      twitchRedeemBody,
-    );
-    logData.external['1'] = {
-      path: '/redemptions/redemption',
-      body: twitchRedeemBody,
-      responseTime: Date.now() - start,
-    };
+    try {
+      start = Date.now();
+      await axios.post(
+        `${
+          this.configService.get('SERVICE').twitchService
+        }/redemptions/redemption`,
+        twitchRedeemBody,
+      );
+      logData.external['1'] = {
+        path: '/redemptions/redemption',
+        body: twitchRedeemBody,
+        responseTime: Date.now() - start,
+      };
+    } catch (e) {}
     logger.log(logData);
   }
 }
