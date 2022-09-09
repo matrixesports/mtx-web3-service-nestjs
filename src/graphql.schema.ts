@@ -52,7 +52,9 @@ export abstract class IQuery {
 
     abstract getAllXpRanking(creatorId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
 
-    abstract getReputationRanking(creatorId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
+    abstract getReputationRanking(creatorId: number): Ranking | Promise<Ranking>;
+
+    abstract getReputationRankings(creatorId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
 }
 
 export abstract class IMutation {

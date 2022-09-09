@@ -1,4 +1,11 @@
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Context,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { BattlePass__factory } from 'abi/typechain';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
@@ -64,7 +71,7 @@ export class LeaderboardResolver {
   }
 
   @Query()
-  async getReputationRanking(@Args('creatorId') creatorId: number) {
+  async getReputationRankings(@Args('creatorId') creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const res = await this.leaderboardService.getFollowers(creatorId);
     const addresses = [];
@@ -96,6 +103,17 @@ export class LeaderboardResolver {
     return dtos;
   }
 
+  @Query()
+  async getReputationRanking(
+    @Args('creatorId') creatorId: number,
+    @Context() context,
+  ) {
+    const userAddress: string = context.req.headers['user-address'];
+    const dtos: GetSeasonXpRankingDto[] = await this.getReputationRankings(
+      creatorId,
+    );
+    return dtos.find((dto) => (dto.userAddress = userAddress));
+  }
   @Query()
   async getAllXpRanking(@Args('creatorId') creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
