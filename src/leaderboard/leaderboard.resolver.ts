@@ -112,7 +112,7 @@ export class LeaderboardResolver {
     const dtos: GetSeasonXpRankingDto[] = await this.getReputationRankings(
       creatorId,
     );
-    return dtos.find((dto) => (dto.userAddress = userAddress));
+    return dtos.find((dto) => dto.userAddress === userAddress);
   }
   @Query()
   async getAllXpRanking(@Args('creatorId') creatorId: number) {
