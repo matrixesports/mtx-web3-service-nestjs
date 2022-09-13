@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BigNumber } from 'ethers';
@@ -77,8 +77,6 @@ export class BattlePassService {
     level: number,
   ): Promise<RequiredFieldsResponse> {
     if (level != 1) return null;
-    const logger = new Logger(this.checkRequiredFields.name);
-    const logData = { external: {} };
     const battlePassDB = await this.getBattlePassDB(creatorId);
     if (
       battlePassDB.required_user_social_options.length == 0 &&
@@ -100,19 +98,12 @@ export class BattlePassService {
       required_user_social_options,
       required_user_payment_options,
     };
-    const start = Date.now();
     const missingRedeemFields = await axios.post(
       `${
         this.configService.get('SERVICE').userService
       }/api/user/missingRedeemFields`,
       requiredFieldsBody,
     );
-    logData.external['0'] = {
-      path: '/api/user/missingRedeemFields',
-      body: requiredFieldsBody,
-      responseTime: Date.now() - start,
-    };
-    logger.log(logData);
     if (
       missingRedeemFields.data.missing_user_payment_options.length != 0 ||
       missingRedeemFields.data.missing_user_social_options.length != 0
@@ -142,8 +133,6 @@ export class BattlePassService {
     address: string,
     metadata: MetadataDB,
   ) {
-    const logger = new Logger(this.redeemItemHelper.name);
-    const logData = { external: {} };
     const ticketRedeemBody: TicketRedeemBody = {
       name: metadata.name,
       description: metadata.description,
@@ -153,18 +142,12 @@ export class BattlePassService {
       userAddress: userAddress,
       itemAddress: address,
     };
-    let start = Date.now();
     await axios.post(
       `${
         this.configService.get('SERVICE').ticketService
       }/api/ticket/redemption`,
       ticketRedeemBody,
     );
-    logData.external['0'] = {
-      path: '/api/ticket/redemption',
-      body: ticketRedeemBody,
-      responseTime: Date.now() - start,
-    };
     const twitchRedeemBody: TwitchRedeemBody = {
       ...metadata,
       creatorId: creatorId,
@@ -173,22 +156,15 @@ export class BattlePassService {
       itemAddress: address,
     };
     try {
-      start = Date.now();
       await axios.post(
         `${
           this.configService.get('SERVICE').twitchService
         }/redemptions/redemption`,
         twitchRedeemBody,
       );
-      logData.external['1'] = {
-        path: '/redemptions/redemption',
-        body: twitchRedeemBody,
-        responseTime: Date.now() - start,
-      };
     } catch (e) {
       console.log('Twitch Service Failed');
     }
-    logger.log(logData);
   }
 }
 

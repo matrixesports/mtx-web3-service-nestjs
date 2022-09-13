@@ -34,9 +34,15 @@ export class CraftingResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number,
   ): Promise<GetRecipeDto> {
+    const creatorObj = this.craftingService.getCreatorObj([creatorId]);
     return {
       creatorId,
       recipeId,
+      creatorObj: {
+        pfp: creatorObj[0].pfp,
+        slug: creatorObj[0].slug,
+        name: creatorObj[0].name,
+      },
     };
   }
 
@@ -164,6 +170,25 @@ export class CraftingResolver {
   /*
 |========================| FIELDS |========================|
 */
+  @ResolveField()
+  async creator(@Parent() parent: GetRecipeDto) {
+    return parent;
+  }
+
+  @ResolveField()
+  async name(@Parent() parent: GetRecipeDto) {
+    return parent.creatorObj.name;
+  }
+
+  @ResolveField()
+  async pfp(@Parent() parent: GetRecipeDto) {
+    return parent.creatorObj.pfp;
+  }
+
+  @ResolveField()
+  async slug(@Parent() parent: GetRecipeDto) {
+    return parent.creatorObj.slug;
+  }
 
   @ResolveField()
   async recipeId(@Parent() parent: GetRecipeDto) {

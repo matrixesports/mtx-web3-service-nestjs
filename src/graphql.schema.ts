@@ -135,6 +135,14 @@ export class Recipe {
     isActive: boolean;
     inputIngredients: Nullable<Reward>[];
     outputIngredients: Nullable<Reward>[];
+    creator: Creator;
+}
+
+export class Creator {
+    id: number;
+    name: string;
+    pfp?: Nullable<string>;
+    slug?: Nullable<string>;
 }
 
 export class ClaimRewardResponse {

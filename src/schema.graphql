@@ -125,6 +125,14 @@ type Recipe {
   isActive: Boolean!
   inputIngredients: [Reward]!
   outputIngredients: [Reward]!
+  creator: Creator!
+}
+
+type Creator {
+  id: Int!,
+  name: String!,
+  pfp: String,
+  slug: String,
 }
 
 # |========================| CLAIM |========================|

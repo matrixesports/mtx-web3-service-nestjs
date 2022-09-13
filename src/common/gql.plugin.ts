@@ -20,11 +20,7 @@ export class GraphQLPlugin implements ApolloServerPlugin {
       return;
     }
     gqlCtx.logger = this.logger.logger.child({ context: 'GraphQLLogger' });
-    return new Listener({
-      operationName: gqlCtx.request.operationName,
-      query: gqlCtx.request.query,
-      variables: gqlCtx.request.variables,
-    }) as unknown as GraphQLRequestListener;
+    return new Listener({}) as unknown as GraphQLRequestListener;
   }
 }
 
