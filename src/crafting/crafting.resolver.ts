@@ -34,7 +34,7 @@ export class CraftingResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number,
   ): Promise<GetRecipeDto> {
-    const creatorObj = await this.craftingService.getCreatorObj([creatorId]);
+    const creatorObj = await this.craftingService.getOwner([creatorId]);
     return {
       creatorId,
       recipeId,

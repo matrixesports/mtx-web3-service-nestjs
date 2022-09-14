@@ -13,7 +13,7 @@ export class CraftingService {
     private configService: ConfigService,
   ) {}
 
-  async getCreatorObj(creatorIds: number[]): Promise<
+  async getOwner(creatorIds: number[]): Promise<
     [
       {
         id: number;
@@ -23,13 +23,11 @@ export class CraftingService {
       },
     ]
   > {
-    const creatorObjs = await axios.post(
-      `${
-        this.configService.get('SERVICE').userService
-      }/api/user/missingRedeemFields`,
+    const owners = await axios.post(
+      `${this.configService.get('SERVICE').userService}/api/creator/getRecipes`,
       { creatorIds },
     );
-    return creatorObjs.data;
+    return owners.data;
   }
   async addRecipe(creatorId: number, recipeId: number) {
     return await this.recipeRepository.insert({
