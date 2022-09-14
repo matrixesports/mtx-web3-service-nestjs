@@ -1,10 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { GraphQLError } from 'graphql';
 import { Repository } from 'typeorm';
 import { RecipeDB } from './crafting.entity';
+
+export type Owner = {
+  id: number;
+  name: string;
+  slug: string;
+  pfp: string;
+};
 
 @Injectable()
 export class CraftingService {
@@ -14,17 +21,8 @@ export class CraftingService {
     private configService: ConfigService,
   ) {}
 
-  async getOwner(creatorIds: number[]): Promise<
-    [
-      {
-        id: number;
-        name: string;
-        slug: string;
-        pfp: string;
-      },
-    ]
-  > {
-    let owners;
+  async getOwner(creatorIds: number[]) {
+    let owners: AxiosResponse<any, any>;
     try {
       owners = await axios.post(
         `${
@@ -33,11 +31,11 @@ export class CraftingService {
         { ids: creatorIds },
       );
     } catch (e) {
-      throw new GraphQLError('Fetch Owner from User-Service Failed!');
+      throw new Error('Fetch Owners from User-Service Failed!');
     }
-    if (owners.length == 0)
-      throw new GraphQLError('Owner Not Found In User-Service!');
-    return owners.data;
+    if (owners.data.length == 0)
+      throw new Error('Owners Not Found In User-Service!');
+    return owners.data as Owner[];
   }
   async addRecipe(creatorId: number, recipeId: number) {
     return await this.recipeRepository.insert({

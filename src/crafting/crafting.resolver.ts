@@ -36,9 +36,9 @@ export class CraftingResolver {
     @Args('recipeId') recipeId: number,
   ): Promise<GetRecipeDto> {
     const recipes = await this.craftingService.getRecipes(creatorId);
-    if (!recipes.length) throw new GraphQLError('Owner Not Found!');
+    if (!recipes.length) throw new Error('Owner Not Found!');
     if (!recipes.find((recipe) => recipe.id == recipeId))
-      throw new GraphQLError('Recipe Not Found!');
+      throw new Error('Recipe Not Found!');
     const owner = await this.craftingService
       .getOwner([creatorId])
       .catch((error) => {
@@ -58,9 +58,14 @@ export class CraftingResolver {
   @Query()
   async getRecipes(@Args('creatorId') creatorId: number) {
     const dtos: GetRecipeDto[] = [];
-    const recipes = await this.craftingService.getRecipes(creatorId);
-    if (!recipes) throw new GraphQLError('Recipe Not Found!');
     const calls: ContractCall[] = [];
+    const recipes = await this.craftingService.getRecipes(creatorId);
+    if (!recipes.length) throw new GraphQLError('Recipes Not Found!');
+    const owner = await this.craftingService
+      .getOwner([creatorId])
+      .catch((error) => {
+        throw error;
+      });
     const iface = Crafting__factory.createInterface();
     const infragment = iface.getFunction('getInputIngredients');
     const outfragment = iface.getFunction('getOutputIngredients');
@@ -84,6 +89,11 @@ export class CraftingResolver {
       dtos.push({
         creatorId: creatorId,
         recipeId: recipes[i].id,
+        owner: {
+          pfp: owner[0].pfp,
+          slug: owner[0].slug,
+          name: owner[0].name,
+        },
       });
     }
     const results = await this.chainService.multicall(calls);
@@ -108,10 +118,16 @@ export class CraftingResolver {
 
   @Query()
   async getAllRecipes() {
-    const recipes = await this.craftingService.getAllRecipes();
     const dtos: GetRecipeDto[] = [];
-    const creators = [...new Set(recipes.map((recipe) => recipe.creator_id))];
     const calls: ContractCall[] = [];
+    const recipes = await this.craftingService.getAllRecipes();
+    if (!recipes.length) throw new GraphQLError('Recipes Not Found!');
+    const creators = [...new Set(recipes.map((recipe) => recipe.creator_id))];
+    const owner = await this.craftingService
+      .getOwner(creators)
+      .catch((error) => {
+        throw error;
+      });
     const iface = Crafting__factory.createInterface();
     const infragment = iface.getFunction('getInputIngredients');
     const outfragment = iface.getFunction('getOutputIngredients');
@@ -136,6 +152,11 @@ export class CraftingResolver {
         dtos.push({
           creatorId: creators[i],
           recipeId: recipes[k].id,
+          owner: {
+            pfp: owner[i].pfp,
+            slug: owner[i].slug,
+            name: owner[i].name,
+          },
         });
       }
     }
