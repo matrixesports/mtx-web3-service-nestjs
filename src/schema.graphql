@@ -129,7 +129,7 @@ type Recipe {
 }
 
 type Owner {
-  creatorId: Int!,
+  id: Int!,
   name: String!,
   pfp: String,
   slug: String,

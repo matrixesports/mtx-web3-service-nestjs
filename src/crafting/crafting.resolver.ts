@@ -171,7 +171,7 @@ export class CraftingResolver {
 |========================| FIELDS |========================|
 */
   @ResolveField()
-  async creator(@Parent() parent: GetRecipeDto) {
+  async owner(@Parent() parent: GetRecipeDto) {
     return parent;
   }
 
