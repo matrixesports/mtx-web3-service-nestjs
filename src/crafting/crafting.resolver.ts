@@ -191,7 +191,7 @@ export class CraftingResolver {
   }
 
   @ResolveField()
-  async creatorId(@Parent() parent: GetRecipeDto) {
+  async id(@Parent() parent: GetRecipeDto) {
     return parent.creatorId;
   }
 
