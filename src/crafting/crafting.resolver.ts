@@ -35,7 +35,6 @@ export class CraftingResolver {
     @Args('recipeId') recipeId: number,
   ): Promise<GetRecipeDto> {
     const creatorObj = await this.craftingService.getOwner([creatorId]);
-    console.log(creatorId);
     return {
       creatorId,
       recipeId,
@@ -171,11 +170,11 @@ export class CraftingResolver {
   /*
 |========================| FIELDS |========================|
 */
-  @ResolveField()
-  async owner(@Parent() parent: GetRecipeDto) {
-    console.log(parent);
-    return parent;
-  }
+  // @ResolveField()
+  // async owner(@Parent() parent: GetRecipeDto) {
+  //   console.log(parent);
+  //   return parent;
+  // }
 
   @ResolveField()
   async name(@Parent() parent: GetRecipeDto) {
