@@ -113,9 +113,12 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
         playground: false,
         debug: true, // stacktrace for error context
         formatError: (err) => {
-          const message = err.message.search(config.get('rpc').url)
-            ? 'on-chain error'
-            : err.message;
+          console.log(err.message.search(config.get('rpc').url));
+          const message =
+            err.message.search(config.get('rpc').url) > 0
+              ? 'on-chain error'
+              : err.message;
+          console.log(message);
           return new GraphQLError(message);
         },
         plugins: [ApolloServerPluginLandingPageLocalDefault()],

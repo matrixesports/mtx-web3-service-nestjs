@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
+import { GraphQLError } from 'graphql';
 import { Repository } from 'typeorm';
 import { RecipeDB } from './crafting.entity';
 
@@ -23,10 +24,19 @@ export class CraftingService {
       },
     ]
   > {
-    const owners = await axios.post(
-      `${this.configService.get('SERVICE').userService}/api/creator/getRecipes`,
-      { ids: creatorIds },
-    );
+    let owners;
+    try {
+      owners = await axios.post(
+        `${
+          this.configService.get('SERVICE').userService
+        }/api/creator/getRecipes`,
+        { ids: creatorIds },
+      );
+    } catch (e) {
+      throw new GraphQLError('Fetch Owner from User-Service Failed!');
+    }
+    if (owners.length == 0)
+      throw new GraphQLError('Owner Not Found In User-Service!');
     return owners.data;
   }
   async addRecipe(creatorId: number, recipeId: number) {

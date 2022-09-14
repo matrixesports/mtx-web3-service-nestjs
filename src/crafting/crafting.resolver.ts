@@ -16,6 +16,7 @@ import { ChainService } from 'src/chain/chain.service';
 import { Reward } from 'src/graphql.schema';
 import { CraftingService } from './crafting.service';
 import { GetRecipeDto } from './crafting.dto';
+import { GraphQLError } from 'graphql';
 
 @Resolver('Recipe')
 export class CraftingResolver {
@@ -34,14 +35,22 @@ export class CraftingResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number,
   ): Promise<GetRecipeDto> {
-    const creatorObj = await this.craftingService.getOwner([creatorId]);
+    const recipes = await this.craftingService.getRecipes(creatorId);
+    if (!recipes.length) throw new GraphQLError('Owner Not Found!');
+    if (!recipes.find((recipe) => recipe.id == recipeId))
+      throw new GraphQLError('Recipe Not Found!');
+    const owner = await this.craftingService
+      .getOwner([creatorId])
+      .catch((error) => {
+        throw error;
+      });
     return {
       creatorId,
       recipeId,
       owner: {
-        pfp: creatorObj[0].pfp,
-        slug: creatorObj[0].slug,
-        name: creatorObj[0].name,
+        pfp: owner[0].pfp,
+        slug: owner[0].slug,
+        name: owner[0].name,
       },
     };
   }
@@ -50,7 +59,7 @@ export class CraftingResolver {
   async getRecipes(@Args('creatorId') creatorId: number) {
     const dtos: GetRecipeDto[] = [];
     const recipes = await this.craftingService.getRecipes(creatorId);
-    if (!recipes) return null;
+    if (!recipes) throw new GraphQLError('Recipe Not Found!');
     const calls: ContractCall[] = [];
     const iface = Crafting__factory.createInterface();
     const infragment = iface.getFunction('getInputIngredients');
@@ -170,32 +179,14 @@ export class CraftingResolver {
   /*
 |========================| FIELDS |========================|
 */
-  // @ResolveField()
-  // async owner(@Parent() parent: GetRecipeDto) {
-  //   console.log(parent);
-  //   return parent;
-  // }
-
   @ResolveField()
-  async name(@Parent() parent: GetRecipeDto) {
-    return parent.owner.name;
-  }
-
-  @ResolveField()
-  async pfp(@Parent() parent: GetRecipeDto) {
-    return parent.owner.pfp;
-  }
-
-  @ResolveField()
-  async slug(@Parent() parent: GetRecipeDto) {
-    return parent.owner.slug;
-  }
-
-  @Resolver('owner')
-  @ResolveField('id')
-  async id(@Parent() parent: GetRecipeDto) {
-    console.log(parent);
-    return parent.creatorId;
+  async owner(@Parent() parent: GetRecipeDto) {
+    return {
+      name: parent.owner.name,
+      pfp: parent.owner.pfp,
+      creatorId: parent.creatorId,
+      slug: parent.owner.slug,
+    };
   }
 
   @ResolveField()
