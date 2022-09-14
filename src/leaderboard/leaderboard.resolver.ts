@@ -190,8 +190,9 @@ export class LeaderboardResolver {
     const index = parent.others.findIndex(
       (other) => other.userAddress === parent.userAddress,
     );
-    return Math.round(
-      ((parent.others.length - index) / parent.others.length) * 100,
+    return (
+      100 -
+      Math.round(((parent.others.length - index) / parent.others.length) * 100)
     );
   }
 }
