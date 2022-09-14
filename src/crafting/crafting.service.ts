@@ -25,7 +25,7 @@ export class CraftingService {
   > {
     const owners = await axios.post(
       `${this.configService.get('SERVICE').userService}/api/creator/getRecipes`,
-      { creatorIds },
+      { ids: creatorIds },
     );
     return owners.data;
   }
