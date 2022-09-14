@@ -5,7 +5,7 @@ export class GetRecipeDto {
   recipeId: number;
   inputIngredients?: Result;
   outputIngredients?: Result;
-  creatorObj?: {
+  owner?: {
     name: string;
     slug: string;
     pfp: string;

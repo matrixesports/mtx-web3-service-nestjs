@@ -125,11 +125,11 @@ type Recipe {
   isActive: Boolean!
   inputIngredients: [Reward]!
   outputIngredients: [Reward]!
-  creator: Creator!
+  owner: Owner!
 }
 
-type Creator {
-  id: Int!,
+type Owner {
+  creatorId: Int!,
   name: String!,
   pfp: String,
   slug: String,

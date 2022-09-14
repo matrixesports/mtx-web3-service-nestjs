@@ -135,11 +135,11 @@ export class Recipe {
     isActive: boolean;
     inputIngredients: Nullable<Reward>[];
     outputIngredients: Nullable<Reward>[];
-    creator: Creator;
+    owner: Owner;
 }
 
-export class Creator {
-    id: number;
+export class Owner {
+    creatorId: number;
     name: string;
     pfp?: Nullable<string>;
     slug?: Nullable<string>;

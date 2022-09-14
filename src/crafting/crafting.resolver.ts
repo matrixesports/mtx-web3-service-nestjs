@@ -38,7 +38,7 @@ export class CraftingResolver {
     return {
       creatorId,
       recipeId,
-      creatorObj: {
+      owner: {
         pfp: creatorObj[0].pfp,
         slug: creatorObj[0].slug,
         name: creatorObj[0].name,
@@ -177,17 +177,22 @@ export class CraftingResolver {
 
   @ResolveField()
   async name(@Parent() parent: GetRecipeDto) {
-    return parent.creatorObj.name;
+    return parent.owner.name;
   }
 
   @ResolveField()
   async pfp(@Parent() parent: GetRecipeDto) {
-    return parent.creatorObj.pfp;
+    return parent.owner.pfp;
   }
 
   @ResolveField()
   async slug(@Parent() parent: GetRecipeDto) {
-    return parent.creatorObj.slug;
+    return parent.owner.slug;
+  }
+
+  @ResolveField()
+  async creatorId(@Parent() parent: GetRecipeDto) {
+    return parent.creatorId;
   }
 
   @ResolveField()
