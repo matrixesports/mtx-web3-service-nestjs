@@ -121,13 +121,17 @@ export class CraftingResolver {
     const dtos: GetRecipeDto[] = [];
     const calls: ContractCall[] = [];
     const recipes = await this.craftingService.getAllRecipes();
-    if (!recipes.length) throw new GraphQLError('Recipes Not Found!');
-    const creators = [...new Set(recipes.map((recipe) => recipe.creator_id))];
-    const owner = await this.craftingService
-      .getOwner(creators)
-      .catch((error) => {
+    if (!recipes.length) throw new Error('Recipes Not Found!');
+    const creators = [
+      ...new Set(recipes.map((recipe) => recipe.creator_id)),
+    ].sort();
+    const owner = (
+      await this.craftingService.getOwner(creators).catch((error) => {
         throw error;
-      });
+      })
+    ).sort();
+    if (creators.length != owner.length)
+      throw new Error('Invalid Recipes or Creator!');
     const iface = Crafting__factory.createInterface();
     const infragment = iface.getFunction('getInputIngredients');
     const outfragment = iface.getFunction('getOutputIngredients');
@@ -153,8 +157,8 @@ export class CraftingResolver {
           creatorId: creators[i],
           recipeId: recipes[k].id,
           owner: {
-            pfp: owner[i].pfp,
-            slug: owner[i].slug,
+            pfp: owner[i]?.pfp,
+            slug: owner[i]?.slug,
             name: owner[i].name,
           },
         });
