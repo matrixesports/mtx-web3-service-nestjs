@@ -13,7 +13,16 @@ export class CraftingService {
     private configService: ConfigService,
   ) {}
 
-  async getCreatorObj(creatorIds: number[]) {
+  async getCreatorObj(creatorIds: number[]): Promise<
+    [
+      {
+        id: number;
+        name: string;
+        slug: string;
+        pfp: string;
+      },
+    ]
+  > {
     const creatorObjs = await axios.post(
       `${
         this.configService.get('SERVICE').userService
