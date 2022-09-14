@@ -178,8 +178,6 @@ export class CraftingResolver {
 
   @ResolveField()
   async name(@Parent() parent: GetRecipeDto) {
-    console.log(parent);
-    console.log(parent.owner.name);
     return parent.owner.name;
   }
 
@@ -193,8 +191,10 @@ export class CraftingResolver {
     return parent.owner.slug;
   }
 
-  @ResolveField()
+  @Resolver('owner')
+  @ResolveField('id')
   async id(@Parent() parent: GetRecipeDto) {
+    console.log(parent);
     return parent.creatorId;
   }
 

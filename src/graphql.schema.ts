@@ -139,7 +139,7 @@ export class Recipe {
 }
 
 export class Owner {
-    creatorId: number;
+    id: number;
     name: string;
     pfp?: Nullable<string>;
     slug?: Nullable<string>;
