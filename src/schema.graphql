@@ -12,7 +12,7 @@ type Query {
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
   getSeasonXpRanking(creatorId: Int!, seasonId: Int!): [Ranking]!
   getAllXpRanking(creatorId: Int!): [Ranking]!
-  getReputationRanking(creatorId: Int!): Ranking!
+  getReputationRanking(creatorId: Int!): Ranking
   getReputationRankings(creatorId: Int!): [Ranking]!
 }
 
