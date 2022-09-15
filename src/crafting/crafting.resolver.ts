@@ -136,6 +136,7 @@ export class CraftingResolver {
     for (let i = 0; i < creators.length; i++) {
       const owner = owners.find((owner) => owner.id == creators[i]);
       for (let k = 0; k < recipes.length; k++) {
+        if (recipes[k].creator_id != creators[i]) continue;
         calls.push({
           reference: 'getInputIngredients',
           address: this.chainService.craftingProxy.address,
