@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios, { AxiosResponse } from 'axios';
-import { GraphQLError } from 'graphql';
 import { Repository } from 'typeorm';
 import { RecipeDB } from './crafting.entity';
 
@@ -21,6 +20,10 @@ export class CraftingService {
     private configService: ConfigService,
   ) {}
 
+  /*
+|========================| SERVICE CALLS |========================|
+*/
+
   async getOwner(creatorIds: number[]) {
     let owners: AxiosResponse<any, any>;
     try {
@@ -37,31 +40,40 @@ export class CraftingService {
       throw new Error('Owners Not Found In User-Service!');
     return owners.data as Owner[];
   }
+
+  /*
+|========================| REPOSITORY |========================|
+*/
+
   async addRecipe(creatorId: number, recipeId: number) {
-    return await this.recipeRepository.insert({
-      creator_id: creatorId,
-      id: recipeId,
-    });
+    return await this.recipeRepository
+      .createQueryBuilder('recipe')
+      .insert()
+      .values({ creator_id: creatorId, id: recipeId })
+      .execute();
   }
 
   async getRecipes(creatorId: number) {
-    return await this.recipeRepository.find({
-      where: {
-        creator_id: creatorId,
-      },
-    });
+    return await this.recipeRepository
+      .createQueryBuilder('recipe')
+      .select()
+      .where('recipe.creator_id = :creatorId', { creatorId })
+      .getMany();
   }
 
   async checkRecipe(recipeId: number) {
-    await this.recipeRepository.find({
-      where: {
-        id: recipeId,
-      },
-    });
-    return true;
+    if (
+      await this.recipeRepository
+        .createQueryBuilder('recipe')
+        .select('recipe.id')
+        .where('recipe.id = :recipeId', { recipeId })
+        .getOne()
+    )
+      return true;
+    throw new Error('Recipe Not Found!');
   }
 
   async getAllRecipes() {
-    return await this.recipeRepository.find();
+    return await this.recipeRepository.createQueryBuilder('recipe').getMany();
   }
 }

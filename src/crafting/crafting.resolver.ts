@@ -122,20 +122,19 @@ export class CraftingResolver {
     const calls: ContractCall[] = [];
     const recipes = await this.craftingService.getAllRecipes();
     if (!recipes.length) throw new Error('Recipes Not Found!');
-    const creators = [
-      ...new Set(recipes.map((recipe) => recipe.creator_id)),
-    ].sort();
-    const owner = (
-      await this.craftingService.getOwner(creators).catch((error) => {
+    const creators = [...new Set(recipes.map((recipe) => recipe.creator_id))];
+    const owners = await this.craftingService
+      .getOwner(creators)
+      .catch((error) => {
         throw error;
-      })
-    ).sort();
-    if (creators.length != owner.length)
+      });
+    if (creators.length != owners.length)
       throw new Error('Invalid Recipes or Creator!');
     const iface = Crafting__factory.createInterface();
     const infragment = iface.getFunction('getInputIngredients');
     const outfragment = iface.getFunction('getOutputIngredients');
     for (let i = 0; i < creators.length; i++) {
+      const owner = owners.find((owner) => owner.id == creators[i]);
       for (let k = 0; k < recipes.length; k++) {
         calls.push({
           reference: 'getInputIngredients',
@@ -157,9 +156,9 @@ export class CraftingResolver {
           creatorId: creators[i],
           recipeId: recipes[k].id,
           owner: {
-            pfp: owner[i]?.pfp,
-            slug: owner[i]?.slug,
-            name: owner[i].name,
+            pfp: owner?.pfp,
+            slug: owner?.slug,
+            name: owner.name,
           },
         });
       }
@@ -190,7 +189,9 @@ export class CraftingResolver {
 
   @Mutation()
   async craft(@Args('recipeId') recipeId: number, @Context() context) {
-    if (!this.craftingService.checkRecipe(recipeId)) return { success: false };
+    await this.craftingService.checkRecipe(recipeId).catch((error) => {
+      throw error;
+    });
     const userAddress: string = context.req.headers['user-address'];
     await this.chainService.callCrafting(
       'craft',
