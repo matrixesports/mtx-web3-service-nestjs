@@ -89,7 +89,9 @@ export class AdminController {
         description: 'Deployment failed!',
       };
     }
-    this.battlePassService.addBattlePassDB(creatorId);
+    this.battlePassService.addBattlePass(creatorId).catch((error) => {
+      throw new HttpException(error.message, 500);
+    });
     return {
       success: true,
     };

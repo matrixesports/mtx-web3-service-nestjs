@@ -26,7 +26,11 @@ export class InventoryResolver {
   @ResolveField()
   async default(@Parent() parent: GetInventoryChildDto) {
     const defaultRewards: Reward[] = [];
-    const allBattlePasses = await this.battlePassService.findAll();
+    const allBattlePasses = await this.battlePassService
+      .getBattlePasses()
+      .catch((error) => {
+        throw error;
+      });
 
     for (let x = 0; x < allBattlePasses.length; x++) {
       const contract = await this.chainService.getBattlePassContract(

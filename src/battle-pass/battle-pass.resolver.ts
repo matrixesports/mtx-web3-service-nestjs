@@ -38,9 +38,11 @@ export class BattlePassResolver {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const seasonId = await contract.seasonId();
     const maxLevel = await contract.getMaxLevel(seasonId);
-    const battlePassDB = await this.battlePassService.getBattlePassDB(
-      creatorId,
-    );
+    const battlePassDB = await this.battlePassService
+      .getBattlePass(creatorId)
+      .catch((error) => {
+        throw error;
+      });
     return {
       contract,
       seasonId,
@@ -259,7 +261,6 @@ export class BattlePassResolver {
         seasonInfo.premiumRewardId,
         seasonInfo.premiumRewardQty,
       );
-
       levelInfo.push({
         level: x,
         xpToCompleteLevel: seasonInfo.xpToCompleteLevel,

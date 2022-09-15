@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseFilters } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Param,
+  Post,
+  UseFilters,
+} from '@nestjs/common';
 import { BattlePass } from 'abi/typechain';
 import { ChainService } from 'src/chain/chain.service';
 import { EthersFilter, TypeORMFilter } from 'src/common/filters';
@@ -21,9 +29,11 @@ export class BattlePassController {
   async getBattlePassDB(@Param('creatorId') creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const seasonId = await contract.seasonId();
-    const battlePassDB = await this.battlePassService.getBattlePassDB(
-      creatorId,
-    );
+    const battlePassDB = await this.battlePassService
+      .getBattlePass(creatorId)
+      .catch((error) => {
+        throw new HttpException(error.message, 500);
+      });
     return {
       price: battlePassDB.price,
       currency: battlePassDB.currency,
