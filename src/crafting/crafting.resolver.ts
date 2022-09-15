@@ -16,7 +16,6 @@ import { ChainService } from 'src/chain/chain.service';
 import { Reward } from 'src/graphql.schema';
 import { CraftingService } from './crafting.service';
 import { GetRecipeDto } from './crafting.dto';
-import { GraphQLError } from 'graphql';
 
 @Resolver('Recipe')
 export class CraftingResolver {
@@ -35,10 +34,9 @@ export class CraftingResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number,
   ): Promise<GetRecipeDto> {
-    const recipes = await this.craftingService.getRecipes(creatorId);
-    if (!recipes.length) throw new Error('Owner Not Found!');
-    if (!recipes.find((recipe) => recipe.id == recipeId))
-      throw new Error('Recipe Not Found!');
+    await this.craftingService.getRecipe(creatorId, recipeId).catch((error) => {
+      throw error;
+    });
     const owner = await this.craftingService
       .getOwner([creatorId])
       .catch((error) => {
@@ -59,8 +57,11 @@ export class CraftingResolver {
   async getRecipes(@Args('creatorId') creatorId: number) {
     const dtos: GetRecipeDto[] = [];
     const calls: ContractCall[] = [];
-    const recipes = await this.craftingService.getRecipes(creatorId);
-    if (!recipes.length) throw new GraphQLError('Recipes Not Found!');
+    const recipes = await this.craftingService
+      .getRecipes(creatorId)
+      .catch((error) => {
+        throw error;
+      });
     const owner = await this.craftingService
       .getOwner([creatorId])
       .catch((error) => {
@@ -120,8 +121,11 @@ export class CraftingResolver {
   async getAllRecipes() {
     const dtos: GetRecipeDto[] = [];
     const calls: ContractCall[] = [];
-    const recipes = await this.craftingService.getAllRecipes();
-    if (!recipes.length) throw new Error('Recipes Not Found!');
+    const recipes = await this.craftingService
+      .getAllRecipes()
+      .catch((error) => {
+        throw error;
+      });
     const creators = [...new Set(recipes.map((recipe) => recipe.creator_id))];
     const owners = await this.craftingService
       .getOwner(creators)

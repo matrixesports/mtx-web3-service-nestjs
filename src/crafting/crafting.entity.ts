@@ -1,10 +1,11 @@
-import { Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
 @Entity('recipe')
 export class RecipeDB {
   @PrimaryColumn()
-  creator_id: number;
-
-  @PrimaryColumn()
   id: number;
+
+  @Column()
+  @Index('ix_creator')
+  creator_id: number;
 }

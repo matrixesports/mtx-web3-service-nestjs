@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseFilters } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Param,
+  Post,
+  UseFilters,
+} from '@nestjs/common';
 import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
 import {
   BattlePass,
@@ -181,44 +189,49 @@ export class AdminController {
   @Post('newRecipe')
   async newRecipe(@Body() newRecipeDto: NewRecipeDto) {
     //assume creatorIDs exists (retool)
-    const inputIngredients: IngredientsStruct = {
-      battlePasses: [],
-      ids: [],
-      qtys: [],
-    };
-    for (let i = 0; i < newRecipeDto.inputIngredients.length; i++) {
-      const ingredient = newRecipeDto.inputIngredients[i];
-      const address = await this.chainService.getBattlePassAddress(
-        ingredient.creatorId,
-      );
-      inputIngredients.battlePasses.push(address);
-      inputIngredients.ids.push(ingredient.id);
-      inputIngredients.qtys.push(ingredient.qty);
-    }
-    const outputIngredients: IngredientsStruct = {
-      battlePasses: [],
-      ids: [],
-      qtys: [],
-    };
-    for (let i = 0; i < newRecipeDto.outputIngredients.length; i++) {
-      const ingredient = newRecipeDto.outputIngredients[i];
-      const address = await this.chainService.getBattlePassAddress(
-        ingredient.creatorId,
-      );
-      outputIngredients.battlePasses.push(address);
-      outputIngredients.ids.push(ingredient.id);
-      outputIngredients.qtys.push(ingredient.qty);
-    }
-    const rc = (await this.chainService.callCrafting(
-      'addRecipe',
-      [inputIngredients, outputIngredients],
-      null,
-      true,
-    )) as ethers.providers.TransactionReceipt;
-    const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
-    const recipeId = event.args['recipeId'].toNumber();
-    this.craftingService.addRecipe(newRecipeDto.creatorId, recipeId);
-    return { success: true };
+    // const inputIngredients: IngredientsStruct = {
+    //   battlePasses: [],
+    //   ids: [],
+    //   qtys: [],
+    // };
+    // for (let i = 0; i < newRecipeDto.inputIngredients.length; i++) {
+    //   const ingredient = newRecipeDto.inputIngredients[i];
+    //   const address = await this.chainService.getBattlePassAddress(
+    //     ingredient.creatorId,
+    //   );
+    //   inputIngredients.battlePasses.push(address);
+    //   inputIngredients.ids.push(ingredient.id);
+    //   inputIngredients.qtys.push(ingredient.qty);
+    // }
+    // const outputIngredients: IngredientsStruct = {
+    //   battlePasses: [],
+    //   ids: [],
+    //   qtys: [],
+    // };
+    // for (let i = 0; i < newRecipeDto.outputIngredients.length; i++) {
+    //   const ingredient = newRecipeDto.outputIngredients[i];
+    //   const address = await this.chainService.getBattlePassAddress(
+    //     ingredient.creatorId,
+    //   );
+    //   outputIngredients.battlePasses.push(address);
+    //   outputIngredients.ids.push(ingredient.id);
+    //   outputIngredients.qtys.push(ingredient.qty);
+    // }
+    // const rc = (await this.chainService.callCrafting(
+    //   'addRecipe',
+    //   [inputIngredients, outputIngredients],
+    //   null,
+    //   true,
+    // )) as ethers.providers.TransactionReceipt;
+    // const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
+    // const recipeId = event.args['recipeId'].toNumber();
+    // this.craftingService
+    //   .addRecipe(newRecipeDto.creatorId, recipeId)
+    //   .catch((error) => {
+    //     throw new HttpException(error.message, 500);
+    //   });
+    // return { success: true };
+    await this.craftingService.getRecipes(12);
   }
 
   @Post('mint')

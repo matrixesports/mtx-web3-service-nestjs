@@ -5,3 +5,9 @@ CREATE TABLE recipe (
     PRIMARY KEY (id)
 );
 CREATE INDEX ix_creator ON recipe USING btree(creator_id);
+
+-- List  Indices
+SELECT schemaname, indexname, tablename 
+FROM pg_indexes 
+WHERE schemaname = 'public' 
+ORDER BY indexname;
