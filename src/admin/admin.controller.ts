@@ -149,14 +149,18 @@ export class AdminController {
     const fee = await this.chainService.getMaticFeeData();
     await (await bp.newLootbox(lootboxOption, fee)).wait(1);
     const lootboxId = await bp.lootboxId();
-    await this.metadataService.addMetadata(
-      newLootboxDto.creatorId,
-      lootboxId.toNumber(),
-      'TODO',
-      'TODO',
-      'TODO',
-      RewardType.LOOTBOX,
-    );
+    await this.metadataService
+      .addMetadata(
+        newLootboxDto.creatorId,
+        lootboxId.toNumber(),
+        'TODO',
+        'TODO',
+        'TODO',
+        RewardType.LOOTBOX,
+      )
+      .catch((error) => {
+        throw new HttpException(error.message, 500);
+      });
     return {
       success: true,
       lootboxId: lootboxId.toNumber(),
@@ -188,50 +192,49 @@ export class AdminController {
 
   @Post('newRecipe')
   async newRecipe(@Body() newRecipeDto: NewRecipeDto) {
-    //assume creatorIDs exists (retool)
-    // const inputIngredients: IngredientsStruct = {
-    //   battlePasses: [],
-    //   ids: [],
-    //   qtys: [],
-    // };
-    // for (let i = 0; i < newRecipeDto.inputIngredients.length; i++) {
-    //   const ingredient = newRecipeDto.inputIngredients[i];
-    //   const address = await this.chainService.getBattlePassAddress(
-    //     ingredient.creatorId,
-    //   );
-    //   inputIngredients.battlePasses.push(address);
-    //   inputIngredients.ids.push(ingredient.id);
-    //   inputIngredients.qtys.push(ingredient.qty);
-    // }
-    // const outputIngredients: IngredientsStruct = {
-    //   battlePasses: [],
-    //   ids: [],
-    //   qtys: [],
-    // };
-    // for (let i = 0; i < newRecipeDto.outputIngredients.length; i++) {
-    //   const ingredient = newRecipeDto.outputIngredients[i];
-    //   const address = await this.chainService.getBattlePassAddress(
-    //     ingredient.creatorId,
-    //   );
-    //   outputIngredients.battlePasses.push(address);
-    //   outputIngredients.ids.push(ingredient.id);
-    //   outputIngredients.qtys.push(ingredient.qty);
-    // }
-    // const rc = (await this.chainService.callCrafting(
-    //   'addRecipe',
-    //   [inputIngredients, outputIngredients],
-    //   null,
-    //   true,
-    // )) as ethers.providers.TransactionReceipt;
-    // const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
-    // const recipeId = event.args['recipeId'].toNumber();
-    // this.craftingService
-    //   .addRecipe(newRecipeDto.creatorId, recipeId)
-    //   .catch((error) => {
-    //     throw new HttpException(error.message, 500);
-    //   });
-    // return { success: true };
-    await this.craftingService.getRecipes(12);
+    // assume creatorIDs exists (retool)
+    const inputIngredients: IngredientsStruct = {
+      battlePasses: [],
+      ids: [],
+      qtys: [],
+    };
+    for (let i = 0; i < newRecipeDto.inputIngredients.length; i++) {
+      const ingredient = newRecipeDto.inputIngredients[i];
+      const address = await this.chainService.getBattlePassAddress(
+        ingredient.creatorId,
+      );
+      inputIngredients.battlePasses.push(address);
+      inputIngredients.ids.push(ingredient.id);
+      inputIngredients.qtys.push(ingredient.qty);
+    }
+    const outputIngredients: IngredientsStruct = {
+      battlePasses: [],
+      ids: [],
+      qtys: [],
+    };
+    for (let i = 0; i < newRecipeDto.outputIngredients.length; i++) {
+      const ingredient = newRecipeDto.outputIngredients[i];
+      const address = await this.chainService.getBattlePassAddress(
+        ingredient.creatorId,
+      );
+      outputIngredients.battlePasses.push(address);
+      outputIngredients.ids.push(ingredient.id);
+      outputIngredients.qtys.push(ingredient.qty);
+    }
+    const rc = (await this.chainService.callCrafting(
+      'addRecipe',
+      [inputIngredients, outputIngredients],
+      null,
+      true,
+    )) as ethers.providers.TransactionReceipt;
+    const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
+    const recipeId = event.args['recipeId'].toNumber();
+    this.craftingService
+      .addRecipe(newRecipeDto.creatorId, recipeId)
+      .catch((error) => {
+        throw new HttpException(error.message, 500);
+      });
+    return { success: true };
   }
 
   @Post('mint')
