@@ -1,10 +1,10 @@
 import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { ContractCall } from 'pilum';
-import { GetBattlePassUserInfoChildDto } from '../../battle-pass.dto';
+import { GetBattlePassUserInfoChildDto } from './battle-pass.dto';
 import { ChainService } from 'src/chain/chain.service';
 
 @Resolver('PremiumBattlePassUser')
-export class PremiumResolver {
+export class PremiumUserResolver {
   constructor(private chainService: ChainService) {}
 
   @ResolveField()

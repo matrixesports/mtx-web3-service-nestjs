@@ -72,7 +72,7 @@ export class BattlePassService {
       await queryRunner.release();
     }
     if (bp) return bp;
-    throw new Error('Insert Recipe Failed!');
+    throw new Error('Insert BattlePass Failed!');
   }
 
   /*

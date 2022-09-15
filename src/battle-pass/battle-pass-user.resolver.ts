@@ -1,12 +1,11 @@
 import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
-import { GetBattlePassUserInfoChildDto } from '../battle-pass.dto';
+import { GetBattlePassUserInfoChildDto } from './battle-pass.dto';
 
 @Resolver('BattlePassUser')
 export class UserResolver {
   constructor(private chainService: ChainService) {}
-
   @ResolveField()
   async xp(@Parent() parent: GetBattlePassUserInfoChildDto) {
     const userInfo = await parent.contract.userInfo(
@@ -15,12 +14,10 @@ export class UserResolver {
     );
     return userInfo.xp;
   }
-
   @ResolveField()
   async level(@Parent() parent: GetBattlePassUserInfoChildDto) {
     return await parent.contract.level(parent.userAddress, parent.seasonId);
   }
-
   @ResolveField()
   async unclaimedFreeRewards(@Parent() parent: GetBattlePassUserInfoChildDto) {
     const userLevel = await parent.contract.level(
@@ -45,7 +42,6 @@ export class UserResolver {
     }
     return unclaimedFree;
   }
-
   @ResolveField()
   // only show if user is premium
   async premium(
