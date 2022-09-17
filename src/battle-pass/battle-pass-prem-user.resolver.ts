@@ -9,7 +9,9 @@ export class PremiumUserResolver {
 
   @ResolveField()
   async owned(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    return await parent.contract.balanceOf(parent.userAddress, parent.seasonId);
+    return (
+      await parent.contract.balanceOf(parent.userAddress, parent.seasonId)
+    ).toNumber();
   }
 
   @ResolveField()

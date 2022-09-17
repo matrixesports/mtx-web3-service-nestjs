@@ -7,10 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { BattlePass__factory, Crafting__factory } from 'abi/typechain';
 import { BigNumber } from 'ethers';
-import { Result } from 'ethers/lib/utils';
-import { ContractCall } from 'pilum';
 import { BattlePassService } from 'src/battle-pass/battle-pass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Reward } from 'src/graphql.schema';
@@ -37,14 +34,29 @@ export class CraftingResolver {
     await this.craftingService.getRecipe(creatorId, recipeId).catch((error) => {
       throw error;
     });
+    const recipe = await this.craftingService
+      .getRecipe(creatorId, recipeId)
+      .catch((error) => {
+        throw error;
+      });
     const owner = await this.craftingService
       .getOwner([creatorId])
+      .catch((error) => {
+        throw error;
+      });
+    const ingridients = await this.craftingService
+      .getIngridients([recipe])
       .catch((error) => {
         throw error;
       });
     return {
       creatorId,
       recipeId,
+      recipe: {
+        input: ingridients[0].input,
+        output: ingridients[0].output,
+      },
+      active: recipe.active,
       owner: {
         pfp: owner[0].pfp,
         slug: owner[0].slug,
@@ -56,63 +68,38 @@ export class CraftingResolver {
   @Query()
   async getRecipes(@Args('creatorId') creatorId: number) {
     const dtos: GetRecipeDto[] = [];
-    const calls: ContractCall[] = [];
     const recipes = await this.craftingService
-      .getRecipes(creatorId)
+      .getActiveRecipes(creatorId)
       .catch((error) => {
         throw error;
       });
-    const owner = await this.craftingService
-      .getOwner([creatorId])
+    // const owners = await this.craftingService
+    //   .getOwner([creatorId])
+    //   .catch((error) => {
+    //     throw error;
+    //   });
+    const owners = [{ pfp: 'pfp', slug: 'slug', name: 'name' }];
+    const ingridients = await this.craftingService
+      .getIngridients(recipes)
       .catch((error) => {
         throw error;
       });
-    const iface = Crafting__factory.createInterface();
-    const infragment = iface.getFunction('getInputIngredients');
-    const outfragment = iface.getFunction('getOutputIngredients');
-    for (let i = 0; i < recipes.length; i++) {
-      calls.push({
-        reference: 'getInputIngredients',
-        address: this.chainService.craftingProxy.address,
-        abi: [infragment],
-        method: 'getInputIngredients',
-        params: [recipes[i].id],
-        value: 0,
-      });
-      calls.push({
-        reference: 'getOutputIngredients',
-        address: this.chainService.craftingProxy.address,
-        abi: [outfragment],
-        method: 'getOutputIngredients',
-        params: [recipes[i].id],
-        value: 0,
-      });
+    const owner = {
+      pfp: owners[0].pfp,
+      slug: owners[0].slug,
+      name: owners[0].name,
+    };
+    for (let i = 0; i < ingridients.length; i++) {
       dtos.push({
         creatorId: creatorId,
         recipeId: recipes[i].id,
-        owner: {
-          pfp: owner[0].pfp,
-          slug: owner[0].slug,
-          name: owner[0].name,
+        recipe: {
+          input: ingridients[i].input,
+          output: ingridients[i].output,
         },
+        active: recipes[0].active,
+        owner,
       });
-    }
-    const results = await this.chainService.multicall(calls);
-    if (!results) return null;
-    for (let i = 0, j = 0; i < results.length - 1; i += 2, j++) {
-      const input = iface.decodeFunctionResult(
-        'getInputIngredients',
-        results[i].returnData[1],
-      );
-      const output = iface.decodeFunctionResult(
-        'getOutputIngredients',
-        results[i + 1].returnData[1],
-      );
-      dtos[j] = {
-        inputIngredients: input,
-        outputIngredients: output,
-        ...dtos[j],
-      };
     }
     return dtos;
   }
@@ -120,9 +107,8 @@ export class CraftingResolver {
   @Query()
   async getAllRecipes() {
     const dtos: GetRecipeDto[] = [];
-    const calls: ContractCall[] = [];
     const recipes = await this.craftingService
-      .getAllRecipes()
+      .getAllActiveRecipes()
       .catch((error) => {
         throw error;
       });
@@ -134,56 +120,27 @@ export class CraftingResolver {
       });
     if (creators.length != owners.length)
       throw new Error('Invalid Recipes or Creator!');
-    const iface = Crafting__factory.createInterface();
-    const infragment = iface.getFunction('getInputIngredients');
-    const outfragment = iface.getFunction('getOutputIngredients');
-    for (let i = 0; i < creators.length; i++) {
-      const owner = owners.find((owner) => owner.id == creators[i]);
-      for (let k = 0; k < recipes.length; k++) {
-        if (recipes[k].creator_id != creators[i]) continue;
-        calls.push({
-          reference: 'getInputIngredients',
-          address: this.chainService.craftingProxy.address,
-          abi: [infragment],
-          method: 'getInputIngredients',
-          params: [recipes[k].id],
-          value: 0,
-        });
-        calls.push({
-          reference: 'getOutputIngredients',
-          address: this.chainService.craftingProxy.address,
-          abi: [outfragment],
-          method: 'getOutputIngredients',
-          params: [recipes[k].id],
-          value: 0,
-        });
-        dtos.push({
-          creatorId: creators[i],
-          recipeId: recipes[k].id,
-          owner: {
-            pfp: owner?.pfp,
-            slug: owner?.slug,
-            name: owner.name,
-          },
-        });
-      }
-    }
-    const results = await this.chainService.multicall(calls);
-    if (!results) return null;
-    for (let i = 0, j = 0; i < results.length - 1; i += 2, j++) {
-      const input = iface.decodeFunctionResult(
-        'getInputIngredients',
-        results[i].returnData[1],
-      );
-      const output = iface.decodeFunctionResult(
-        'getOutputIngredients',
-        results[i + 1].returnData[1],
-      );
-      dtos[j] = {
-        inputIngredients: input,
-        outputIngredients: output,
-        ...dtos[j],
-      };
+    const ingridients = await this.craftingService
+      .getIngridients(recipes)
+      .catch((error) => {
+        throw error;
+      });
+
+    for (let i = 0; i < ingridients.length; i++) {
+      dtos.push({
+        creatorId: recipes[i].creator_id,
+        recipeId: recipes[i].id,
+        recipe: {
+          input: ingridients[i].input,
+          output: ingridients[i].output,
+        },
+        active: recipes[i].active,
+        owner: {
+          pfp: owners[i].pfp,
+          name: owners[i].name,
+          slug: owners[i].slug,
+        },
+      });
     }
     return dtos;
   }
@@ -198,12 +155,7 @@ export class CraftingResolver {
       throw error;
     });
     const userAddress: string = context.req.headers['user-address'];
-    await this.chainService.callCrafting(
-      'craft',
-      [recipeId],
-      userAddress,
-      true,
-    );
+    await this.chainService.callCrafting('craft', [recipeId], userAddress);
     return { success: true };
   }
 
@@ -222,40 +174,22 @@ export class CraftingResolver {
 
   @ResolveField()
   async recipeId(@Parent() parent: GetRecipeDto) {
-    return BigNumber.from(parent.recipeId);
+    return parent.recipeId;
   }
 
   @ResolveField()
   async isActive(@Parent() parent: GetRecipeDto) {
-    const rc = (await this.chainService.callCrafting(
-      'isActive',
-      [parent.recipeId],
-      null,
-      false,
-    )) as Result;
-    return rc[0];
+    return parent.active;
   }
 
   @ResolveField()
   async inputIngredients(@Parent() parent: GetRecipeDto) {
-    const rc = parent.inputIngredients
-      ? parent.inputIngredients
-      : ((await this.chainService.callCrafting(
-          'getInputIngredients',
-          [parent.recipeId],
-          null,
-          false,
-        )) as Result);
     const rewards: Reward[] = [];
-    for (let i = 0; i < rc[0][0].length; i++) {
-      const bp = BattlePass__factory.connect(
-        rc[0][0][i],
-        this.chainService.provider,
-      );
+    for (let i = 0; i < parent.recipe.input.battlePasses.length; i++) {
       const reward = await this.battlePassService.createRewardObj(
-        (await bp.creatorId()).toNumber(),
-        rc[0][1][i],
-        rc[0][2][i],
+        parent.creatorId,
+        parent.recipe.input.ids[i],
+        parent.recipe.input.qtys[i],
       );
       rewards.push(reward);
     }
@@ -264,24 +198,12 @@ export class CraftingResolver {
 
   @ResolveField()
   async outputIngredients(@Parent() parent: GetRecipeDto) {
-    const rc = parent.outputIngredients
-      ? parent.outputIngredients
-      : ((await this.chainService.callCrafting(
-          'getOutputIngredients',
-          [parent.recipeId],
-          null,
-          false,
-        )) as Result);
     const rewards: Reward[] = [];
-    for (let i = 0; i < rc[0][0].length; i++) {
-      const bp = BattlePass__factory.connect(
-        rc[0][0][i],
-        this.chainService.provider,
-      );
+    for (let i = 0; i < parent.recipe.output.battlePasses.length; i++) {
       const reward = await this.battlePassService.createRewardObj(
-        (await bp.creatorId()).toNumber(),
-        rc[0][1][i],
-        rc[0][2][i],
+        parent.creatorId,
+        parent.recipe.output.ids[i],
+        parent.recipe.output.qtys[i],
       );
       rewards.push(reward);
     }

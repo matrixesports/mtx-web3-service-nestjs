@@ -22,6 +22,7 @@ export class DateResolver implements CustomScalar<string, Date> {
   }
 }
 
+// Deprecated
 @Scalar('BigInt')
 export class BigIntResolver implements CustomScalar<number, BigNumber> {
   description = 'BigNumber custom scalar type';

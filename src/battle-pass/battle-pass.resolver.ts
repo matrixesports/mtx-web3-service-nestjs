@@ -8,7 +8,6 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { BattlePass } from 'abi/typechain';
-import { BigNumber } from 'ethers';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { RewardType } from 'src/graphql.schema';
@@ -36,8 +35,8 @@ export class BattlePassResolver {
     @Args('creatorId') creatorId: number,
   ): Promise<GetBattlePassChildDto> {
     const contract = await this.chainService.getBattlePassContract(creatorId);
-    const seasonId = await contract.seasonId();
-    const maxLevel = await contract.getMaxLevel(seasonId);
+    const seasonId = (await contract.seasonId()).toNumber();
+    const maxLevel = (await contract.getMaxLevel(seasonId)).toNumber();
     const battlePassDB = await this.battlePassService
       .getBattlePass(creatorId)
       .catch((error) => {
@@ -145,8 +144,8 @@ export class BattlePassResolver {
         rewards.push(
           await this.battlePassService.createRewardObj(
             creatorId,
-            option[1][y],
-            option[2][y],
+            option[1][y].toNumber(),
+            option[2][y].toNumber(),
           ),
         );
       }
@@ -154,8 +153,8 @@ export class BattlePassResolver {
     }
     const reward = await this.battlePassService.createRewardObj(
       creatorId,
-      BigNumber.from(id),
-      BigNumber.from(qty),
+      id,
+      qty,
     );
     return { success: true, reward: [reward] };
   }
@@ -234,7 +233,7 @@ export class BattlePassResolver {
   async levelInfo(@Parent() parent: GetBattlePassChildDto) {
     const levelInfo = [];
     const calls: ContractCall[] = [];
-    for (let x = 0; x <= parent.maxLevel.toNumber(); x++) {
+    for (let x = 0; x <= parent.maxLevel; x++) {
       calls.push({
         reference: 'seasonInfo',
         address: parent.contract.address,
@@ -252,18 +251,18 @@ export class BattlePassResolver {
       );
       const freeReward = await this.battlePassService.createRewardObj(
         parent.creatorId,
-        seasonInfo.freeRewardId,
-        seasonInfo.freeRewardQty,
+        seasonInfo.freeRewardId.toNumber(),
+        seasonInfo.freeRewardQty.toNumber(),
       );
 
       const premiumReward = await this.battlePassService.createRewardObj(
         parent.creatorId,
-        seasonInfo.premiumRewardId,
-        seasonInfo.premiumRewardQty,
+        seasonInfo.premiumRewardId.toNumber(),
+        seasonInfo.premiumRewardQty.toNumber(),
       );
       levelInfo.push({
         level: x,
-        xpToCompleteLevel: seasonInfo.xpToCompleteLevel,
+        xpToCompleteLevel: seasonInfo.xpToCompleteLevel.toNumber(),
         freeReward,
         premiumReward,
       });

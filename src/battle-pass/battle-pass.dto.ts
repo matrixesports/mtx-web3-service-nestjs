@@ -1,13 +1,12 @@
 import { BattlePass } from 'abi/typechain';
-import { BigNumber } from 'ethers';
 import { BattlePassDB } from './battle-pass.entity';
 
 export class GetBattlePassChildDto {
   contract: BattlePass;
-  seasonId: BigNumber;
+  seasonId: number;
   battlePassDB: BattlePassDB;
   creatorId: number;
-  maxLevel: BigNumber;
+  maxLevel: number;
 }
 
 export class GetBattlePassUserInfoChildDto extends GetBattlePassChildDto {

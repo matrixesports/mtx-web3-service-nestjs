@@ -185,23 +185,16 @@ export class BattlePassService {
 |========================| OPERATIONS |========================|
 */
 
-  async createRewardObj(
-    creatorId: number,
-    id: BigNumber,
-    qty: BigNumber,
-  ): Promise<Reward> {
-    if (!id || id.isZero()) return null;
-    const metadata = await this.metadataService.getMetadata(
-      creatorId,
-      id.toNumber(),
-    );
+  async createRewardObj(creatorId: number, id: number, qty: number) {
+    if (id == 0) return null;
+    const metadata = await this.metadataService.getMetadata(creatorId, id);
     return {
       id,
       qty,
       metadata,
       rewardType: metadata.reward_type,
       creatorId,
-    };
+    } as Reward;
   }
 }
 

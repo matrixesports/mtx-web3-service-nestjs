@@ -1,5 +1,6 @@
 export default () => {
   let db;
+  let rs;
   let ticketService;
   let userService;
   let twitchService;
@@ -8,6 +9,7 @@ export default () => {
 
   if (process.env.ZEET_ENVIRONMENT == 'main') {
     db = process.env.DB_WEB3_SERVICE_URL;
+    rs = process.env.RS_WEB3_SERVICE_URL;
     ticketService = process.env.TICKET_SERVICE_URL;
     userService = process.env.USER_SERVICE_URL;
     twitchService = process.env.TWITCH_SERVICE_URL;
@@ -15,6 +17,7 @@ export default () => {
     bpFactory = process.env.BP_FACTORY;
   } else {
     db = process.env.DB_STAGING_WEB3_SERVICE_URL;
+    rs = process.env.RS_STAGING_WEB3_SERVICE_URL;
     ticketService = process.env.STAGING_TICKET_SERVICE_URL;
     userService = process.env.STAGING_USER_SERVICE_URL;
     twitchService = process.env.STAGING_TWITCH_SERVICE_URL;
@@ -35,6 +38,7 @@ export default () => {
       craftingProxy,
     },
     db,
+    rs,
     SERVICE: {
       ticketService,
       userService,

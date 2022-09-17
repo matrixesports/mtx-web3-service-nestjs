@@ -3,7 +3,7 @@ import {
   ApolloFederationDriver,
   ApolloFederationDriverConfig,
 } from '@nestjs/apollo';
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -23,6 +23,8 @@ import { LoggerModule } from 'nestjs-pino';
 import { GraphQLPlugin } from './common/gql.plugin';
 import { GraphQLError } from 'graphql';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import type { ClientOpts } from 'redis';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -127,6 +129,15 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
       typePaths: ['**/*.graphql'],
+    }),
+    CacheModule.registerAsync<ClientOpts>({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      isGlobal: true,
+      useFactory: async (config: ConfigService) => ({
+        store: redisStore,
+        url: config.get('rs'),
+      }),
     }),
     ScalarModule,
     BattlePassModule,

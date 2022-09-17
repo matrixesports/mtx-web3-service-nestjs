@@ -87,12 +87,7 @@ export class ChainService {
     return await this.battlePassFactory.isBattlePassDeployed(address);
   }
 
-  async callCrafting(
-    func: any,
-    args: any,
-    userAddress: string,
-    isSigner: boolean,
-  ) {
+  async callCrafting(func: any, args: any, userAddress: string) {
     const abi = [Crafting__factory.createInterface().getFunction(func)];
     const iface = new ethers.utils.Interface(abi);
     let encodedCall = iface.encodeFunctionData(func, args);
@@ -103,15 +98,15 @@ export class ChainService {
       data: encodedCall,
       ...fee,
     };
-    const tx = await (isSigner
-      ? this.signer.sendTransaction(txData)
-      : this.provider.call(txData));
-    if (isSigner)
+    try {
+      const tx = await this.signer.sendTransaction(txData);
       return this.signer.provider.waitForTransaction(
         (tx as ethers.providers.TransactionResponse).hash,
         1,
       );
-    return iface.decodeFunctionResult(abi[0], tx as string);
+    } catch (error) {
+      error.message = 'Crafting Transaction Failed!';
+    }
   }
 
   async metatx(

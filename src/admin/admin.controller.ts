@@ -223,12 +223,11 @@ export class AdminController {
       outputIngredients.ids.push(ingredient.id);
       outputIngredients.qtys.push(ingredient.qty);
     }
-    const rc = (await this.chainService.callCrafting(
+    const rc = await this.chainService.callCrafting(
       'addRecipe',
       [inputIngredients, outputIngredients],
       null,
-      true,
-    )) as ethers.providers.TransactionReceipt;
+    );
     const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
     const recipeId = event.args['recipeId'].toNumber();
     this.craftingService

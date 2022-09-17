@@ -1,10 +1,10 @@
-import { Result } from 'ethers/lib/utils';
+import { Recipe } from './crafting.entity';
 
 export class GetRecipeDto {
   creatorId: number;
   recipeId: number;
-  inputIngredients?: Result;
-  outputIngredients?: Result;
+  recipe: Recipe;
+  active: boolean;
   owner?: {
     name: string;
     slug: string;

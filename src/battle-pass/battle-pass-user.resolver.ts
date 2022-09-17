@@ -12,11 +12,13 @@ export class UserResolver {
       parent.userAddress,
       parent.seasonId,
     );
-    return userInfo.xp;
+    return userInfo.xp.toNumber();
   }
   @ResolveField()
   async level(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    return await parent.contract.level(parent.userAddress, parent.seasonId);
+    return (
+      await parent.contract.level(parent.userAddress, parent.seasonId)
+    ).toNumber();
   }
   @ResolveField()
   async unclaimedFreeRewards(@Parent() parent: GetBattlePassUserInfoChildDto) {

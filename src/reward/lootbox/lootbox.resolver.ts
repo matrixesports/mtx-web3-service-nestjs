@@ -43,8 +43,8 @@ export class LootboxResolver {
         rewardsInOption.push(
           await this.battlePassService.createRewardObj(
             creatorId,
-            option[0].ids[y],
-            option[0].qtys[y],
+            option[0].ids[y].toNumber(),
+            option[0].qtys[y].toNumber(),
           ),
         );
       }

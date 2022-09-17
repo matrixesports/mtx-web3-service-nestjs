@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BattlePassDB } from './battle-pass.entity';
 import { MetadataModule } from 'src/metadata/metadata.module';
 import { UserResolver } from './battle-pass-user.resolver';
-import { PremiumUserResolver } from './battle-pass-prem-user';
+import { PremiumUserResolver } from './battle-pass-prem-user.resolver';
 
 @Module({
   providers: [
