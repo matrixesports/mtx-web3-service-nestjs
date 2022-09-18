@@ -73,12 +73,11 @@ export class CraftingResolver {
       .catch((error) => {
         throw error;
       });
-    // const owners = await this.craftingService
-    //   .getOwner([creatorId])
-    //   .catch((error) => {
-    //     throw error;
-    //   });
-    const owners = [{ pfp: 'pfp', slug: 'slug', name: 'name' }];
+    const owners = await this.craftingService
+      .getOwner([creatorId])
+      .catch((error) => {
+        throw error;
+      });
     const ingridients = await this.craftingService
       .getIngridients(recipes)
       .catch((error) => {
