@@ -1,25 +1,98 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BigNumber } from 'ethers';
-import { Reward } from 'src/graphql.schema';
+import { LevelInfo, Reward } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { DataSource, Repository } from 'typeorm';
 import { parse } from 'postgres-array';
 import { BattlePassDB } from './battle-pass.entity';
 import axios from 'axios';
 import { MetadataDB } from 'src/metadata/metadata.entity';
+import { GetBattlePassChildDto } from './battle-pass.dto';
+import { ContractCall } from 'pilum';
+import { ChainService } from 'src/chain/chain.service';
+import { CACHE_MANAGER, Inject } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class BattlePassService {
+  private readonly logger = new Logger(BattlePassService.name);
   constructor(
     private configService: ConfigService,
     @InjectRepository(BattlePassDB)
     private battlePassRepository: Repository<BattlePassDB>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private metadataService: MetadataService,
+    private chainService: ChainService,
     private dataSource: DataSource,
   ) {}
 
+  async getLevelInfo(dto: GetBattlePassChildDto) {
+    let levelInfo: LevelInfo[];
+    try {
+      levelInfo = await this.cacheManager.get<LevelInfo[]>(
+        `level-info-${dto.creatorId}`,
+      );
+    } catch (error) {
+      this.logger.error({
+        operation: 'Cache Read',
+        error,
+      });
+    }
+    if (levelInfo == null) {
+      levelInfo = [];
+      const calls: ContractCall[] = [];
+      for (let x = 0; x <= dto.maxLevel; x++) {
+        calls.push({
+          reference: 'seasonInfo',
+          address: dto.contract.address,
+          abi: [dto.contract.interface.getFunction('seasonInfo')],
+          method: 'seasonInfo',
+          params: [dto.seasonId, x],
+          value: 0,
+        });
+      }
+      const results = await this.chainService.multicall(calls);
+      if (!results) throw new Error('Read Level Info Failed!');
+      for (let x = 0; x < results.length; x++) {
+        const seasonInfo = dto.contract.interface.decodeFunctionResult(
+          'seasonInfo',
+          results[x].returnData[1],
+        );
+        const freeReward = await this.createRewardObj(
+          dto.creatorId,
+          seasonInfo.freeRewardId.toNumber(),
+          seasonInfo.freeRewardQty.toNumber(),
+        );
+
+        const premiumReward = await this.createRewardObj(
+          dto.creatorId,
+          seasonInfo.premiumRewardId.toNumber(),
+          seasonInfo.premiumRewardQty.toNumber(),
+        );
+        levelInfo.push({
+          level: x,
+          xpToCompleteLevel: seasonInfo.xpToCompleteLevel.toNumber(),
+          freeReward,
+          premiumReward,
+        });
+      }
+      try {
+        await this.cacheManager.set<LevelInfo[]>(
+          `level-info-${dto.creatorId}`,
+          levelInfo,
+          { ttl: 0 },
+        );
+      } catch (error) {
+        this.logger.error({
+          operation: 'Cache Write',
+          error,
+        });
+      }
+    }
+    return levelInfo;
+  }
   /*
 |========================| REPOSITORY |========================|
 */

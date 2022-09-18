@@ -231,42 +231,102 @@ export class BattlePassResolver {
 
   @ResolveField()
   async levelInfo(@Parent() parent: GetBattlePassChildDto) {
-    const levelInfo = [];
+    return await this.battlePassService.getLevelInfo(parent);
+  }
+}
+
+@Resolver('BattlePassUser')
+export class UserResolver {
+  constructor(private chainService: ChainService) {}
+  @ResolveField()
+  async xp(@Parent() parent: GetBattlePassUserInfoChildDto) {
+    const userInfo = await parent.contract.userInfo(
+      parent.userAddress,
+      parent.seasonId,
+    );
+    return userInfo.xp.toNumber();
+  }
+  @ResolveField()
+  async level(@Parent() parent: GetBattlePassUserInfoChildDto) {
+    return (
+      await parent.contract.level(parent.userAddress, parent.seasonId)
+    ).toNumber();
+  }
+  @ResolveField()
+  async unclaimedFreeRewards(@Parent() parent: GetBattlePassUserInfoChildDto) {
+    const userLevel = await parent.contract.level(
+      parent.userAddress,
+      parent.seasonId,
+    );
     const calls: ContractCall[] = [];
-    for (let x = 0; x <= parent.maxLevel; x++) {
+    const unclaimedFree = [];
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
       calls.push({
-        reference: 'seasonInfo',
+        reference: 'isRewardClaimed',
         address: parent.contract.address,
-        abi: [parent.contract.interface.getFunction('seasonInfo')],
-        method: 'seasonInfo',
-        params: [parent.seasonId, x],
+        abi: [parent.contract.interface.getFunction('isRewardClaimed')],
+        method: 'isRewardClaimed',
+        params: [parent.userAddress, parent.seasonId, x, false],
         value: 0,
       });
     }
     const results = await this.chainService.multicall(calls);
-    for (let x = 0; x < results.length; x++) {
-      const seasonInfo = parent.contract.interface.decodeFunctionResult(
-        'seasonInfo',
-        results[x].returnData[1],
-      );
-      const freeReward = await this.battlePassService.createRewardObj(
-        parent.creatorId,
-        seasonInfo.freeRewardId.toNumber(),
-        seasonInfo.freeRewardQty.toNumber(),
-      );
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
+      if (!parseInt(results[x].returnData[1])) unclaimedFree.push(x);
+    }
+    return unclaimedFree;
+  }
+  @ResolveField()
+  // only show if user is premium
+  async premium(
+    @Parent() parent: GetBattlePassUserInfoChildDto,
+  ): Promise<GetBattlePassUserInfoChildDto> {
+    const isPremium = await parent.contract.isUserPremium(
+      parent.userAddress,
+      parent.seasonId,
+    );
+    if (!isPremium) return null;
+    return parent;
+  }
+}
 
-      const premiumReward = await this.battlePassService.createRewardObj(
-        parent.creatorId,
-        seasonInfo.premiumRewardId.toNumber(),
-        seasonInfo.premiumRewardQty.toNumber(),
-      );
-      levelInfo.push({
-        level: x,
-        xpToCompleteLevel: seasonInfo.xpToCompleteLevel.toNumber(),
-        freeReward,
-        premiumReward,
+@Resolver('PremiumBattlePassUser')
+export class PremiumUserResolver {
+  constructor(private chainService: ChainService) {}
+
+  @ResolveField()
+  async owned(@Parent() parent: GetBattlePassUserInfoChildDto) {
+    return (
+      await parent.contract.balanceOf(parent.userAddress, parent.seasonId)
+    ).toNumber();
+  }
+
+  @ResolveField()
+  async unclaimedPremiumRewards(
+    @Parent() parent: GetBattlePassUserInfoChildDto,
+  ) {
+    const userLevel = await parent.contract.level(
+      parent.userAddress,
+      parent.seasonId,
+    );
+    const unclaimedPrem = [];
+    const calls: ContractCall[] = [];
+
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
+      calls.push({
+        reference: 'isRewardClaimed',
+        address: parent.contract.address,
+        abi: [parent.contract.interface.getFunction('isRewardClaimed')],
+        method: 'isRewardClaimed',
+        params: [parent.userAddress, parent.seasonId, x, true],
+        value: 0,
       });
     }
-    return levelInfo;
+    const results = await this.chainService.multicall(calls);
+    // returns true for empty rewards
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
+      if (!parseInt(results[x].returnData[1])) unclaimedPrem.push(x);
+    }
+    return unclaimedPrem;
   }
 }

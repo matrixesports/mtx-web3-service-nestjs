@@ -11,7 +11,6 @@ import { Ingridients, Recipe, RecipeDB } from './crafting.entity';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Logger } from '@nestjs/common';
-import { IngredientsStructOutput } from 'abi/typechain/Crafting';
 
 export type Owner = {
   id: number;
