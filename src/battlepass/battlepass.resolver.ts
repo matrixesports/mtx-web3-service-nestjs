@@ -8,15 +8,14 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { BattlePass } from 'abi/typechain';
-import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
-import { BattlePassService } from './battle-pass.service';
+import { BattlePassService } from './battlepass.service';
 import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
-} from './battle-pass.dto';
+} from './battlepass.dto';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
@@ -37,11 +36,7 @@ export class BattlePassResolver {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const seasonId = (await contract.seasonId()).toNumber();
     const maxLevel = (await contract.getMaxLevel(seasonId)).toNumber();
-    const battlePassDB = await this.battlePassService
-      .getBattlePass(creatorId)
-      .catch((error) => {
-        throw error;
-      });
+    const battlePassDB = await this.battlePassService.getBattlePass(creatorId);
     return {
       contract,
       seasonId,
@@ -237,7 +232,7 @@ export class BattlePassResolver {
 
 @Resolver('BattlePassUser')
 export class UserResolver {
-  constructor(private chainService: ChainService) {}
+  constructor(private battlePassService: BattlePassService) {}
   @ResolveField()
   async xp(@Parent() parent: GetBattlePassUserInfoChildDto) {
     const userInfo = await parent.contract.userInfo(
@@ -252,30 +247,12 @@ export class UserResolver {
       await parent.contract.level(parent.userAddress, parent.seasonId)
     ).toNumber();
   }
+
   @ResolveField()
   async unclaimedFreeRewards(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    const userLevel = await parent.contract.level(
-      parent.userAddress,
-      parent.seasonId,
-    );
-    const calls: ContractCall[] = [];
-    const unclaimedFree = [];
-    for (let x = 0; x <= userLevel.toNumber(); x++) {
-      calls.push({
-        reference: 'isRewardClaimed',
-        address: parent.contract.address,
-        abi: [parent.contract.interface.getFunction('isRewardClaimed')],
-        method: 'isRewardClaimed',
-        params: [parent.userAddress, parent.seasonId, x, false],
-        value: 0,
-      });
-    }
-    const results = await this.chainService.multicall(calls);
-    for (let x = 0; x <= userLevel.toNumber(); x++) {
-      if (!parseInt(results[x].returnData[1])) unclaimedFree.push(x);
-    }
-    return unclaimedFree;
+    return await this.battlePassService.getUserRewards(parent, false);
   }
+
   @ResolveField()
   // only show if user is premium
   async premium(
@@ -292,7 +269,7 @@ export class UserResolver {
 
 @Resolver('PremiumBattlePassUser')
 export class PremiumUserResolver {
-  constructor(private chainService: ChainService) {}
+  constructor(private battlePassService: BattlePassService) {}
 
   @ResolveField()
   async owned(@Parent() parent: GetBattlePassUserInfoChildDto) {
@@ -305,28 +282,6 @@ export class PremiumUserResolver {
   async unclaimedPremiumRewards(
     @Parent() parent: GetBattlePassUserInfoChildDto,
   ) {
-    const userLevel = await parent.contract.level(
-      parent.userAddress,
-      parent.seasonId,
-    );
-    const unclaimedPrem = [];
-    const calls: ContractCall[] = [];
-
-    for (let x = 0; x <= userLevel.toNumber(); x++) {
-      calls.push({
-        reference: 'isRewardClaimed',
-        address: parent.contract.address,
-        abi: [parent.contract.interface.getFunction('isRewardClaimed')],
-        method: 'isRewardClaimed',
-        params: [parent.userAddress, parent.seasonId, x, true],
-        value: 0,
-      });
-    }
-    const results = await this.chainService.multicall(calls);
-    // returns true for empty rewards
-    for (let x = 0; x <= userLevel.toNumber(); x++) {
-      if (!parseInt(results[x].returnData[1])) unclaimedPrem.push(x);
-    }
-    return unclaimedPrem;
+    return await this.battlePassService.getUserRewards(parent, true);
   }
 }

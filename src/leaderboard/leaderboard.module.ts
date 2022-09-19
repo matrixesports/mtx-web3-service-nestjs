@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BattlePassModule } from 'src/battle-pass/battle-pass.module';
+import { BattlePassModule } from 'src/battlepass/battlepass.module';
 import { LeaderboardResolver } from './leaderboard.resolver';
 import { LeaderboardService } from './leaderboard.service';
 

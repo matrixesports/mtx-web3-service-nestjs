@@ -7,8 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { BigNumber } from 'ethers';
-import { BattlePassService } from 'src/battle-pass/battle-pass.service';
+import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Reward } from 'src/graphql.schema';
 import { CraftingService } from './crafting.service';
@@ -31,24 +30,10 @@ export class CraftingResolver {
     @Args('creatorId') creatorId: number,
     @Args('recipeId') recipeId: number,
   ): Promise<GetRecipeDto> {
-    await this.craftingService.getRecipe(creatorId, recipeId).catch((error) => {
-      throw error;
-    });
-    const recipe = await this.craftingService
-      .getRecipe(creatorId, recipeId)
-      .catch((error) => {
-        throw error;
-      });
-    const owner = await this.craftingService
-      .getOwner([creatorId])
-      .catch((error) => {
-        throw error;
-      });
-    const ingridients = await this.craftingService
-      .getIngridients([recipe])
-      .catch((error) => {
-        throw error;
-      });
+    await this.craftingService.getRecipe(creatorId, recipeId);
+    const recipe = await this.craftingService.getRecipe(creatorId, recipeId);
+    const owner = await this.craftingService.getOwner([creatorId]);
+    const ingridients = await this.craftingService.getIngridients([recipe]);
     return {
       creatorId,
       recipeId,
@@ -68,21 +53,9 @@ export class CraftingResolver {
   @Query()
   async getRecipes(@Args('creatorId') creatorId: number) {
     const dtos: GetRecipeDto[] = [];
-    const recipes = await this.craftingService
-      .getActiveRecipes(creatorId)
-      .catch((error) => {
-        throw error;
-      });
-    const owners = await this.craftingService
-      .getOwner([creatorId])
-      .catch((error) => {
-        throw error;
-      });
-    const ingridients = await this.craftingService
-      .getIngridients(recipes)
-      .catch((error) => {
-        throw error;
-      });
+    const recipes = await this.craftingService.getActiveRecipes(creatorId);
+    const owners = await this.craftingService.getOwner([creatorId]);
+    const ingridients = await this.craftingService.getIngridients(recipes);
     const owner = {
       pfp: owners[0].pfp,
       slug: owners[0].slug,
@@ -106,25 +79,12 @@ export class CraftingResolver {
   @Query()
   async getAllRecipes() {
     const dtos: GetRecipeDto[] = [];
-    const recipes = await this.craftingService
-      .getAllActiveRecipes()
-      .catch((error) => {
-        throw error;
-      });
+    const recipes = await this.craftingService.getAllActiveRecipes();
     const creators = [...new Set(recipes.map((recipe) => recipe.creator_id))];
-    const owners = await this.craftingService
-      .getOwner(creators)
-      .catch((error) => {
-        throw error;
-      });
+    const owners = await this.craftingService.getOwner(creators);
     if (creators.length != owners.length)
       throw new Error('Invalid Recipes or Creator!');
-    const ingridients = await this.craftingService
-      .getIngridients(recipes)
-      .catch((error) => {
-        throw error;
-      });
-
+    const ingridients = await this.craftingService.getIngridients(recipes);
     for (let i = 0; i < ingridients.length; i++) {
       dtos.push({
         creatorId: recipes[i].creator_id,

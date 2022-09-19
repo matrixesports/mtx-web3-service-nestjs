@@ -1,6 +1,6 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { ContractCall } from 'pilum';
-import { BattlePassService } from 'src/battle-pass/battle-pass.service';
+import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
 
 @Resolver('LootboxOption')

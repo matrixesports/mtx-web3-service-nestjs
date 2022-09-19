@@ -15,7 +15,7 @@ import {
 } from 'abi/typechain/BattlePass';
 import { IngredientsStruct } from 'abi/typechain/Crafting';
 import { ethers } from 'ethers';
-import { BattlePassService } from 'src/battle-pass/battle-pass.service';
+import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
 import {
   EthersFilter,

@@ -12,7 +12,7 @@ import { join } from 'path';
 import configuration from './configuration';
 import { ScalarModule } from './scalar/scalar.module';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
-import { BattlePassModule } from './battle-pass/battle-pass.module';
+import { BattlePassModule } from './battlepass/battlepass.module';
 import { ChainModule } from './chain/chain.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { LootboxModule } from './reward/lootbox/lootbox.module';

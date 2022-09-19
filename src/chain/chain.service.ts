@@ -133,8 +133,10 @@ export class ChainService {
   }
 
   async multicall(calls: ContractCall[]) {
+    if (calls.length == 0) return null;
     const res = await this.multicallObj.call(calls, { network: this.chainId });
-    return res.results;
+    if (res.results) return res.results;
+    throw new Error('Multi Call Read Failed!');
   }
 
   /// fallback value is 40 coz minimum is 30

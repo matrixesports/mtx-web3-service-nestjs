@@ -3,11 +3,11 @@ import {
   BattlePassResolver,
   PremiumUserResolver,
   UserResolver,
-} from './battle-pass.resolver';
-import { BattlePassService } from './battle-pass.service';
-import { BattlePassController } from './battle-pass.controller';
+} from './battlepass.resolver';
+import { BattlePassService } from './battlepass.service';
+import { BattlePassController } from './battlepass.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BattlePassDB } from './battle-pass.entity';
+import { BattlePassDB } from './battlepass.entity';
 import { MetadataModule } from 'src/metadata/metadata.module';
 
 @Module({

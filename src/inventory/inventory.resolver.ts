@@ -8,7 +8,7 @@ import {
 } from '@nestjs/graphql';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import { BattlePassService } from 'src/battle-pass/battle-pass.service';
+import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Redeemed, RedeemStatus, Reward } from 'src/graphql.schema';
 import { GetInventoryChildDto } from './inventory.dto';
@@ -26,11 +26,7 @@ export class InventoryResolver {
   @ResolveField()
   async default(@Parent() parent: GetInventoryChildDto) {
     const defaultRewards: Reward[] = [];
-    const allBattlePasses = await this.battlePassService
-      .getBattlePasses()
-      .catch((error) => {
-        throw error;
-      });
+    const allBattlePasses = await this.battlePassService.getBattlePasses();
 
     for (let x = 0; x < allBattlePasses.length; x++) {
       const contract = await this.chainService.getBattlePassContract(

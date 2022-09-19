@@ -1,5 +1,5 @@
 import { BattlePass } from 'abi/typechain';
-import { BattlePassDB } from './battle-pass.entity';
+import { BattlePassDB } from './battlepass.entity';
 
 export class GetBattlePassChildDto {
   contract: BattlePass;

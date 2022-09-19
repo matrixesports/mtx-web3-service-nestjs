@@ -44,7 +44,7 @@ export class LeaderboardResolver {
       });
     }
     const results = await this.chainService.multicall(calls);
-    if (!results) return null;
+    if (results == null) return null;
     const dtos: GetSeasonXpRankingDto[] = [];
     const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < results.length; i++) {
@@ -136,7 +136,7 @@ export class LeaderboardResolver {
       }
     }
     const results = await this.chainService.multicall(calls);
-    if (!results) return null;
+    if (results == null) return null;
     const dtos: GetSeasonXpRankingDto[] = [];
     const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < res.data.length; i++) {

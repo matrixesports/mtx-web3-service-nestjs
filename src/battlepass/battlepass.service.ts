@@ -5,10 +5,13 @@ import { LevelInfo, Reward } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { DataSource, Repository } from 'typeorm';
 import { parse } from 'postgres-array';
-import { BattlePassDB } from './battle-pass.entity';
+import { BattlePassDB } from './battlepass.entity';
 import axios from 'axios';
 import { MetadataDB } from 'src/metadata/metadata.entity';
-import { GetBattlePassChildDto } from './battle-pass.dto';
+import {
+  GetBattlePassChildDto,
+  GetBattlePassUserInfoChildDto,
+} from './battlepass.dto';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
@@ -28,6 +31,9 @@ export class BattlePassService {
     private dataSource: DataSource,
   ) {}
 
+  /*
+|========================| WEB3 CALLS |========================|
+*/
   async getLevelInfo(dto: GetBattlePassChildDto) {
     let levelInfo: LevelInfo[];
     try {
@@ -54,7 +60,6 @@ export class BattlePassService {
         });
       }
       const results = await this.chainService.multicall(calls);
-      if (!results) throw new Error('Read Level Info Failed!');
       for (let x = 0; x < results.length; x++) {
         const seasonInfo = dto.contract.interface.decodeFunctionResult(
           'seasonInfo',
@@ -93,6 +98,28 @@ export class BattlePassService {
     }
     return levelInfo;
   }
+
+  async getUserRewards(dto: GetBattlePassUserInfoChildDto, isPrem: boolean) {
+    const userLevel = await dto.contract.level(dto.userAddress, dto.seasonId);
+    const calls: ContractCall[] = [];
+    const unclaimedFree = [];
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
+      calls.push({
+        reference: 'isRewardClaimed',
+        address: dto.contract.address,
+        abi: [dto.contract.interface.getFunction('isRewardClaimed')],
+        method: 'isRewardClaimed',
+        params: [dto.userAddress, dto.seasonId, x, isPrem],
+        value: 0,
+      });
+    }
+    const results = await this.chainService.multicall(calls);
+    for (let x = 0; x <= userLevel.toNumber(); x++) {
+      if (!parseInt(results[x].returnData[1])) unclaimedFree.push(x);
+    }
+    return unclaimedFree;
+  }
+
   /*
 |========================| REPOSITORY |========================|
 */

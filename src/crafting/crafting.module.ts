@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BattlePassModule } from 'src/battle-pass/battle-pass.module';
+import { BattlePassModule } from 'src/battlepass/battlepass.module';
 import { RecipeDB } from './crafting.entity';
 import { CraftingResolver } from './crafting.resolver';
 import { CraftingService } from './crafting.service';

@@ -10,8 +10,8 @@ import {
 import { BattlePass } from 'abi/typechain';
 import { ChainService } from 'src/chain/chain.service';
 import { EthersFilter, TypeORMFilter } from 'src/common/filters';
-import { BattlePassService } from './battle-pass.service';
-import { GiveXpDto, MintPremiumPassDto } from './battle-pass.dto';
+import { BattlePassService } from './battlepass.service';
+import { GiveXpDto, MintPremiumPassDto } from './battlepass.dto';
 
 @Controller('battlepass')
 @UseFilters(TypeORMFilter, EthersFilter)

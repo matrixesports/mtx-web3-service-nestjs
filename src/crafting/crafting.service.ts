@@ -75,7 +75,6 @@ export class CraftingService {
         });
       }
       const results = await this.chainService.multicall(calls);
-      if (!results) throw new Error('Read Ingridients Failed!');
       for (let i = 0; i < results.length - 1; i += 2) {
         const recipe: Recipe = {
           input: this.mapIngridients(
