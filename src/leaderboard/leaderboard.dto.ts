@@ -6,3 +6,8 @@ export class GetSeasonXpRankingDto {
   total: number;
   others: { total: number; userAddress: string }[];
 }
+
+export type Ranking = {
+  userAddress: string;
+  total: number;
+};

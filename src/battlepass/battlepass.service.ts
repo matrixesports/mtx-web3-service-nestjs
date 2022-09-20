@@ -115,6 +115,7 @@ export class BattlePassService {
     }
     const results = await this.chainService.multicall(calls);
     for (let x = 0; x <= userLevel.toNumber(); x++) {
+      // todo add typing
       if (!parseInt(results[x].returnData[1])) unclaimedFree.push(x);
     }
     return unclaimedFree;

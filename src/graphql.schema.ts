@@ -48,13 +48,13 @@ export abstract class IQuery {
 
     abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
 
-    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
+    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Nullable<Nullable<Ranking>[]> | Promise<Nullable<Nullable<Ranking>[]>>;
 
-    abstract getAllXpRanking(creatorId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
+    abstract getAllXpRanking(creatorId: number): Nullable<Nullable<Ranking>[]> | Promise<Nullable<Nullable<Ranking>[]>>;
 
     abstract getReputationRanking(creatorId: number): Nullable<Ranking> | Promise<Nullable<Ranking>>;
 
-    abstract getReputationRankings(creatorId: number): Nullable<Ranking>[] | Promise<Nullable<Ranking>[]>;
+    abstract getReputationRankings(creatorId: number): Nullable<Nullable<Ranking>[]> | Promise<Nullable<Nullable<Ranking>[]>>;
 }
 
 export abstract class IMutation {

@@ -6,18 +6,12 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { BattlePass__factory } from 'abi/typechain';
-import { ContractCall } from 'pilum';
-import { ChainService } from 'src/chain/chain.service';
 import { GetSeasonXpRankingDto } from './leaderboard.dto';
 import { LeaderboardService } from './leaderboard.service';
 
 @Resolver('Ranking')
 export class LeaderboardResolver {
-  constructor(
-    private chainService: ChainService,
-    private leaderboardService: LeaderboardService,
-  ) {}
+  constructor(private leaderboardService: LeaderboardService) {}
 
   /*
 |========================| QUERY |========================|
@@ -27,80 +21,21 @@ export class LeaderboardResolver {
     @Args('creatorId') creatorId: number,
     @Args('seasonId') seasonId: number,
   ) {
-    const contract = await this.chainService.getBattlePassContract(creatorId);
-    const res = await this.leaderboardService.getFollowers(creatorId);
-    const iface = BattlePass__factory.createInterface();
-    const fragment = iface.getFunction('userInfo');
-    const calls: ContractCall[] = [];
-    for (let i = 0; i < res.data.length; i++) {
-      const follower = res.data[i];
-      calls.push({
-        reference: 'userInfo',
-        address: contract.address,
-        abi: [fragment],
-        method: 'userInfo',
-        params: [follower.userAddress, seasonId],
-        value: 0,
-      });
-    }
-    const results = await this.chainService.multicall(calls);
-    if (results == null) return null;
-    const dtos: GetSeasonXpRankingDto[] = [];
-    const others: { total: number; userAddress: string }[] = [];
-    for (let i = 0; i < results.length; i++) {
-      const follower = res.data[i];
-      const userInfo = iface.decodeFunctionResult(
-        'userInfo',
-        results[i].returnData[1],
-      );
-      others.push({
-        total: userInfo.xp.toNumber(),
-        userAddress: follower.userAddress,
-      });
-      dtos.push({
-        id: follower.id,
-        userAddress: follower.userAddress,
-        pfp: follower?.pfp,
-        name: follower?.name,
-        total: userInfo.xp.toNumber(),
-        others,
-      });
-    }
-    others.sort((a, b) => b.total - a.total);
-    return dtos;
+    const followers = await this.leaderboardService.getFollowers(creatorId);
+    return await this.leaderboardService.getSeasonInfo(
+      creatorId,
+      seasonId,
+      followers,
+    );
   }
 
   @Query()
   async getReputationRankings(@Args('creatorId') creatorId: number) {
-    const contract = await this.chainService.getBattlePassContract(creatorId);
-    const res = await this.leaderboardService.getFollowers(creatorId);
-    const addresses = [];
-    const ids = [];
-    for (let i = 0; i < res.data.length; i++) {
-      const follower = res.data[i];
-      addresses.push(follower.userAddress);
-      ids.push(1000);
-    }
-    const results = await contract.balanceOfBatch(addresses, ids);
-    const dtos: GetSeasonXpRankingDto[] = [];
-    const others: { total: number; userAddress: string }[] = [];
-    for (let i = 0; i < results.length; i++) {
-      const follower = res.data[i];
-      others.push({
-        total: results[i].toNumber(),
-        userAddress: follower.userAddress,
-      });
-      dtos.push({
-        id: follower.id,
-        userAddress: follower.userAddress,
-        pfp: follower?.pfp,
-        name: follower?.name,
-        total: results[i].toNumber(),
-        others,
-      });
-    }
-    others.sort((a, b) => b.total - a.total);
-    return dtos;
+    const followers = await this.leaderboardService.getFollowers(creatorId);
+    return await this.leaderboardService.getReputationInfo(
+      creatorId,
+      followers,
+    );
   }
 
   @Query()
@@ -109,58 +44,17 @@ export class LeaderboardResolver {
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    const dtos: GetSeasonXpRankingDto[] = await this.getReputationRankings(
+    const followers = await this.leaderboardService.getFollowers(creatorId);
+    const repInfos = await this.leaderboardService.getReputationInfo(
       creatorId,
+      followers,
     );
-    return dtos.find((dto) => dto.userAddress === userAddress);
+    return repInfos.find((info) => info.userAddress === userAddress);
   }
+
   @Query()
   async getAllXpRanking(@Args('creatorId') creatorId: number) {
-    const contract = await this.chainService.getBattlePassContract(creatorId);
-    const res = await this.leaderboardService.getFollowers(creatorId);
-    const iface = BattlePass__factory.createInterface();
-    const fragment = iface.getFunction('userInfo');
-    const seasonId = (await contract.seasonId()).toNumber();
-    const calls: ContractCall[] = [];
-    for (let i = 0; i < res.data.length; i++) {
-      const follower = res.data[i];
-      for (let season = 1; season <= seasonId; season++) {
-        calls.push({
-          reference: 'userInfo',
-          address: contract.address,
-          abi: [fragment],
-          method: 'userInfo',
-          params: [follower.userAddress, season],
-          value: 0,
-        });
-      }
-    }
-    const results = await this.chainService.multicall(calls);
-    if (results == null) return null;
-    const dtos: GetSeasonXpRankingDto[] = [];
-    const others: { total: number; userAddress: string }[] = [];
-    for (let i = 0; i < res.data.length; i++) {
-      const follower = res.data[i];
-      let total = 0;
-      for (let season = 0; season < seasonId; season++) {
-        const userInfo = iface.decodeFunctionResult(
-          'userInfo',
-          results[i * seasonId + season].returnData[1],
-        );
-        total += userInfo.xp.toNumber();
-      }
-      others.push({ total, userAddress: follower.userAddress });
-      dtos.push({
-        id: follower.id,
-        userAddress: follower.userAddress,
-        pfp: follower?.pfp,
-        name: follower?.name,
-        total,
-        others,
-      });
-    }
-    others.sort((a, b) => b.total - a.total);
-    return dtos;
+    return await this.leaderboardService.getAllSeasonInfo(creatorId);
   }
 
   /*
