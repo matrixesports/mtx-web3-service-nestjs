@@ -35,6 +35,12 @@ export enum RequiredUserPaymentOptions {
     VENMO_USERNAME = "VENMO_USERNAME"
 }
 
+export enum Requirements {
+    PRESTIGE = "PRESTIGE",
+    SEASONXP = "SEASONXP",
+    ALLXP = "ALLXP"
+}
+
 export abstract class IQuery {
     abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
 
@@ -55,6 +61,8 @@ export abstract class IQuery {
     abstract getReputationRanking(creatorId: number): Nullable<Ranking> | Promise<Nullable<Ranking>>;
 
     abstract getReputationRankings(creatorId: number): Nullable<Nullable<Ranking>[]> | Promise<Nullable<Nullable<Ranking>[]>>;
+
+    abstract getLootdrop(creatorId: number): Nullable<Lootdrop> | Promise<Nullable<Lootdrop>>;
 }
 
 export abstract class IMutation {
@@ -63,6 +71,8 @@ export abstract class IMutation {
     abstract redeemReward(creatorId: number, itemId: number): MutationResponse | Promise<MutationResponse>;
 
     abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
+
+    abstract claimLootdrop(creatorId: number): MutationResponse | Promise<MutationResponse>;
 }
 
 export class MutationResponse {
@@ -164,6 +174,14 @@ export class Ranking {
     pfp?: Nullable<string>;
     name?: Nullable<string>;
     total: number;
+}
+
+export class Lootdrop {
+    reward: Reward;
+    requirements: Requirements;
+    threshold: number;
+    start: Date;
+    end: Date;
 }
 
 export type BigInt = unknown;

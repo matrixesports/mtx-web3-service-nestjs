@@ -1,3 +1,5 @@
+import { Requirements } from 'src/graphql.schema';
+
 export class GiveXpDto {
   userAddress: string;
   creatorId: number;
@@ -40,10 +42,4 @@ export class NewLootdropDto {
   threshold: number;
   start: string;
   end: string;
-}
-
-export enum Requirements {
-  PRESTIGE = 'PRESTIGE',
-  SEASONXP = 'SEASONXP',
-  ALLXP = 'ALLXP',
 }

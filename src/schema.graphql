@@ -16,6 +16,8 @@ type Query {
   getAllXpRanking(creatorId: Int!): [Ranking]
   getReputationRanking(creatorId: Int!): Ranking
   getReputationRankings(creatorId: Int!): [Ranking]
+
+  getLootdrop(creatorId: Int!): Lootdrop
 }
 
 # |========================| MUTATION |========================|
@@ -29,6 +31,7 @@ type Mutation {
   ): ClaimRewardResponse!
   redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
   craft(recipeId: Int!): MutationResponse!
+  claimLootdrop(creatorId: Int!): MutationResponse!
 }
 
 type MutationResponse {
@@ -176,5 +179,20 @@ type Ranking {
   total: Int!
 }
 
+# |========================| LOOTDROP |========================|
+
+enum Requirements {
+  PRESTIGE
+  SEASONXP
+  ALLXP
+}
+
+type Lootdrop {
+  reward: Reward!
+  requirements: Requirements!
+  threshold: Int!
+  start: Date!
+  end: Date!
+}
 
 

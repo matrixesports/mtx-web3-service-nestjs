@@ -15,7 +15,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { BattlePassModule } from './battlepass/battlepass.module';
 import { ChainModule } from './chain/chain.module';
 import { MetadataModule } from './metadata/metadata.module';
-import { LootboxModule } from './reward/lootbox/lootbox.module';
+import { RewardModule } from './reward/reward.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { AdminModule } from './admin/admin.module';
 import { CraftingModule } from './crafting/crafting.module';
@@ -23,7 +23,6 @@ import { LoggerModule } from 'nestjs-pino';
 import { GraphQLPlugin } from './common/gql.plugin';
 import { GraphQLError } from 'graphql';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
-import type { ClientOpts } from 'redis';
 import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
@@ -130,7 +129,7 @@ import * as redisStore from 'cache-manager-redis-store';
       driver: ApolloFederationDriver,
       typePaths: ['**/*.graphql'],
     }),
-    CacheModule.registerAsync<ClientOpts>({
+    CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       isGlobal: true,
@@ -143,7 +142,7 @@ import * as redisStore from 'cache-manager-redis-store';
     BattlePassModule,
     ChainModule,
     MetadataModule,
-    LootboxModule,
+    RewardModule,
     InventoryModule,
     CraftingModule,
     AdminModule,
