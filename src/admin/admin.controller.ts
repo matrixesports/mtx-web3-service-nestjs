@@ -14,7 +14,6 @@ import {
   LootboxOptionStruct,
 } from 'abi/typechain/BattlePass';
 import { IngredientsStruct } from 'abi/typechain/Crafting';
-import { ethers } from 'ethers';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
 import {
@@ -27,18 +26,27 @@ import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import {
   GiveXpDto,
-  MintTokenDto,
+  MintReputationDto,
   NewLootboxDto,
+  NewLootdropDto,
   NewRecipeDto,
   NewSeasonDto,
 } from './admin.dto';
+import { CACHE_MANAGER, Inject } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { Logger } from '@nestjs/common';
+import { date } from 'joi';
+
 @Controller('admin')
 @UseFilters(TypeORMFilter, EthersFilter)
 export class AdminController {
+  CREATOR_TOKEN_ID = 1000;
+  private readonly logger = new Logger(AdminController.name);
   constructor(
     private chainService: ChainService,
     private craftingService: CraftingService,
     private battlePassService: BattlePassService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private metadataService: MetadataService,
   ) {}
 
@@ -238,22 +246,55 @@ export class AdminController {
     return { success: true };
   }
 
-  @Post('mint')
-  async mintPremiumPass(@Body() mintTokenDto: MintTokenDto) {
-    const CREATOR_TOKEN = 1000;
+  @Post('mint/reputation')
+  async mintReputation(@Body() mintRepDto: MintReputationDto) {
     const contract = await this.chainService.getBattlePassContract(
-      mintTokenDto.creatorId,
+      mintRepDto.creatorId,
     );
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
     await (
       await bp.mint(
-        mintTokenDto.userAddress,
-        CREATOR_TOKEN,
-        mintTokenDto.amount,
+        mintRepDto.userAddress,
+        this.CREATOR_TOKEN_ID,
+        mintRepDto.amount,
         fee,
       )
     ).wait(1);
     return { success: true };
+  }
+
+  @Post('newLootdrop')
+  async newLootdrop(@Body() newLootdropDto: NewLootdropDto) {
+    const startPST = new Date(newLootdropDto.start).toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+    });
+    const endPST = new Date(newLootdropDto.end).toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+    });
+    const start = new Date(startPST);
+    const end = new Date(endPST);
+    if (start > end) throw new HttpException('Start Must Be Before End!', 500);
+    const nwPST = new Date().toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+    });
+    const nw = new Date(nwPST);
+    const ttl =
+      nw > start
+        ? Math.floor((end.getTime() - start.getTime()) / 1000)
+        : Math.floor((end.getTime() - nw.getTime()) / 1000);
+    try {
+      await this.cacheManager.set<NewLootdropDto>(
+        `lootdrop-${newLootdropDto.creatorId}`,
+        newLootdropDto,
+        { ttl },
+      );
+    } catch (error) {
+      this.logger.error({
+        operation: 'Cache Write',
+        error,
+      });
+    }
+    //TODO call url service
   }
 }
