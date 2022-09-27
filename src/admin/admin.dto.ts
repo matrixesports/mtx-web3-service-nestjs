@@ -1,4 +1,5 @@
 import { Requirements } from 'src/graphql.schema';
+import { GetLootdropDto } from 'src/reward/reward.dto';
 
 export class GiveXpDto {
   userAddress: string;
@@ -35,7 +36,7 @@ export class NewSeasonDto {
   levelDetails: any;
 }
 
-export class NewLootdropDto {
+export class NewLootdropDto implements GetLootdropDto {
   creatorId: number;
   rewardId: number;
   requirements: Requirements;
