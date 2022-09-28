@@ -34,9 +34,15 @@ type Mutation {
   claimLootdrop(creatorId: Int!): MutationResponse!
 }
 
+type ClaimRewardResponse {
+  success: Boolean!
+  reward: [Reward]
+  description: String
+  missingFields: UserMissingFields
+}
+
 type MutationResponse {
   success: Boolean!
-  description: String
 }
 
 # |========================| BattlePass |========================|
@@ -141,13 +147,6 @@ type Owner {
 }
 
 # |========================| CLAIM |========================|
-
-type ClaimRewardResponse {
-  success: Boolean!
-  reward: [Reward]
-  description: String
-  missingFields: UserMissingFields
-}
 
 type UserMissingFields {
   payment: [RequiredUserPaymentOptions]

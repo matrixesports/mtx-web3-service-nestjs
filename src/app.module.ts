@@ -19,11 +19,11 @@ import { RewardModule } from './reward/reward.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { AdminModule } from './admin/admin.module';
 import { CraftingModule } from './crafting/crafting.module';
-import { LoggerModule } from 'nestjs-pino';
 import { GraphQLPlugin } from './common/gql.plugin';
 import { GraphQLError } from 'graphql';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import * as redisStore from 'cache-manager-redis-store';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
@@ -114,12 +114,10 @@ import * as redisStore from 'cache-manager-redis-store';
         playground: false,
         debug: true, // stacktrace for error context
         formatError: (err) => {
-          console.log(err.message.search(config.get('rpc').url));
           const message =
             err.message.search(config.get('rpc').url) > 0
               ? 'on-chain error'
               : err.message;
-          console.log(message);
           return new GraphQLError(message);
         },
         plugins: [ApolloServerPluginLandingPageLocalDefault()],

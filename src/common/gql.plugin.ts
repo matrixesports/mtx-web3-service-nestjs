@@ -4,7 +4,8 @@ import {
   ApolloServerPlugin,
   GraphQLRequestListener,
 } from 'apollo-server-plugin-base';
-import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
+import { GraphQLError } from 'graphql';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Plugin()
 export class GraphQLPlugin implements ApolloServerPlugin {
@@ -13,13 +14,12 @@ export class GraphQLPlugin implements ApolloServerPlugin {
     private readonly logger: PinoLogger,
   ) {}
   async requestDidStart(
-    gqlCtx: GraphQLRequestContext,
+    ctx: GraphQLRequestContext,
   ): Promise<GraphQLRequestListener> {
-    // no logs for schema polling
-    if (gqlCtx.request.operationName === 'IntrospectionQuery') {
+    if (ctx.request.operationName === 'IntrospectionQuery') {
       return;
     }
-    gqlCtx.logger = this.logger.logger.child({ context: 'GraphQLLogger' });
+    ctx.logger = this.logger.logger.child({ context: 'GraphQLLogger' });
     return new Listener({}) as unknown as GraphQLRequestListener;
   }
 }
@@ -33,22 +33,16 @@ class Listener<T = unknown>
     this.start = Date.now();
   }
 
-  async willSendResponse(gqlCtx: GraphQLRequestContext): Promise<void> {
-    if (gqlCtx?.errors) {
-      if (gqlCtx.operation.operation === 'mutation')
-        gqlCtx.response.data = { success: false };
-      gqlCtx.logger.error({
-        graphql: this.logData,
-        responseTime: Date.now() - this.start,
-        error: gqlCtx.errors,
+  async willSendResponse(ctx: GraphQLRequestContext) {
+    if (ctx?.errors && ctx.operation.operation === 'mutation') {
+      ctx.response.data = { success: false };
+    } else {
+      ctx.logger.info({
+        operationName: ctx.request.operationName,
+        query: ctx.request.query,
+        variables: ctx.request.variables,
+        duration: Date.now() - this.start,
       });
-      return;
     }
-    // this.logData['response'] = gqlCtx.response.data; // logging response may expose sensitive info
-    gqlCtx.logger.info({
-      graphql: this.logData,
-      responseTime: Date.now() - this.start,
-      success: gqlCtx?.errors ? false : true,
-    });
   }
 }

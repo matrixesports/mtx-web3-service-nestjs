@@ -75,9 +75,15 @@ export abstract class IMutation {
     abstract claimLootdrop(creatorId: number): MutationResponse | Promise<MutationResponse>;
 }
 
+export class ClaimRewardResponse {
+    success: boolean;
+    reward?: Nullable<Nullable<Reward>[]>;
+    description?: Nullable<string>;
+    missingFields?: Nullable<UserMissingFields>;
+}
+
 export class MutationResponse {
     success: boolean;
-    description?: Nullable<string>;
 }
 
 export class BattlePass {
@@ -153,13 +159,6 @@ export class Owner {
     name: string;
     pfp?: Nullable<string>;
     slug?: Nullable<string>;
-}
-
-export class ClaimRewardResponse {
-    success: boolean;
-    reward?: Nullable<Nullable<Reward>[]>;
-    description?: Nullable<string>;
-    missingFields?: Nullable<UserMissingFields>;
 }
 
 export class UserMissingFields {
