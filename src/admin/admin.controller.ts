@@ -55,6 +55,13 @@ export class AdminController {
     };
   }
 
+  @Get('/healthCheck')
+  async healthCheck() {
+    return {
+      status: 200,
+    };
+  }
+
   /*
 |========================| POST |========================|
 */
