@@ -148,17 +148,35 @@ export class LootdropResolver {
           );
           userThreshold += userInfo.xp.toNumber();
         }
+        if (userThreshold < lootdrop.threshold)
+          throw new Warn(
+            `You need ${
+              lootdrop.threshold - userThreshold
+            } more XP to claim this Lootdrop!`,
+          );
         break;
       case Requirements.PRESTIGE:
         userThreshold = (
           await contract.balanceOf(userAddress, lootdrop.rewardId)
         ).toNumber();
+        if (userThreshold < lootdrop.threshold)
+          throw new Warn(
+            `You need ${
+              lootdrop.threshold - userThreshold
+            } more Prestige to claim this Lootdrop!`,
+          );
         break;
       case Requirements.SEASONXP:
         seasonId = (await contract.seasonId()).toNumber();
         userThreshold = (
           await contract.userInfo(userAddress, seasonId)
         ).xp.toNumber();
+        if (userThreshold < lootdrop.threshold)
+          throw new Warn(
+            `You need ${
+              lootdrop.threshold - userThreshold
+            } more XP to claim this Lootdrop!`,
+          );
         break;
       default:
         throw new Error('Invalid Lootdrop!');
