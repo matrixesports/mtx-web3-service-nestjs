@@ -6,6 +6,7 @@ export default () => {
   let twitchService;
   let craftingProxy;
   let bpFactory;
+  let urlShortenerService: string;
 
   if (process.env.ZEET_ENVIRONMENT == 'main') {
     db = process.env.DB_WEB3_SERVICE_URL;
@@ -15,6 +16,7 @@ export default () => {
     twitchService = process.env.TWITCH_SERVICE_URL;
     craftingProxy = process.env.CRAFTING_PROXY;
     bpFactory = process.env.BP_FACTORY;
+    urlShortenerService = process.env.URL_SHORTENER_SERVICE_URL;
   } else {
     db = process.env.DB_STAGING_WEB3_SERVICE_URL;
     rs = process.env.RS_STAGING_WEB3_SERVICE_URL;
@@ -23,6 +25,7 @@ export default () => {
     twitchService = process.env.STAGING_TWITCH_SERVICE_URL;
     craftingProxy = process.env.TEST_CRAFTING_PROXY;
     bpFactory = process.env.TEST_BP_FACTORY;
+    urlShortenerService = process.env.TEST_URL_SHORTENER_SERVICE_URL;
   }
 
   const config = {
@@ -43,6 +46,13 @@ export default () => {
       ticketService,
       userService,
       twitchService,
+      urlShortenerService,
+    },
+    microservice: {
+      twitch: {
+        host: process.env.TWITCH_MICROSERVICE_HOST,
+        port: parseInt(process.env.TWITCH_MICROSERVICE_PORT),
+      },
     },
   };
   return config;
