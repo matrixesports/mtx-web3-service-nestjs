@@ -31,11 +31,15 @@ import {
   NewLootdropDto,
   NewRecipeDto,
   NewSeasonDto,
+  ShortUrl,
 } from './admin.dto';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Logger } from '@nestjs/common';
 import { date } from 'joi';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('admin')
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -48,6 +52,8 @@ export class AdminController {
     private battlePassService: BattlePassService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private metadataService: MetadataService,
+    private config: ConfigService,
+    @Inject('TWITCH_SERVICE') private tcpClient: ClientProxy,
   ) {}
 
   /*
@@ -295,6 +301,32 @@ export class AdminController {
         error,
       });
     }
-    //TODO call url service
+
+    // the url service payload
+    const urlpayload = {
+      creatorId: newLootdropDto.creatorId,
+    };
+    // make the call to the url service with the creator id
+    try {
+      const {
+        data: { shortUrl },
+      } = await axios.post<ShortUrl>(
+        `${this.config.get<string>('SERVICE.urlShortenerService')}/createurl`,
+        urlpayload,
+      );
+      // then call the twitch service to show the alert on stream
+      this.tcpClient.emit('drop-activated', {
+        creatorId: newLootdropDto.creatorId,
+        reward: newLootdropDto.rewardId,
+        criteria: newLootdropDto.requirements,
+        url: shortUrl,
+      });
+      return { success: true };
+    } catch (error) {
+      this.logger.error({
+        operation: 'Shorten Lootdrop url',
+        error,
+      });
+    }
   }
 }
