@@ -44,3 +44,7 @@ export class NewLootdropDto implements GetLootdropDto {
   start: string;
   end: string;
 }
+
+export class ShortUrl {
+  shortUrl: string;
+}
