@@ -26,7 +26,7 @@ import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import {
   GiveXpDto,
-  MintReputationDto,
+  MintPrestigeDto,
   NewLootboxDto,
   NewLootdropDto,
   NewRecipeDto,
@@ -36,7 +36,6 @@ import {
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Logger } from '@nestjs/common';
-import { date } from 'joi';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
@@ -252,18 +251,18 @@ export class AdminController {
     return { success: true };
   }
 
-  @Post('mint/reputation')
-  async mintReputation(@Body() mintRepDto: MintReputationDto) {
+  @Post('mint/prestige')
+  async mintPrestige(@Body() mintPrestigeDto: MintPrestigeDto) {
     const contract = await this.chainService.getBattlePassContract(
-      mintRepDto.creatorId,
+      mintPrestigeDto.creatorId,
     );
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
     await (
       await bp.mint(
-        mintRepDto.userAddress,
+        mintPrestigeDto.userAddress,
         this.CREATOR_TOKEN_ID,
-        mintRepDto.amount,
+        mintPrestigeDto.amount,
         fee,
       )
     ).wait(1);
