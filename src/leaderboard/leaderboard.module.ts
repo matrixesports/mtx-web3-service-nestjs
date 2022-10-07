@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { BattlePassModule } from 'src/battlepass/battlepass.module';
-import { LeaderboardResolver } from './leaderboard.resolver';
+import { LeaderboardResolver, RankingResolver } from './leaderboard.resolver';
 import { LeaderboardService } from './leaderboard.service';
 
 @Module({
-  providers: [LeaderboardService, LeaderboardResolver],
+  providers: [LeaderboardService, LeaderboardResolver, RankingResolver],
   imports: [BattlePassModule],
   controllers: [],
   exports: [LeaderboardService],

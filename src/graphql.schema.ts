@@ -41,6 +41,15 @@ export enum Requirements {
     ALLXP = "ALLXP"
 }
 
+export interface Ranking {
+    rank: number;
+    topPercent: number;
+    id: string;
+    pfp?: Nullable<string>;
+    name?: Nullable<string>;
+    total: number;
+}
+
 export abstract class IQuery {
     abstract getBattlePass(creatorId: number): Nullable<BattlePass> | Promise<Nullable<BattlePass>>;
 
@@ -54,13 +63,13 @@ export abstract class IQuery {
 
     abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
 
-    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Nullable<Nullable<Ranking>[]> | Promise<Nullable<Nullable<Ranking>[]>>;
+    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Nullable<Nullable<SeasonRaking>[]> | Promise<Nullable<Nullable<SeasonRaking>[]>>;
 
-    abstract getAllXpRanking(creatorId: number): Nullable<Nullable<Ranking>[]> | Promise<Nullable<Nullable<Ranking>[]>>;
+    abstract getAllXpRanking(creatorId: number): Nullable<Nullable<AllSeasonRaking>[]> | Promise<Nullable<Nullable<AllSeasonRaking>[]>>;
 
-    abstract getReputationRanking(creatorId: number): Nullable<Ranking> | Promise<Nullable<Ranking>>;
+    abstract getReputationRanking(creatorId: number): Nullable<ReputationRaking> | Promise<Nullable<ReputationRaking>>;
 
-    abstract getReputationRankings(creatorId: number): Nullable<Nullable<Ranking>[]> | Promise<Nullable<Nullable<Ranking>[]>>;
+    abstract getReputationRankings(creatorId: number): Nullable<Nullable<ReputationRaking>[]> | Promise<Nullable<Nullable<ReputationRaking>[]>>;
 
     abstract getLootdrop(creatorId: number): Nullable<Lootdrop> | Promise<Nullable<Lootdrop>>;
 }
@@ -166,7 +175,25 @@ export class UserMissingFields {
     social?: Nullable<Nullable<RequiredUserSocialOptions>[]>;
 }
 
-export class Ranking {
+export class SeasonRaking implements Ranking {
+    rank: number;
+    topPercent: number;
+    id: string;
+    pfp?: Nullable<string>;
+    name?: Nullable<string>;
+    total: number;
+}
+
+export class AllSeasonRaking implements Ranking {
+    rank: number;
+    topPercent: number;
+    id: string;
+    pfp?: Nullable<string>;
+    name?: Nullable<string>;
+    total: number;
+}
+
+export class ReputationRaking implements Ranking {
     rank: number;
     topPercent: number;
     id: string;

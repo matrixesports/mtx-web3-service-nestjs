@@ -12,10 +12,10 @@ type Query {
   getRecipes(creatorId: Int!): [Recipe]
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
 
-  getSeasonXpRanking(creatorId: Int!, seasonId: Int!): [Ranking]
-  getAllXpRanking(creatorId: Int!): [Ranking]
-  getReputationRanking(creatorId: Int!): Ranking
-  getReputationRankings(creatorId: Int!): [Ranking]
+  getSeasonXpRanking(creatorId: Int!, seasonId: Int!): [SeasonRaking]
+  getAllXpRanking(creatorId: Int!): [AllSeasonRaking]
+  getReputationRanking(creatorId: Int!): ReputationRaking
+  getReputationRankings(creatorId: Int!): [ReputationRaking]
 
   getLootdrop(creatorId: Int!): Lootdrop
 }
@@ -169,9 +169,36 @@ enum RequiredUserPaymentOptions {
 
 # |========================| LEADERBOARD |========================|
 
-type Ranking {
+type SeasonRaking implements Ranking {
   rank: Int!
-  topPercent: Int!
+  topPercent: Float!
+  id: String!
+  pfp: String
+  name: String
+  total: Int!
+}
+
+type AllSeasonRaking implements Ranking {
+  rank: Int!
+  topPercent: Float!
+  id: String!
+  pfp: String
+  name: String
+  total: Int!
+}
+
+type ReputationRaking implements Ranking {
+  rank: Int!
+  topPercent: Float!
+  id: String!
+  pfp: String
+  name: String
+  total: Int!
+}
+
+interface Ranking {
+  rank: Int!
+  topPercent: Float!
   id: String!
   pfp: String
   name: String

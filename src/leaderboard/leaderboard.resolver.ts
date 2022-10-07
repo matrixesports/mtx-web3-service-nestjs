@@ -6,10 +6,16 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import {
+  ReputationRaking,
+  Ranking,
+  SeasonRaking,
+  AllSeasonRaking,
+} from 'src/graphql.schema';
 import { GetSeasonXpRankingDto } from './leaderboard.dto';
 import { LeaderboardService } from './leaderboard.service';
 
-@Resolver('Ranking')
+@Resolver()
 export class LeaderboardResolver {
   constructor(private leaderboardService: LeaderboardService) {}
 
@@ -38,7 +44,6 @@ export class LeaderboardResolver {
     );
   }
 
-  @Query()
   async getReputationRanking(
     @Args('creatorId') creatorId: number,
     @Context() context,
@@ -56,11 +61,12 @@ export class LeaderboardResolver {
   async getAllXpRanking(@Args('creatorId') creatorId: number) {
     return await this.leaderboardService.getAllSeasonInfo(creatorId);
   }
+}
 
-  /*
-|========================| FIELDS |========================|
-*/
-
+@Resolver((of) => ReputationRaking)
+@Resolver((of) => SeasonRaking)
+@Resolver((of) => AllSeasonRaking)
+export class RankingResolver {
   @ResolveField()
   name(@Parent() parent: GetSeasonXpRankingDto) {
     return parent.name;
@@ -79,14 +85,16 @@ export class LeaderboardResolver {
       ) + 1
     );
   }
+
   @ResolveField()
   topPercent(@Parent() parent: GetSeasonXpRankingDto) {
     const index = parent.others.findIndex(
       (other) => other.userAddress === parent.userAddress,
     );
-    return (
-      100 -
-      Math.round(((parent.others.length - index) / parent.others.length) * 100)
-    );
+    return ((parent.others.length - index) / parent.others.length) * 100;
   }
 }
+
+/*
+|========================| FIELDS |========================|
+*/
