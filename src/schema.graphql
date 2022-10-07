@@ -169,7 +169,7 @@ enum RequiredUserPaymentOptions {
 
 # |========================| LEADERBOARD |========================|
 
-type SeasonRaking implements Ranking {
+type SeasonRanking implements Ranking {
   rank: Int!
   topPercent: Float!
   id: String!
@@ -178,7 +178,7 @@ type SeasonRaking implements Ranking {
   total: Int!
 }
 
-type AllSeasonRaking implements Ranking {
+type AllSeasonRanking implements Ranking {
   rank: Int!
   topPercent: Float!
   id: String!
@@ -187,7 +187,7 @@ type AllSeasonRaking implements Ranking {
   total: Int!
 }
 
-type ReputationRaking implements Ranking {
+type ReputationRanking implements Ranking {
   rank: Int!
   topPercent: Float!
   id: String!
