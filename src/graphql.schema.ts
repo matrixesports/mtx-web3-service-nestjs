@@ -63,13 +63,13 @@ export abstract class IQuery {
 
     abstract getRecipe(creatorId: number, recipeId: number): Nullable<Recipe> | Promise<Nullable<Recipe>>;
 
-    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Nullable<Nullable<SeasonRaking>[]> | Promise<Nullable<Nullable<SeasonRaking>[]>>;
+    abstract getSeasonXpRanking(creatorId: number, seasonId: number): Nullable<Nullable<SeasonRanking>[]> | Promise<Nullable<Nullable<SeasonRanking>[]>>;
 
-    abstract getAllXpRanking(creatorId: number): Nullable<Nullable<AllSeasonRaking>[]> | Promise<Nullable<Nullable<AllSeasonRaking>[]>>;
+    abstract getAllXpRanking(creatorId: number): Nullable<Nullable<AllSeasonRanking>[]> | Promise<Nullable<Nullable<AllSeasonRanking>[]>>;
 
-    abstract getReputationRanking(creatorId: number): Nullable<ReputationRaking> | Promise<Nullable<ReputationRaking>>;
+    abstract getReputationRanking(creatorId: number): Nullable<ReputationRanking> | Promise<Nullable<ReputationRanking>>;
 
-    abstract getReputationRankings(creatorId: number): Nullable<Nullable<ReputationRaking>[]> | Promise<Nullable<Nullable<ReputationRaking>[]>>;
+    abstract getReputationRankings(creatorId: number): Nullable<Nullable<ReputationRanking>[]> | Promise<Nullable<Nullable<ReputationRanking>[]>>;
 
     abstract getLootdrop(creatorId: number): Nullable<Lootdrop> | Promise<Nullable<Lootdrop>>;
 }
@@ -175,7 +175,7 @@ export class UserMissingFields {
     social?: Nullable<Nullable<RequiredUserSocialOptions>[]>;
 }
 
-export class SeasonRaking implements Ranking {
+export class SeasonRanking implements Ranking {
     rank: number;
     topPercent: number;
     id: string;
@@ -184,7 +184,7 @@ export class SeasonRaking implements Ranking {
     total: number;
 }
 
-export class AllSeasonRaking implements Ranking {
+export class AllSeasonRanking implements Ranking {
     rank: number;
     topPercent: number;
     id: string;
@@ -193,7 +193,7 @@ export class AllSeasonRaking implements Ranking {
     total: number;
 }
 
-export class ReputationRaking implements Ranking {
+export class ReputationRanking implements Ranking {
     rank: number;
     topPercent: number;
     id: string;

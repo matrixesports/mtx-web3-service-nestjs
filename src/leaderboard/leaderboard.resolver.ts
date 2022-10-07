@@ -7,9 +7,9 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import {
-  ReputationRaking,
-  SeasonRaking,
-  AllSeasonRaking,
+  AllSeasonRanking,
+  ReputationRanking,
+  SeasonRanking,
 } from 'src/graphql.schema';
 import { GetSeasonXpRankingDto } from './leaderboard.dto';
 import { LeaderboardService } from './leaderboard.service';
@@ -62,10 +62,14 @@ export class LeaderboardResolver {
   }
 }
 
-@Resolver((of) => ReputationRaking)
-@Resolver((of) => SeasonRaking)
-@Resolver((of) => AllSeasonRaking)
+@Resolver((of) => ReputationRanking)
+@Resolver((of) => SeasonRanking)
+@Resolver((of) => AllSeasonRanking)
 export class RankingResolver {
+  /*
+|========================| FIELDS |========================|
+*/
+
   @ResolveField()
   name(@Parent() parent: GetSeasonXpRankingDto) {
     return parent.name;
@@ -93,7 +97,3 @@ export class RankingResolver {
     return ((parent.others.length - index) / parent.others.length) * 100;
   }
 }
-
-/*
-|========================| FIELDS |========================|
-*/
