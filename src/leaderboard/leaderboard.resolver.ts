@@ -8,7 +8,6 @@ import {
 } from '@nestjs/graphql';
 import {
   ReputationRaking,
-  Ranking,
   SeasonRaking,
   AllSeasonRaking,
 } from 'src/graphql.schema';

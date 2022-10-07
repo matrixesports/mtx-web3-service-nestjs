@@ -145,30 +145,29 @@ export class LeaderboardService {
 */
 
   async getFollowers(creatorId: number) {
-    const res = { data: [] };
-    res.data.push({
-      userAddress: 'E0c788889AaBeAd8D4181d14b2868E7720AE1c26',
-      id: 10,
-      pfp: 'pfp',
-      name: 'name',
-    });
-    res.data.push({
-      userAddress: '0000000000000000000000000000000000000001',
-      id: 11,
-      pfp: 'pfp1',
-      name: 'name1',
-    });
-    console.log('Ds');
-    return res.data;
-    // const res = await axios
-    //   .get(
-    //     `${
-    //       this.configService.get('SERVICE').userService
-    //     }/api/creator/${creatorId}/followers`,
-    //   )
-    //   .catch((error) => {
-    //     throw new Error('Fetching Leaderboard Failed!');
-    //   });
+    // const res = { data: [] };
+    // res.data.push({
+    //   userAddress: 'E0c788889AaBeAd8D4181d14b2868E7720AE1c26',
+    //   id: 10,
+    //   pfp: 'pfp',
+    //   name: 'name',
+    // });
+    // res.data.push({
+    //   userAddress: '0000000000000000000000000000000000000001',
+    //   id: 11,
+    //   pfp: 'pfp1',
+    //   name: 'name1',
+    // });
     // return res.data;
+    const res = await axios
+      .get(
+        `${
+          this.configService.get('SERVICE').userService
+        }/api/creator/${creatorId}/followers`,
+      )
+      .catch((error) => {
+        throw new Error('Fetching Leaderboard Failed!');
+      });
+    return res.data;
   }
 }
