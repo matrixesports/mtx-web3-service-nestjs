@@ -12,10 +12,10 @@ type Query {
   getRecipes(creatorId: Int!): [Recipe]
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
 
-  getSeasonXpRanking(creatorId: Int!, seasonId: Int!): [SeasonRaking]
-  getAllXpRanking(creatorId: Int!): [AllSeasonRaking]
-  getReputationRanking(creatorId: Int!): ReputationRaking
-  getReputationRankings(creatorId: Int!): [ReputationRaking]
+  getSeasonXpRanking(creatorId: Int!, seasonId: Int!): [SeasonRanking]
+  getAllXpRanking(creatorId: Int!): [AllSeasonRanking]
+  getReputationRanking(creatorId: Int!): ReputationRanking
+  getReputationRankings(creatorId: Int!): [ReputationRanking]
 
   getLootdrop(creatorId: Int!): Lootdrop
 }
