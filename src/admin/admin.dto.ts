@@ -14,7 +14,7 @@ export class MintTokenDto {
   id: number;
 }
 
-export class MintPrestigeDto {
+export class MintReputationDto {
   userAddress: string;
   creatorId: number;
   amount: number;

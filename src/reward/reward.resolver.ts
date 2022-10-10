@@ -155,7 +155,7 @@ export class LootdropResolver {
             } more XP to claim this Lootdrop!`,
           );
         break;
-      case Requirements.PRESTIGE:
+      case Requirements.REPUTATION:
         userThreshold = (
           await contract.balanceOf(userAddress, lootdrop.rewardId)
         ).toNumber();
@@ -163,7 +163,7 @@ export class LootdropResolver {
           throw new Warn(
             `You need ${
               lootdrop.threshold - userThreshold
-            } more Prestige to claim this Lootdrop!`,
+            } more Reputation to claim this Lootdrop!`,
           );
         break;
       case Requirements.SEASONXP:

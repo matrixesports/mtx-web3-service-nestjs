@@ -36,7 +36,7 @@ export enum RequiredUserPaymentOptions {
 }
 
 export enum Requirements {
-    PRESTIGE = "PRESTIGE",
+    REPUTATION = "REPUTATION",
     SEASONXP = "SEASONXP",
     ALLXP = "ALLXP"
 }

@@ -34,7 +34,7 @@ abstract class RankingResolver {
     const index = parent.others.findIndex(
       (other) => other.userAddress === parent.userAddress,
     );
-    return ((parent.others.length - index) / parent.others.length) * 100;
+    return 100 - ((parent.others.length - index) / parent.others.length) * 100;
   }
 }
 
@@ -93,7 +93,6 @@ export class AllSeasonRankingResolver extends RankingResolver {
   }
   @Query()
   async getAllXpRanking(@Args('creatorId') creatorId: number) {
-    console.log('dsa');
     return await this.leaderboardService.getAllSeasonInfo(creatorId);
   }
 }

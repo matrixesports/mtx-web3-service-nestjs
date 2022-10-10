@@ -26,7 +26,7 @@ import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import {
   GiveXpDto,
-  MintPrestigeDto,
+  MintReputationDto,
   NewLootboxDto,
   NewLootdropDto,
   NewRecipeDto,
@@ -251,18 +251,18 @@ export class AdminController {
     return { success: true };
   }
 
-  @Post('mint/prestige')
-  async mintPrestige(@Body() mintPrestigeDto: MintPrestigeDto) {
+  @Post('mint/reputation')
+  async mintReputation(@Body() mintReputationDto: MintReputationDto) {
     const contract = await this.chainService.getBattlePassContract(
-      mintPrestigeDto.creatorId,
+      mintReputationDto.creatorId,
     );
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
     await (
       await bp.mint(
-        mintPrestigeDto.userAddress,
+        mintReputationDto.userAddress,
         this.CREATOR_TOKEN_ID,
-        mintPrestigeDto.amount,
+        mintReputationDto.amount,
         fee,
       )
     ).wait(1);

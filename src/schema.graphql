@@ -208,7 +208,7 @@ interface Ranking {
 # |========================| LOOTDROP |========================|
 
 enum Requirements {
-  PRESTIGE
+  REPUTATION
   SEASONXP
   ALLXP
 }
