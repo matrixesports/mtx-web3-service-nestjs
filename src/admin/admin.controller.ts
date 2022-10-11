@@ -314,10 +314,14 @@ export class AdminController {
         urlpayload,
       );
       // then call the twitch service to show the alert on stream
+      // TODO: send the reward object rather than sending the reward id
       this.tcpClient.emit('drop-activated', {
         creatorId: newLootdropDto.creatorId,
         reward: newLootdropDto.rewardId,
-        criteria: newLootdropDto.requirements,
+        threshold: newLootdropDto.threshold,
+        requirements: newLootdropDto.requirements,
+        start,
+        end,
         url: shortUrl,
       });
       return { success: true };
