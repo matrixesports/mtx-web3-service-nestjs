@@ -10,13 +10,14 @@ import {
 import { ContractCall } from 'pilum';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
-import { GetLootdropDto } from './reward.dto';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Logger } from '@nestjs/common';
 import { Lootdrop, MutationResponse, Requirements } from 'src/graphql.schema';
 import { BattlePass, BattlePass__factory } from 'abi/typechain';
 import { Warn } from 'src/common/error.interceptor';
+import { LootdropRS } from './reward.entity';
+import { GetLootdropDto } from './reward.dto';
 
 @Resolver('LootboxOption')
 export class LootboxResolver {
@@ -84,12 +85,10 @@ export class LootdropResolver {
   ) {}
 
   @Query((of) => Lootdrop, { name: 'getLootdrop' })
-  async getlootdrop(
-    @Args('creatorId') creatorId: number,
-  ): Promise<GetLootdropDto> {
-    let lootdrop: GetLootdropDto;
+  async getlootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
+    let lootdrop: LootdropRS;
     try {
-      lootdrop = await this.cacheManager.get<GetLootdropDto>(
+      lootdrop = await this.cacheManager.get<LootdropRS>(
         `lootdrop-${creatorId}`,
       );
     } catch (error) {
@@ -108,9 +107,9 @@ export class LootdropResolver {
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    let lootdrop: GetLootdropDto;
+    let lootdrop: LootdropRS;
     try {
-      lootdrop = await this.cacheManager.get<GetLootdropDto>(
+      lootdrop = await this.cacheManager.get<LootdropRS>(
         `lootdrop-${creatorId}`,
       );
     } catch (error) {

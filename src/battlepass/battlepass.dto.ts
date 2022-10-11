@@ -12,14 +12,3 @@ export class GetBattlePassChildDto {
 export class GetBattlePassUserInfoChildDto extends GetBattlePassChildDto {
   userAddress: string;
 }
-
-export class GiveXpDto {
-  userAddress: string;
-  creatorId: number;
-  xp: number;
-}
-
-export class MintPremiumPassDto {
-  userAddress: string;
-  creatorId: number;
-}

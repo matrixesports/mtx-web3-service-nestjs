@@ -34,7 +34,9 @@ abstract class RankingResolver {
     const index = parent.others.findIndex(
       (other) => other.userAddress === parent.userAddress,
     );
-    return 100 - ((parent.others.length - index) / parent.others.length) * 100;
+    const topPercent =
+      100 - ((parent.others.length - index) / parent.others.length) * 100;
+    return topPercent > 0.01 ? topPercent : 0.01;
   }
 }
 

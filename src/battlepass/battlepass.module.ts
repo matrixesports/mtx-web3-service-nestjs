@@ -5,7 +5,6 @@ import {
   UserResolver,
 } from './battlepass.resolver';
 import { BattlePassService } from './battlepass.service';
-import { BattlePassController } from './battlepass.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BattlePassDB } from './battlepass.entity';
 import { MetadataModule } from 'src/metadata/metadata.module';
@@ -18,7 +17,7 @@ import { MetadataModule } from 'src/metadata/metadata.module';
     PremiumUserResolver,
   ],
   imports: [TypeOrmModule.forFeature([BattlePassDB]), MetadataModule],
-  controllers: [BattlePassController],
+  controllers: [],
   exports: [BattlePassService],
 })
 export class BattlePassModule {}

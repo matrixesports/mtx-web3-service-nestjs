@@ -1,7 +1,6 @@
 import { Requirements } from 'src/graphql.schema';
-import { LootdropRS } from './reward.entity';
 
-export class GetLootdropDto implements LootdropRS {
+export class LootdropRS {
   creatorId: number;
   rewardId: number;
   requirements: Requirements;

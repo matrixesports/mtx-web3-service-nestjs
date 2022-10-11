@@ -24,27 +24,29 @@ import {
 import { CraftingService } from 'src/crafting/crafting.service';
 import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
-import {
-  GiveXpDto,
-  MintReputationDto,
-  NewLootboxDto,
-  NewLootdropDto,
-  NewRecipeDto,
-  NewSeasonDto,
-  ShortUrl,
-} from './admin.dto';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Logger } from '@nestjs/common';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
+import {
+  CreateLootboxDto,
+  CreateLootdropDto,
+  CreateRecipeDto,
+  CreateSeasonDto,
+  MintPremPassDto,
+  MintRepDto,
+  MintXpDto,
+  REPUTATION_TOKEN_ID,
+  ShortUrl,
+} from './api.dto';
+import { LootdropRS } from 'src/reward/reward.entity';
 
-@Controller('admin')
+@Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
-export class AdminController {
-  CREATOR_TOKEN_ID = 1000;
-  private readonly logger = new Logger(AdminController.name);
+export class ApiController {
+  private readonly logger = new Logger(ApiController.name);
   constructor(
     private chainService: ChainService,
     private craftingService: CraftingService,
@@ -59,7 +61,7 @@ export class AdminController {
 |========================| GET |========================|
 */
 
-  @Get('check/:creatorId')
+  @Get('battlepass/check/:creatorId')
   async check(@Param('creatorId') creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     return {
@@ -68,11 +70,30 @@ export class AdminController {
     };
   }
 
-  @Get('seasonId/:creatorId')
-  async seasonId(@Param('creatorId') creatorId: number) {
+  @Get('battlepass/season/:creatorId')
+  async getSeasonId(@Param('creatorId') creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     return {
       seasonId: (await contract.seasonId()).toNumber(),
+    };
+  }
+
+  @Get('battlepass/:creatorId')
+  async getBattlePass(@Param('creatorId') creatorId: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const seasonId = await contract.seasonId();
+    const battlePassDB = await this.battlePassService
+      .getBattlePass(creatorId)
+      .catch((error) => {
+        throw new HttpException(error.message, 500);
+      });
+    return {
+      price: battlePassDB.price,
+      currency: battlePassDB.currency,
+      name: battlePassDB.name,
+      description: battlePassDB.description,
+      seasonId: seasonId.toNumber(),
+      address: contract.address,
     };
   }
 
@@ -80,7 +101,52 @@ export class AdminController {
 |========================| POST |========================|
 */
 
-  @Post('deploy')
+  @Post('mint/prempass')
+  async mintPremiumPass(@Body() mintPremPassDto: MintPremPassDto) {
+    const contract = await this.chainService.getBattlePassContract(
+      mintPremPassDto.creatorId,
+    );
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const seasonId = await bp.seasonId();
+    const fee = await this.chainService.getMaticFeeData();
+    await (
+      await bp.mint(mintPremPassDto.userAddress, seasonId, 1, fee)
+    ).wait(1);
+    return { success: true };
+  }
+
+  @Post('mint/reputation')
+  async mintReputation(@Body() mintRepDto: MintRepDto) {
+    const contract = await this.chainService.getBattlePassContract(
+      mintRepDto.creatorId,
+    );
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const fee = await this.chainService.getMaticFeeData();
+    await (
+      await bp.mint(
+        mintRepDto.userAddress,
+        REPUTATION_TOKEN_ID,
+        mintRepDto.amount,
+        fee,
+      )
+    ).wait(1);
+    return { success: true };
+  }
+
+  @Post('mint/xp') async mintXp(@Body() mintXpDto: MintXpDto) {
+    const contract = await this.chainService.getBattlePassContract(
+      mintXpDto.creatorId,
+    );
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const seasonId = await bp.seasonId();
+    const fee = await this.chainService.getMaticFeeData();
+    await (
+      await bp.giveXp(seasonId, mintXpDto.amount, mintXpDto.userAddress, fee)
+    ).wait(1);
+    return { success: true };
+  }
+
+  @Post('deploy/battlepass')
   async deploy(@Body('creatorId') creatorId: number) {
     if (await this.chainService.isBattlePassDeployed(creatorId)) {
       return {
@@ -110,27 +176,13 @@ export class AdminController {
     };
   }
 
-  @Post('giveXp')
-  async giveXp(@Body() giveXpDto: GiveXpDto) {
-    const contract = await this.chainService.getBattlePassContract(
-      giveXpDto.creatorId,
-    );
-    const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    const seasonId = await bp.seasonId();
-    const fee = await this.chainService.getMaticFeeData();
-    await (
-      await bp.giveXp(seasonId, giveXpDto.xp, giveXpDto.userAddress, fee)
-    ).wait(1);
-    return { success: true };
-  }
-
-  @Post('newLootbox')
-  async newLootbox(@Body() newLootboxDto: NewLootboxDto) {
+  @Post('create/lootbox')
+  async createLootbox(@Body() createLootboxDto: CreateLootboxDto) {
     let jointprob = 0;
     const maxprob = 100;
     const lootboxOption: LootboxOptionStruct[] = [];
-    for (let i = 0; i < newLootboxDto.lootboxInfo.length; i++) {
-      const option = newLootboxDto.lootboxInfo[i];
+    for (let i = 0; i < createLootboxDto.lootboxInfo.length; i++) {
+      const option = createLootboxDto.lootboxInfo[i];
       if (jointprob + option.rarity > maxprob) {
         return {
           success: false,
@@ -158,7 +210,7 @@ export class AdminController {
       };
     }
     const contract = await this.chainService.getBattlePassContract(
-      newLootboxDto.creatorId,
+      createLootboxDto.creatorId,
     );
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
@@ -166,7 +218,7 @@ export class AdminController {
     const lootboxId = await bp.lootboxId();
     await this.metadataService
       .addMetadata(
-        newLootboxDto.creatorId,
+        createLootboxDto.creatorId,
         lootboxId.toNumber(),
         'TODO',
         'TODO',
@@ -182,14 +234,14 @@ export class AdminController {
     };
   }
 
-  @Post('newSeason')
-  async newSeason(@Body() newSeasonDto: NewSeasonDto) {
+  @Post('create/season')
+  async createSeason(@Body() createSeasonDto: CreateSeasonDto) {
     const levelInfo: LevelInfoStruct[] = [];
-    for (let i = 0; i < newSeasonDto.levelDetails.length; i++) {
-      const info = newSeasonDto.levelDetails[i];
+    for (let i = 0; i < createSeasonDto.levelDetails.length; i++) {
+      const info = createSeasonDto.levelDetails[i];
       levelInfo.push({
         xpToCompleteLevel:
-          i != newSeasonDto.levelDetails.length - 1 ? info.xp : 0,
+          i != createSeasonDto.levelDetails.length - 1 ? info.xp : 0,
         freeRewardId: info.freeId,
         freeRewardQty: info.freeQty,
         premiumRewardId: info.premId,
@@ -197,7 +249,7 @@ export class AdminController {
       });
     }
     const contract = await this.chainService.getBattlePassContract(
-      newSeasonDto.creatorId,
+      createSeasonDto.creatorId,
     );
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
@@ -205,16 +257,16 @@ export class AdminController {
     return { success: true };
   }
 
-  @Post('newRecipe')
-  async newRecipe(@Body() newRecipeDto: NewRecipeDto) {
+  @Post('create/recipe')
+  async createRecipe(@Body() createRecipeDto: CreateRecipeDto) {
     // assume creatorIDs exists (retool)
     const inputIngredients: IngredientsStruct = {
       battlePasses: [],
       ids: [],
       qtys: [],
     };
-    for (let i = 0; i < newRecipeDto.inputIngredients.length; i++) {
-      const ingredient = newRecipeDto.inputIngredients[i];
+    for (let i = 0; i < createRecipeDto.inputIngredients.length; i++) {
+      const ingredient = createRecipeDto.inputIngredients[i];
       const address = await this.chainService.getBattlePassAddress(
         ingredient.creatorId,
       );
@@ -227,8 +279,8 @@ export class AdminController {
       ids: [],
       qtys: [],
     };
-    for (let i = 0; i < newRecipeDto.outputIngredients.length; i++) {
-      const ingredient = newRecipeDto.outputIngredients[i];
+    for (let i = 0; i < createRecipeDto.outputIngredients.length; i++) {
+      const ingredient = createRecipeDto.outputIngredients[i];
       const address = await this.chainService.getBattlePassAddress(
         ingredient.creatorId,
       );
@@ -244,37 +296,19 @@ export class AdminController {
     const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
     const recipeId = event.args['recipeId'].toNumber();
     this.craftingService
-      .addRecipe(newRecipeDto.creatorId, recipeId)
+      .addRecipe(createRecipeDto.creatorId, recipeId)
       .catch((error) => {
         throw new HttpException(error.message, 500);
       });
     return { success: true };
   }
 
-  @Post('mint/reputation')
-  async mintReputation(@Body() mintReputationDto: MintReputationDto) {
-    const contract = await this.chainService.getBattlePassContract(
-      mintReputationDto.creatorId,
-    );
-    const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    const fee = await this.chainService.getMaticFeeData();
-    await (
-      await bp.mint(
-        mintReputationDto.userAddress,
-        this.CREATOR_TOKEN_ID,
-        mintReputationDto.amount,
-        fee,
-      )
-    ).wait(1);
-    return { success: true };
-  }
-
-  @Post('newLootdrop')
-  async newLootdrop(@Body() newLootdropDto: NewLootdropDto) {
-    const startPST = new Date(newLootdropDto.start).toLocaleString('en-US', {
+  @Post('create/lootdrop')
+  async createLootdrop(@Body() createLootdropDto: CreateLootdropDto) {
+    const startPST = new Date(createLootdropDto.start).toLocaleString('en-US', {
       timeZone: 'America/Los_Angeles',
     });
-    const endPST = new Date(newLootdropDto.end).toLocaleString('en-US', {
+    const endPST = new Date(createLootdropDto.end).toLocaleString('en-US', {
       timeZone: 'America/Los_Angeles',
     });
     const start = new Date(startPST);
@@ -289,9 +323,9 @@ export class AdminController {
         ? Math.floor((end.getTime() - start.getTime()) / 1000)
         : Math.floor((end.getTime() - nw.getTime()) / 1000);
     try {
-      await this.cacheManager.set<NewLootdropDto>(
-        `lootdrop-${newLootdropDto.creatorId}`,
-        newLootdropDto,
+      await this.cacheManager.set<LootdropRS>(
+        `lootdrop-${createLootdropDto.creatorId}`,
+        createLootdropDto,
         { ttl },
       );
     } catch (error) {
@@ -303,7 +337,7 @@ export class AdminController {
 
     // the url service payload
     const urlpayload = {
-      creatorId: newLootdropDto.creatorId,
+      creatorId: createLootdropDto.creatorId,
     };
     // make the call to the url service with the creator id
     try {
@@ -315,15 +349,15 @@ export class AdminController {
       );
       // then call the twitch service to show the alert on stream
       const reward = await this.battlePassService.createRewardObj(
-        newLootdropDto.creatorId,
-        newLootdropDto.rewardId,
-        20,
+        createLootdropDto.creatorId,
+        createLootdropDto.rewardId,
+        1,
       );
       this.tcpClient.emit('drop-activated', {
-        creatorId: newLootdropDto.creatorId,
+        creatorId: createLootdropDto.creatorId,
         reward: reward,
-        threshold: newLootdropDto.threshold,
-        requirements: newLootdropDto.requirements,
+        threshold: createLootdropDto.threshold,
+        requirements: createLootdropDto.requirements,
         start,
         end,
         url: shortUrl,

@@ -4,10 +4,10 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BattlePassModule } from 'src/battlepass/battlepass.module';
 import { CraftingModule } from 'src/crafting/crafting.module';
 import { MetadataModule } from 'src/metadata/metadata.module';
-import { AdminController } from './admin.controller';
+import { ApiController } from './api.controller';
 
 @Module({
-  controllers: [AdminController],
+  controllers: [ApiController],
   imports: [
     CraftingModule,
     BattlePassModule,
@@ -28,4 +28,4 @@ import { AdminController } from './admin.controller';
     ]),
   ],
 })
-export class AdminModule {}
+export class ApiModule {}

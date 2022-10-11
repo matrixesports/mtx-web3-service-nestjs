@@ -1,4 +1,3 @@
-import { Result } from 'ethers/lib/utils';
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
 @Entity('recipe')
@@ -24,3 +23,15 @@ export type Recipe = {
   input: Ingridients;
   output: Ingridients;
 };
+
+export class RecipeRS {
+  creatorId: number;
+  recipeId: number;
+  recipe: Recipe;
+  active: boolean;
+  owner?: {
+    name: string;
+    slug: string;
+    pfp: string;
+  };
+}

@@ -17,13 +17,13 @@ import { ChainModule } from './chain/chain.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { RewardModule } from './reward/reward.module';
 import { InventoryModule } from './inventory/inventory.module';
-import { AdminModule } from './admin/admin.module';
 import { CraftingModule } from './crafting/crafting.module';
 import { GraphQLPlugin } from './common/gql.plugin';
 import { GraphQLError } from 'graphql';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { LoggerModule } from 'nestjs-pino';
+import { ApiModule } from './api/api.module';
 
 @Module({
   imports: [
@@ -143,7 +143,7 @@ import { LoggerModule } from 'nestjs-pino';
     RewardModule,
     InventoryModule,
     CraftingModule,
-    AdminModule,
+    ApiModule,
     LeaderboardModule,
   ],
   providers: [GraphQLPlugin],
