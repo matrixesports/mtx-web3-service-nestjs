@@ -314,10 +314,14 @@ export class AdminController {
         urlpayload,
       );
       // then call the twitch service to show the alert on stream
-      // TODO: send the reward object rather than sending the reward id
+      const reward = await this.battlePassService.createRewardObj(
+        newLootdropDto.creatorId,
+        newLootdropDto.rewardId,
+        20,
+      );
       this.tcpClient.emit('drop-activated', {
         creatorId: newLootdropDto.creatorId,
-        reward: newLootdropDto.rewardId,
+        reward: reward,
         threshold: newLootdropDto.threshold,
         requirements: newLootdropDto.requirements,
         start,
