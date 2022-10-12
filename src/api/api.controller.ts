@@ -79,7 +79,19 @@ export class ApiController {
     };
   }
 
-  @Get('battlepass/:creatorId')
+  @Get('check/reputation/:creatorId/:userAddress')
+  async getReputation(
+    @Param('creatorId') creatorId: number,
+    @Param('userAddress') userAddress: string,
+  ) {
+    return await this.battlePassService.getBalance(
+      creatorId,
+      userAddress,
+      REPUTATION_TOKEN_ID,
+    );
+  }
+
+  @Get('battlepass/reputation/:creatorId')
   async getBattlePass(@Param('creatorId') creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const seasonId = await contract.seasonId();
