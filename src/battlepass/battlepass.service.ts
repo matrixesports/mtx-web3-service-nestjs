@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LevelInfo, Reward } from 'src/graphql.schema';
@@ -8,15 +8,20 @@ import { parse } from 'postgres-array';
 import { BattlePassDB } from './battlepass.entity';
 import axios from 'axios';
 import { MetadataDB } from 'src/metadata/metadata.entity';
+import { plainToInstance } from 'class-transformer';
 import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
+  RequiredFieldsBody,
+  RequiredFieldsResponse,
+  TicketRedeemBody,
+  TwitchRedeemBody,
 } from './battlepass.dto';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
-import { CACHE_MANAGER, Inject } from '@nestjs/common';
-import { Cache } from 'cache-manager';
-import { Logger } from '@nestjs/common';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
+import { BattlePass } from 'abi/typechain';
 
 @Injectable()
 export class BattlePassService {
@@ -25,7 +30,7 @@ export class BattlePassService {
     private configService: ConfigService,
     @InjectRepository(BattlePassDB)
     private battlePassRepository: Repository<BattlePassDB>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectRedis() private readonly redis: Redis,
     private metadataService: MetadataService,
     private chainService: ChainService,
     private dataSource: DataSource,
@@ -36,17 +41,14 @@ export class BattlePassService {
 */
   async getLevelInfo(dto: GetBattlePassChildDto) {
     let levelInfo: LevelInfo[];
-    try {
-      levelInfo = await this.cacheManager.get<LevelInfo[]>(
-        `level-info-${dto.creatorId}`,
-      );
-    } catch (error) {
+    const target = `level-info-${dto.creatorId}`;
+    const cache = await this.redis.get(target).catch((error) => {
       this.logger.error({
         operation: 'Cache Read',
         error,
       });
-    }
-    if (levelInfo == null) {
+    });
+    if (cache == null) {
       levelInfo = [];
       const calls: ContractCall[] = [];
       for (let x = 0; x <= dto.maxLevel; x++) {
@@ -83,18 +85,17 @@ export class BattlePassService {
           premiumReward,
         });
       }
-      try {
-        await this.cacheManager.set<LevelInfo[]>(
-          `level-info-${dto.creatorId}`,
-          levelInfo,
-          { ttl: 0 },
-        );
-      } catch (error) {
+      await this.redis.set(target, JSON.stringify(levelInfo)).catch((error) => {
         this.logger.error({
           operation: 'Cache Write',
           error,
         });
-      }
+      });
+    } else {
+      levelInfo = plainToInstance(
+        LevelInfo,
+        JSON.parse(cache as string),
+      ) as unknown as LevelInfo[];
     }
     return levelInfo;
   }
@@ -121,6 +122,25 @@ export class BattlePassService {
     return unclaimedFree;
   }
 
+  async getBalance(creatorId: number, userAddress: string, id: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const balance = (await contract.balanceOf(userAddress, id)).toNumber();
+    return balance;
+  }
+
+  async getXp(creatorId: number, userAddress: string) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const seasonId = (await contract.seasonId()).toNumber();
+    const xp = (await contract.userInfo(userAddress, seasonId)).xp.toNumber();
+    return xp;
+  }
+
+  async mint(creatorId: number, userAddress: string, id: number, qty: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const fee = await this.chainService.getMaticFeeData();
+    await (await bp.mint(userAddress, id, qty, fee)).wait(1);
+  }
   /*
 |========================| REPOSITORY |========================|
 */
@@ -297,39 +317,4 @@ export class BattlePassService {
       creatorId,
     } as Reward;
   }
-}
-
-/*
-|========================| DEFINITIONS |========================|
-*/
-
-interface TicketRedeemBody {
-  name: string;
-  description: string;
-  image: string;
-  creatorId: number;
-  itemId: number;
-  userAddress: string;
-  itemAddress: string;
-}
-
-interface TwitchRedeemBody {
-  name: string;
-  description: string;
-  image: string;
-  creatorId: number;
-  itemId: number;
-  userAddress: string;
-  itemAddress: string;
-}
-
-interface RequiredFieldsBody {
-  userAddress: string;
-  required_user_social_options: string[];
-  required_user_payment_options: string[];
-}
-
-interface RequiredFieldsResponse {
-  missing_user_social_options: string[];
-  missing_user_payment_options: string[];
 }

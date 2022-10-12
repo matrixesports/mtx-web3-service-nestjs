@@ -10,14 +10,13 @@ import {
 import { ContractCall } from 'pilum';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
-import { CACHE_MANAGER, Inject } from '@nestjs/common';
-import { Cache } from 'cache-manager';
 import { Logger } from '@nestjs/common';
-import { Lootdrop, MutationResponse, Requirements } from 'src/graphql.schema';
-import { BattlePass, BattlePass__factory } from 'abi/typechain';
+import { Requirements } from 'src/graphql.schema';
 import { Warn } from 'src/common/error.interceptor';
 import { LootdropRS } from './reward.entity';
 import { GetLootdropDto } from './reward.dto';
+import { RewardService } from './reward.service';
+import { LeaderboardService } from 'src/leaderboard/leaderboard.service';
 
 @Resolver('LootboxOption')
 export class LootboxResolver {
@@ -80,73 +79,33 @@ export class LootdropResolver {
   private readonly logger = new Logger(LootdropResolver.name);
   constructor(
     private chainService: ChainService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private battlePassService: BattlePassService,
+    private rewardService: RewardService,
+    private leaderboardService: LeaderboardService,
   ) {}
 
-  @Query((of) => Lootdrop, { name: 'getLootdrop' })
+  @Query('getLootdrop')
   async getlootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
-    let lootdrop: LootdropRS;
-    try {
-      lootdrop = await this.cacheManager.get<LootdropRS>(
-        `lootdrop-${creatorId}`,
-      );
-    } catch (error) {
-      this.logger.error({
-        operation: 'Cache Read',
-        error,
-      });
-    }
-    if (lootdrop == null) return null;
-    return lootdrop;
+    return this.rewardService.getlootdrop(creatorId);
   }
 
-  @Mutation((of) => MutationResponse, { name: 'claimLootdrop' })
+  @Mutation('claimLootdrop')
   async claimLootdrop(
     @Args('creatorId') creatorId: number,
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    let lootdrop: LootdropRS;
-    try {
-      lootdrop = await this.cacheManager.get<LootdropRS>(
-        `lootdrop-${creatorId}`,
-      );
-    } catch (error) {
-      this.logger.error({
-        operation: 'Cache Read',
-        error,
-      });
-    }
-    if (lootdrop == null) throw new Warn('Lootdrop Not Active!');
+    const lootdrop = await this.rewardService.getlootdrop(creatorId);
+
     const contract = await this.chainService.getBattlePassContract(creatorId);
-    let userThreshold = 0;
-    let seasonId: number;
+    let userThreshold: number;
     switch (lootdrop.requirements) {
       case Requirements.ALLXP:
-        const iface = BattlePass__factory.createInterface();
-        const fragment = iface.getFunction('userInfo');
-        seasonId = (await contract.seasonId()).toNumber();
-        const calls: ContractCall[] = [];
-        for (let season = 1; season <= seasonId; season++) {
-          calls.push({
-            reference: 'userInfo',
-            address: contract.address,
-            abi: [fragment],
-            method: 'userInfo',
-            params: [userAddress, season],
-            value: 0,
-          });
-        }
-        const results = await this.chainService.multicall(calls);
-        if (results == null) throw new Warn('Reading XP Failed!');
-        for (let i = 0; i < seasonId; i++) {
-          const userInfo = iface.decodeFunctionResult(
-            'userInfo',
-            results[i].returnData[1],
-          );
-          userThreshold += userInfo.xp.toNumber();
-        }
+        userThreshold = await this.leaderboardService.getOneAllSeasonInfo(
+          creatorId,
+          userAddress,
+        );
+        if (userThreshold == null) throw new Error('On-Chain Error!');
         if (userThreshold < lootdrop.threshold)
           throw new Warn(
             `You need ${
@@ -155,9 +114,11 @@ export class LootdropResolver {
           );
         break;
       case Requirements.REPUTATION:
-        userThreshold = (
-          await contract.balanceOf(userAddress, lootdrop.rewardId)
-        ).toNumber();
+        userThreshold = await this.battlePassService.getBalance(
+          creatorId,
+          userAddress,
+          lootdrop.rewardId,
+        );
         if (userThreshold < lootdrop.threshold)
           throw new Warn(
             `You need ${
@@ -166,10 +127,10 @@ export class LootdropResolver {
           );
         break;
       case Requirements.SEASONXP:
-        seasonId = (await contract.seasonId()).toNumber();
-        userThreshold = (
-          await contract.userInfo(userAddress, seasonId)
-        ).xp.toNumber();
+        userThreshold = await this.battlePassService.getXp(
+          creatorId,
+          userAddress,
+        );
         if (userThreshold < lootdrop.threshold)
           throw new Warn(
             `You need ${
@@ -182,9 +143,13 @@ export class LootdropResolver {
     }
     if (userThreshold < lootdrop.threshold)
       throw new Warn('User Cannot Meet Requirements!');
-    const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    const fee = await this.chainService.getMaticFeeData();
-    await (await bp.mint(userAddress, lootdrop.rewardId, 1, fee)).wait(1);
+    await this.rewardService.setLootdropQty(creatorId, userAddress);
+    await this.battlePassService.mint(
+      creatorId,
+      userAddress,
+      lootdrop.rewardId,
+      1,
+    );
     return { success: true };
   }
 
@@ -196,18 +161,22 @@ export class LootdropResolver {
       1,
     );
   }
+
   @ResolveField()
   requirements(@Parent() parent: GetLootdropDto) {
     return parent.requirements;
   }
+
   @ResolveField()
   threshold(@Parent() parent: GetLootdropDto) {
     return parent.threshold;
   }
+
   @ResolveField()
   start(@Parent() parent: GetLootdropDto) {
     return new Date(parent.start);
   }
+
   @ResolveField()
   end(@Parent() parent: GetLootdropDto) {
     return new Date(parent.end);

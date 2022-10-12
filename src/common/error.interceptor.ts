@@ -76,6 +76,7 @@ export class ErrorInterceptor implements NestInterceptor {
   }
 }
 
+// user facing errors
 export class Warn extends GraphQLError {
   constructor(message: string) {
     super(message);

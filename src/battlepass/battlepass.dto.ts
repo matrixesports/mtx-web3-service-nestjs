@@ -12,3 +12,38 @@ export class GetBattlePassChildDto {
 export class GetBattlePassUserInfoChildDto extends GetBattlePassChildDto {
   userAddress: string;
 }
+
+/*
+|========================| DEFINITIONS |========================|
+*/
+
+export interface TicketRedeemBody {
+  name: string;
+  description: string;
+  image: string;
+  creatorId: number;
+  itemId: number;
+  userAddress: string;
+  itemAddress: string;
+}
+
+export interface TwitchRedeemBody {
+  name: string;
+  description: string;
+  image: string;
+  creatorId: number;
+  itemId: number;
+  userAddress: string;
+  itemAddress: string;
+}
+
+export interface RequiredFieldsBody {
+  userAddress: string;
+  required_user_social_options: string[];
+  required_user_payment_options: string[];
+}
+
+export interface RequiredFieldsResponse {
+  missing_user_social_options: string[];
+  missing_user_payment_options: string[];
+}

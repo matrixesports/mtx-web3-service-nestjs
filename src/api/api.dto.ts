@@ -87,6 +87,8 @@ export class CreateLootdropDto implements LootdropRS, IBattlePass {
   start: string;
   @ApiProperty({ type: String })
   end: string;
+  @ApiProperty({ type: Number })
+  qty: number;
 }
 
 export class ShortUrl {

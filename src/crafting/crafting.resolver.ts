@@ -105,8 +105,8 @@ export class CraftingResolver {
   }
 
   /*
-|========================| MUTATION |========================|
-*/
+  |========================| MUTATION |========================|
+  */
 
   @Mutation()
   async craft(@Args('recipeId') recipeId: number, @Context() context) {
@@ -119,8 +119,8 @@ export class CraftingResolver {
   }
 
   /*
-|========================| FIELDS |========================|
-*/
+  |========================| FIELDS |========================|
+  */
   @ResolveField()
   async owner(@Parent() parent: GetRecipeDto) {
     return {

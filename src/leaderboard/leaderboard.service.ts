@@ -140,6 +140,34 @@ export class LeaderboardService {
     return dtos;
   }
 
+  async getOneAllSeasonInfo(creatorId: number, userAddress: string) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const iface = BattlePass__factory.createInterface();
+    const fragment = iface.getFunction('userInfo');
+    const seasonId = (await contract.seasonId()).toNumber();
+    const calls: ContractCall[] = [];
+    for (let season = 1; season <= seasonId; season++) {
+      calls.push({
+        reference: 'userInfo',
+        address: contract.address,
+        abi: [fragment],
+        method: 'userInfo',
+        params: [userAddress, season],
+        value: 0,
+      });
+    }
+    const results = await this.chainService.multicall(calls);
+    let xp = 0;
+    if (results == null) return null;
+    for (let i = 0; i < seasonId; i++) {
+      const userInfo = iface.decodeFunctionResult(
+        'userInfo',
+        results[i].returnData[1],
+      );
+      xp += userInfo.xp.toNumber();
+    }
+    return xp;
+  }
   /*
 |========================| SERVICE CALLS |========================|
 */

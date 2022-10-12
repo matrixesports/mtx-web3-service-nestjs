@@ -7,4 +7,5 @@ export class LootdropRS {
   threshold: number;
   start: string;
   end: string;
+  qty: number;
 }

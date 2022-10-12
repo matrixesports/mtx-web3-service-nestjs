@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Crafting__factory } from 'abi/typechain';
@@ -8,9 +8,9 @@ import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { DataSource, Repository } from 'typeorm';
 import { Ingridients, Recipe, RecipeDB } from './crafting.entity';
-import { CACHE_MANAGER, Inject } from '@nestjs/common';
-import { Cache } from 'cache-manager';
-import { Logger } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
 
 export type Owner = {
   id: number;
@@ -25,7 +25,7 @@ export class CraftingService {
   constructor(
     @InjectRepository(RecipeDB)
     private recipeRepository: Repository<RecipeDB>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectRedis() private readonly redis: Redis,
     private configService: ConfigService,
     private dataSource: DataSource,
     private chainService: ChainService,
@@ -38,18 +38,16 @@ export class CraftingService {
     const recipes: Recipe[] = [];
     const notCached: RecipeDB[] = [];
     for (let i = 0; i < recipesDB.length; i++) {
-      try {
-        const cacheTry = await this.cacheManager.get<Recipe>(
-          `recipe-${recipesDB[i].id}`,
-        );
-        cacheTry ? recipes.push(cacheTry) : notCached.push(recipesDB[i]);
-      } catch (error) {
+      const target = `recipe-${recipesDB[i].id}`;
+      const cache = await this.redis.get(target).catch((error) => {
         this.logger.error({
           operation: 'Cache Read',
           error,
         });
         notCached.push(recipesDB[i]);
-      }
+      });
+      if (cache == null) notCached.push(recipesDB[i]);
+      else recipes.push(plainToInstance(Recipe, JSON.parse(cache as string)));
     }
     if (notCached.length > 0) {
       const calls: ContractCall[] = [];
@@ -90,18 +88,13 @@ export class CraftingService {
             ),
           ),
         };
-        try {
-          await this.cacheManager.set<Recipe>(
-            `recipe-${notCached[i].id}`,
-            recipe,
-            { ttl: 0 },
-          );
-        } catch (error) {
+        const target = `recipe-${notCached[i].id}`;
+        await this.redis.set(target, JSON.stringify(recipe)).catch((error) => {
           this.logger.error({
             operation: 'Cache Write',
             error,
           });
-        }
+        });
         recipes.push(recipe);
       }
     }
@@ -159,7 +152,7 @@ export class CraftingService {
   async getActiveRecipes(creatorId: number) {
     const recipes = await this.recipeRepository
       .createQueryBuilder('recipe')
-      .select()
+      .select('recipe')
       .where('recipe.creator_id = :creatorId', { creatorId })
       .andWhere('recipe.active = :active', { active: true })
       .getMany();
@@ -170,7 +163,7 @@ export class CraftingService {
   async getRecipes(creatorId: number) {
     const recipes = await this.recipeRepository
       .createQueryBuilder('recipe')
-      .select()
+      .select('recipe')
       .where('recipe.creator_id = :creatorId', { creatorId })
       .getMany();
     if (recipes.length != 0) return recipes;
@@ -180,7 +173,7 @@ export class CraftingService {
   async getActiveRecipe(creatorId: number, recipeId: number) {
     const recipe = await this.recipeRepository
       .createQueryBuilder('recipe')
-      .select('recipe.id')
+      .select('recipe')
       .where('recipe.id = :recipeId', { recipeId })
       .andWhere('recipe.creator_id = :creatorId', { creatorId })
       .andWhere('recipe.active = :active', { active: true })
@@ -192,7 +185,7 @@ export class CraftingService {
   async getRecipe(creatorId: number, recipeId: number) {
     const recipe = await this.recipeRepository
       .createQueryBuilder('recipe')
-      .select('recipe.id')
+      .select('recipe')
       .where('recipe.id = :recipeId', { recipeId })
       .andWhere('recipe.creator_id = :creatorId', { creatorId })
       .getOne();

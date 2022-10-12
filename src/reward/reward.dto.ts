@@ -8,4 +8,5 @@ export class GetLootdropDto implements LootdropRS {
   threshold: number;
   start: string;
   end: string;
+  qty: number;
 }

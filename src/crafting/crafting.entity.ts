@@ -13,16 +13,16 @@ export class RecipeDB {
   active: boolean;
 }
 
-export type Ingridients = {
+export class Ingridients {
   battlePasses: string[];
   ids: number[];
   qtys: number[];
-};
+}
 
-export type Recipe = {
+export class Recipe {
   input: Ingridients;
   output: Ingridients;
-};
+}
 
 export class RecipeRS {
   creatorId: number;

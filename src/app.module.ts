@@ -3,7 +3,7 @@ import {
   ApolloFederationDriver,
   ApolloFederationDriverConfig,
 } from '@nestjs/apollo';
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -21,8 +21,8 @@ import { CraftingModule } from './crafting/crafting.module';
 import { GraphQLPlugin } from './common/gql.plugin';
 import { GraphQLError } from 'graphql';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
-import * as redisStore from 'cache-manager-redis-store';
 import { LoggerModule } from 'nestjs-pino';
+import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 import { ApiModule } from './api/api.module';
 
 @Module({
@@ -127,14 +127,18 @@ import { ApiModule } from './api/api.module';
       driver: ApolloFederationDriver,
       typePaths: ['**/*.graphql'],
     }),
-    CacheModule.registerAsync({
+    RedisModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      isGlobal: true,
-      useFactory: async (config: ConfigService) => ({
-        store: redisStore,
-        url: config.get('rs'),
-      }),
+      useFactory: async (
+        config: ConfigService,
+      ): Promise<RedisModuleOptions> => {
+        return {
+          config: {
+            url: config.get('rs'),
+          },
+        };
+      },
     }),
     ScalarModule,
     BattlePassModule,

@@ -6,6 +6,8 @@ import {
   Param,
   Post,
   UseFilters,
+  Logger,
+  Inject,
 } from '@nestjs/common';
 import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
 import {
@@ -24,9 +26,6 @@ import {
 import { CraftingService } from 'src/crafting/crafting.service';
 import { RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
-import { CACHE_MANAGER, Inject } from '@nestjs/common';
-import { Cache } from 'cache-manager';
-import { Logger } from '@nestjs/common';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
@@ -41,6 +40,8 @@ import {
   REPUTATION_TOKEN_ID,
   ShortUrl,
 } from './api.dto';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
 import { LootdropRS } from 'src/reward/reward.entity';
 
 @Controller()
@@ -51,7 +52,7 @@ export class ApiController {
     private chainService: ChainService,
     private craftingService: CraftingService,
     private battlePassService: BattlePassService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectRedis() private readonly redis: Redis,
     private metadataService: MetadataService,
     private config: ConfigService,
     @Inject('TWITCH_SERVICE') private tcpClient: ClientProxy,
@@ -322,17 +323,22 @@ export class ApiController {
       nw > start
         ? Math.floor((end.getTime() - start.getTime()) / 1000)
         : Math.floor((end.getTime() - nw.getTime()) / 1000);
+    const target = `lootdrop-${createLootdropDto.creatorId}`;
     try {
-      await this.cacheManager.set<LootdropRS>(
-        `lootdrop-${createLootdropDto.creatorId}`,
-        createLootdropDto,
-        { ttl },
+      await this.redis.set(
+        target,
+        JSON.stringify(createLootdropDto),
+        'EX',
+        ttl,
       );
+      await this.redis.set(target + '-qty', createLootdropDto.qty, 'EX', ttl);
+      await this.redis.del(target + '-list');
     } catch (error) {
       this.logger.error({
         operation: 'Cache Write',
         error,
       });
+      throw error;
     }
 
     // the url service payload
