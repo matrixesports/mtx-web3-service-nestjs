@@ -96,8 +96,6 @@ export class LootdropResolver {
   ) {
     const userAddress: string = context.req.headers['user-address'];
     const lootdrop = await this.rewardService.getlootdrop(creatorId);
-
-    const contract = await this.chainService.getBattlePassContract(creatorId);
     let userThreshold: number;
     switch (lootdrop.requirements) {
       case Requirements.ALLXP:

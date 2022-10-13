@@ -307,10 +307,10 @@ export class ApiController {
       .toDate();
     const end = moment.utc(createLootdropDto.end).utcOffset('-07:00').toDate();
     if (start > end) throw new HttpException('Start Must Be Before End!', 500);
-    const nwPST = new Date().toLocaleString('en-US', {
-      timeZone: 'America/Los_Angeles',
-    });
-    const nw = new Date(nwPST);
+    const nw = moment
+      .utc(new Date().toLocaleString('en-US'))
+      .utcOffset('-07:00')
+      .toDate();
     const ttl =
       nw > start
         ? Math.floor((end.getTime() - start.getTime()) / 1000)

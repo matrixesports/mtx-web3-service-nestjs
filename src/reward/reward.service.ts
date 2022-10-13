@@ -24,8 +24,10 @@ export class RewardService {
     const cache = await this.redis.get(target + '-qty');
     if (cache == null) throw new Warn('Lootdrop Not Active!');
     const qty = parseInt(cache);
-    if (qty == -1) return;
-    else if (qty == 0) throw new Warn('Out of Rewards!');
+    if (qty == -1) {
+      await this.redis.sadd(target + '-list', userAddress);
+      return;
+    } else if (qty == 0) throw new Warn('Out of Rewards!');
     else {
       await this.redis
         .multi()
