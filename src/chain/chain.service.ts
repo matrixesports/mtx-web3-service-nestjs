@@ -48,7 +48,7 @@ export class ChainService {
     return contract.connect(this.signer);
   }
 
-  getSigner(): ethers.Signer {
+  getSigner() {
     return this.signer;
   }
 

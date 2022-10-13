@@ -43,6 +43,7 @@ import {
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { LootdropRS } from 'src/reward/reward.entity';
+import * as moment from 'moment';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -90,25 +91,6 @@ export class ApiController {
       REPUTATION_TOKEN_ID,
     );
     return { reputation };
-  }
-
-  @Get('battlepass/reputation/:creatorId')
-  async getBattlePass(@Param('creatorId') creatorId: number) {
-    const contract = await this.chainService.getBattlePassContract(creatorId);
-    const seasonId = await contract.seasonId();
-    const battlePassDB = await this.battlePassService
-      .getBattlePass(creatorId)
-      .catch((error) => {
-        throw new HttpException(error.message, 500);
-      });
-    return {
-      price: battlePassDB.price,
-      currency: battlePassDB.currency,
-      name: battlePassDB.name,
-      description: battlePassDB.description,
-      seasonId: seasonId.toNumber(),
-      address: contract.address,
-    };
   }
 
   /*
@@ -319,14 +301,11 @@ export class ApiController {
 
   @Post('create/lootdrop')
   async createLootdrop(@Body() createLootdropDto: CreateLootdropDto) {
-    const startPST = new Date(createLootdropDto.start).toLocaleString('en-US', {
-      timeZone: 'America/Los_Angeles',
-    });
-    const endPST = new Date(createLootdropDto.end).toLocaleString('en-US', {
-      timeZone: 'America/Los_Angeles',
-    });
-    const start = new Date(startPST);
-    const end = new Date(endPST);
+    const start = moment
+      .utc(createLootdropDto.start)
+      .utcOffset('-07:00')
+      .toDate();
+    const end = moment.utc(createLootdropDto.end).utcOffset('-07:00').toDate();
     if (start > end) throw new HttpException('Start Must Be Before End!', 500);
     const nwPST = new Date().toLocaleString('en-US', {
       timeZone: 'America/Los_Angeles',
