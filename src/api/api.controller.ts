@@ -84,11 +84,12 @@ export class ApiController {
     @Param('creatorId') creatorId: number,
     @Param('userAddress') userAddress: string,
   ) {
-    return await this.battlePassService.getBalance(
+    const reputation = await this.battlePassService.getBalance(
       creatorId,
       userAddress,
       REPUTATION_TOKEN_ID,
     );
+    return { reputation };
   }
 
   @Get('battlepass/reputation/:creatorId')
