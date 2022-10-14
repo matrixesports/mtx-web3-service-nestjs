@@ -30,6 +30,7 @@ export default () => {
 
   const config = {
     PVT_KEY: process.env.PVT_KEY,
+    PUB_ADDR: process.env.PUB_ADDR,
     rpc: {
       url: process.env.POLYGON_RPC,
       chainId: process.env.CHAIN_ID,

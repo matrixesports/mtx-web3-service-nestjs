@@ -16,6 +16,7 @@ import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
 } from './battlepass.dto';
+import { Warn } from 'src/common/error.interceptor';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
@@ -161,18 +162,18 @@ export class BattlePassResolver {
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    const contract = await this.chainService.getBattlePassContract(creatorId);
-    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const bpAddress = await this.battlePassService.getBattlePassAddress(
+      creatorId,
+    );
     const metadata = await this.metadataService.getMetadata(creatorId, itemId);
+    await this.battlePassService.burn(creatorId, userAddress, itemId, 1);
     await this.battlePassService.redeemItemHelper(
       itemId,
       userAddress,
       creatorId,
-      bp.address,
+      bpAddress,
       metadata,
     );
-    const fee = await this.chainService.getMaticFeeData();
-    await (await bp.burn(userAddress, itemId, 1, fee)).wait(1);
     return { success: true };
   }
 

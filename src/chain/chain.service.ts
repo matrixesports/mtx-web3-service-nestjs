@@ -13,6 +13,8 @@ import axios from 'axios';
 import { BigNumber, Contract, ethers } from 'ethers';
 import { FunctionFragment } from 'ethers/lib/utils';
 import { ContractCall, Multicall } from 'pilum';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class ChainService {
@@ -22,8 +24,13 @@ export class ChainService {
   private signer: ethers.Signer;
   battlePassFactory: BattlePassFactory;
   craftingProxy: ERC1967Proxy;
+  pubAddr: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @InjectRedis() private readonly redis: Redis,
+  ) {
+    this.pubAddr = configService.get('PUB_ADDR');
     const rpc = configService.get('rpc');
     this.provider = new ethers.providers.AlchemyProvider(rpc.name, rpc.apiKey);
     this.chainId = rpc.chainId;
@@ -52,6 +59,40 @@ export class ChainService {
     return this.signer;
   }
 
+  async getNonce() {
+    const target = `nonce`;
+    const cache = await this.redis.get(target);
+    let nonce;
+    let retry = true;
+    if (cache == null) {
+      nonce = this.provider.getTransactionCount(this.pubAddr);
+      while (retry) {
+        retry = false;
+        await this.redis.watch(target);
+        await this.redis
+          .multi()
+          .set(target, (await nonce) + 1, 'EX', 300)
+          .exec()
+          .catch(() => {
+            retry = true;
+          });
+      }
+    } else {
+      nonce = parseInt(cache);
+      while (retry) {
+        retry = false;
+        await this.redis.watch(target);
+        await this.redis
+          .multi()
+          .set(target, nonce + 1, 'KEEPTTL')
+          .exec()
+          .catch(() => {
+            retry = true;
+          });
+      }
+    }
+    return nonce;
+  }
   /**
    * will error if not deployed
    * @param creatorId

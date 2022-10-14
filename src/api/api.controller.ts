@@ -88,7 +88,7 @@ export class ApiController {
     const reputation = await this.battlePassService.getBalance(
       creatorId,
       userAddress,
-      REPUTATION_TOKEN_ID,
+      10000,
     );
     return { reputation };
   }

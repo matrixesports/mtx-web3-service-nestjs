@@ -22,6 +22,7 @@ import { ChainService } from 'src/chain/chain.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { BattlePass } from 'abi/typechain';
+import { Warn } from 'src/common/error.interceptor';
 
 @Injectable()
 export class BattlePassService {
@@ -138,8 +139,33 @@ export class BattlePassService {
   async mint(creatorId: number, userAddress: string, id: number, qty: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    const fee = await this.chainService.getMaticFeeData();
+    let fee = await this.chainService.getMaticFeeData();
+    await bp.callStatic.mint(userAddress, id, qty, fee).catch(() => {
+      throw new Warn('Transaction Reverted!');
+    });
+    const nonce = await this.chainService.getNonce();
+    fee = await this.chainService.getMaticFeeData();
+    fee['nonce'] = nonce;
     await (await bp.mint(userAddress, id, qty, fee)).wait(1);
+  }
+
+  async burn(creatorId: number, userAddress: string, id: number, qty: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    let fee = await this.chainService.getMaticFeeData();
+    await bp.callStatic.burn(userAddress, id, qty, fee).catch(() => {
+      throw new Warn('Transaction Reverted!');
+    });
+    const nonce = await this.chainService.getNonce();
+    fee = await this.chainService.getMaticFeeData();
+    fee['nonce'] = nonce;
+    await (await bp.burn(userAddress, id, qty, fee)).wait(1);
+  }
+
+  async getBattlePassAddress(creatorId: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    return bp.address;
   }
   /*
 |========================| REPOSITORY |========================|

@@ -78,7 +78,6 @@ export class LootboxResolver {
 export class LootdropResolver {
   private readonly logger = new Logger(LootdropResolver.name);
   constructor(
-    private chainService: ChainService,
     private battlePassService: BattlePassService,
     private rewardService: RewardService,
     private leaderboardService: LeaderboardService,
@@ -142,6 +141,7 @@ export class LootdropResolver {
     if (userThreshold < lootdrop.threshold)
       throw new Warn('User Cannot Meet Requirements!');
     await this.rewardService.setLootdropQty(creatorId, userAddress);
+
     await this.battlePassService.mint(
       creatorId,
       userAddress,
