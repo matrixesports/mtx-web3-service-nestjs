@@ -166,7 +166,7 @@ export class BattlePassResolver {
       creatorId,
     );
     const metadata = await this.metadataService.getMetadata(creatorId, itemId);
-    await this.battlePassService.burn(creatorId, userAddress, itemId, 1);
+    await this.battlePassService.mint(creatorId, userAddress, itemId, 1);
     await this.battlePassService.redeemItemHelper(
       itemId,
       userAddress,

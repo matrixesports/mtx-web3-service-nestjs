@@ -37,7 +37,6 @@ export class InventoryResolver {
         [contract.address],
         parent.userAddress,
       );
-      console.log(owned);
       for (let y = 0; y < owned.length; y++) {
         let reward: Reward;
         try {
