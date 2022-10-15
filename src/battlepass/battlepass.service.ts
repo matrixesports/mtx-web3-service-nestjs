@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LevelInfo, Reward } from 'src/graphql.schema';
+import { LevelInfo, Reward, RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
 import { DataSource, Repository } from 'typeorm';
 import { parse } from 'postgres-array';
@@ -157,10 +157,115 @@ export class BattlePassService {
       throw new Warn('Transaction Reverted!');
     });
     const nonce = await this.chainService.getNonce();
-    let fee = await this.chainService.getMaticFeeData();
-    fee = await this.chainService.getMaticFeeData();
+    const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
     await (await bp.burn(userAddress, id, qty, fee)).wait(1);
+  }
+
+  async claimReward(
+    creatorId: number,
+    userAddress: string,
+    level: number,
+    premium: boolean,
+  ) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const seasonId = await bp.seasonId();
+    const abi = bp.interface.getFunction('claimReward');
+    await this.chainService.simMetatx(
+      abi,
+      [seasonId, level, premium],
+      userAddress,
+      bp.address,
+    );
+    const nonce = await this.chainService.getNonce();
+    const fee = await this.chainService.getMaticFeeData();
+    fee['nonce'] = nonce;
+    await this.chainService.metatx(
+      abi,
+      [seasonId, level, premium],
+      userAddress,
+      bp.address,
+      fee,
+    );
+    const rewardGiven = await bp.seasonInfo(seasonId, level);
+    let id: number;
+    let qty: number;
+    if (premium) {
+      id = rewardGiven.premiumRewardId.toNumber();
+      qty = rewardGiven.premiumRewardQty.toNumber();
+    } else {
+      id = rewardGiven.freeRewardId.toNumber();
+      qty = rewardGiven.freeRewardQty.toNumber();
+    }
+    const reward = await this.createRewardObj(creatorId, id, qty);
+    return { bpAddress: bp.address, reward: [reward] };
+  }
+
+  async claimRewardAtomic(
+    creatorId: number,
+    userAddress: string,
+    level: number,
+    premium: boolean,
+  ) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    const seasonId = await bp.seasonId();
+    const abi = bp.interface.getFunction('claimRewardAtomic');
+    await this.chainService.simMetatx(
+      abi,
+      [seasonId, level, premium],
+      userAddress,
+      bp.address,
+    );
+
+    const nonce = await this.chainService.getNonce();
+    const fee = await this.chainService.getMaticFeeData();
+    fee['nonce'] = nonce;
+    const rc = await this.chainService.metatx(
+      abi,
+      [seasonId, level, premium],
+      userAddress,
+      bp.address,
+      fee,
+    );
+    const rewardGiven = await bp.seasonInfo(seasonId, level);
+    let id: number;
+    let qty: number;
+    if (premium) {
+      id = rewardGiven.premiumRewardId.toNumber();
+      qty = rewardGiven.premiumRewardQty.toNumber();
+    } else {
+      id = rewardGiven.freeRewardId.toNumber();
+      qty = rewardGiven.freeRewardQty.toNumber();
+    }
+    const metadata = await this.metadataService.getMetadata(creatorId, id);
+    if (metadata.reward_type === RewardType.LOOTBOX) {
+      const logs = [];
+      for (let i = 0; i < rc.logs.length; i++) {
+        try {
+          const log = rc.logs[i];
+          logs.push(bp.interface.parseLog(log));
+        } catch (e) {}
+      }
+      const log = logs.find((log: any) => log.name === 'LootboxOpened');
+      const idxOpened = log.args.idxOpened.toNumber();
+      const option = await contract.getLootboxOptionByIdx(id, idxOpened);
+      const rewards: Reward[] = [];
+      for (let y = 0; y < option[1].length; y++) {
+        rewards.push(
+          await this.createRewardObj(
+            creatorId,
+            option[1][y].toNumber(),
+            option[2][y].toNumber(),
+          ),
+        );
+      }
+      return { bpAddress: bp.address, reward: rewards, metadata };
+    } else {
+      const reward = await this.createRewardObj(creatorId, id, qty);
+      return { bpAddress: bp.address, reward: [reward], metadata };
+    }
   }
 
   async getBattlePassAddress(creatorId: number) {

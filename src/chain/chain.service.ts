@@ -65,13 +65,13 @@ export class ChainService {
     let nonce;
     let retry = true;
     if (cache == null) {
-      nonce = this.provider.getTransactionCount(this.pubAddr);
+      nonce = await this.provider.getTransactionCount(this.pubAddr);
       while (retry) {
         retry = false;
         await this.redis.watch(target);
         await this.redis
           .multi()
-          .set(target, (await nonce) + 1, 'EX', 300)
+          .set(target, nonce + 1, 'EX', 300)
           .exec()
           .catch(() => {
             retry = true;
@@ -171,6 +171,22 @@ export class ChainService {
     };
     const tx = await this.signer.sendTransaction(txData);
     return this.provider.waitForTransaction(tx.hash, 1);
+  }
+
+  async simMetatx(
+    abi: FunctionFragment,
+    args: any[],
+    userAddress: string,
+    contractAddress: string,
+  ) {
+    const iface = new ethers.utils.Interface([abi]);
+    let encodedCall = iface.encodeFunctionData(abi, args);
+    encodedCall += userAddress.substring(2);
+    const txData = {
+      to: contractAddress,
+      data: encodedCall,
+    };
+    await this.signer.call(txData);
   }
 
   async multicall(calls: ContractCall[]) {
