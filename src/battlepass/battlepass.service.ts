@@ -136,6 +136,12 @@ export class BattlePassService {
     return xp;
   }
 
+  async getSeasonId(creatorId: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const seasonId = (await contract.seasonId()).toNumber();
+    return seasonId;
+  }
+
   async mint(creatorId: number, userAddress: string, id: number, qty: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
@@ -160,6 +166,20 @@ export class BattlePassService {
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
     await (await bp.burn(userAddress, id, qty, fee)).wait(1);
+  }
+
+  async giveXp(creatorId: number, userAddress: string, xp: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const seasonId = await contract.seasonId();
+    const bp = this.chainService.getSignerContract(contract) as BattlePass;
+    await bp.callStatic.giveXp(seasonId, xp, userAddress).catch((err) => {
+      console.log(err);
+      throw new Warn('Transaction Reverted!');
+    });
+    const nonce = await this.chainService.getNonce();
+    const fee = await this.chainService.getMaticFeeData();
+    fee['nonce'] = nonce;
+    await (await bp.giveXp(seasonId, xp, userAddress, fee)).wait(1);
   }
 
   async claimReward(

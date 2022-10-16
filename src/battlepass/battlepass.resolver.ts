@@ -7,7 +7,6 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { BattlePass } from 'abi/typechain';
 import { ChainService } from 'src/chain/chain.service';
 import { Reward, RewardType } from 'src/graphql.schema';
 import { MetadataService } from 'src/metadata/metadata.service';
@@ -16,7 +15,6 @@ import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
 } from './battlepass.dto';
-import { Warn } from 'src/common/error.interceptor';
 import { MetadataDB } from 'src/metadata/metadata.entity';
 
 @Resolver('BattlePass')

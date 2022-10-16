@@ -42,7 +42,6 @@ import {
 } from './api.dto';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
-import { LootdropRS } from 'src/reward/reward.entity';
 import * as moment from 'moment';
 
 @Controller()
@@ -74,10 +73,8 @@ export class ApiController {
 
   @Get('battlepass/season/:creatorId')
   async getSeasonId(@Param('creatorId') creatorId: number) {
-    const contract = await this.chainService.getBattlePassContract(creatorId);
-    return {
-      seasonId: (await contract.seasonId()).toNumber(),
-    };
+    const seasonId = await this.battlePassService.getSeasonId(creatorId);
+    return seasonId;
   }
 
   @Get('check/reputation/:creatorId/:userAddress')
@@ -88,7 +85,7 @@ export class ApiController {
     const reputation = await this.battlePassService.getBalance(
       creatorId,
       userAddress,
-      10000,
+      REPUTATION_TOKEN_ID,
     );
     return { reputation };
   }
@@ -99,46 +96,35 @@ export class ApiController {
 
   @Post('mint/prempass')
   async mintPremiumPass(@Body() mintPremPassDto: MintPremPassDto) {
-    const contract = await this.chainService.getBattlePassContract(
+    const seasonId = await this.battlePassService.getSeasonId(
       mintPremPassDto.creatorId,
     );
-    const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    const seasonId = await bp.seasonId();
-    const fee = await this.chainService.getMaticFeeData();
-    await (
-      await bp.mint(mintPremPassDto.userAddress, seasonId, 1, fee)
-    ).wait(1);
+    await this.battlePassService.mint(
+      mintPremPassDto.creatorId,
+      mintPremPassDto.userAddress,
+      seasonId,
+      1,
+    );
     return { success: true };
   }
 
   @Post('mint/reputation')
   async mintReputation(@Body() mintRepDto: MintRepDto) {
-    const contract = await this.chainService.getBattlePassContract(
+    await this.battlePassService.mint(
       mintRepDto.creatorId,
+      mintRepDto.userAddress,
+      REPUTATION_TOKEN_ID,
+      mintRepDto.amount,
     );
-    const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    const fee = await this.chainService.getMaticFeeData();
-    await (
-      await bp.mint(
-        mintRepDto.userAddress,
-        REPUTATION_TOKEN_ID,
-        mintRepDto.amount,
-        fee,
-      )
-    ).wait(1);
     return { success: true };
   }
 
   @Post('mint/xp') async mintXp(@Body() mintXpDto: MintXpDto) {
-    const contract = await this.chainService.getBattlePassContract(
+    await this.battlePassService.giveXp(
       mintXpDto.creatorId,
+      mintXpDto.userAddress,
+      mintXpDto.amount,
     );
-    const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    const seasonId = await bp.seasonId();
-    const fee = await this.chainService.getMaticFeeData();
-    await (
-      await bp.giveXp(seasonId, mintXpDto.amount, mintXpDto.userAddress, fee)
-    ).wait(1);
     return { success: true };
   }
 
@@ -247,6 +233,7 @@ export class ApiController {
     const contract = await this.chainService.getBattlePassContract(
       createSeasonDto.creatorId,
     );
+    // todo invalidate cache
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
     await (await bp.newSeason(levelInfo, fee)).wait(1);
