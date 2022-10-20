@@ -71,6 +71,25 @@ export class ApiController {
     };
   }
 
+  @Get('battlepass/info/:creatorId')
+  async getBattlePassDB(@Param('creatorId') creatorId: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const seasonId = await contract.seasonId();
+    const battlePassDB = await this.battlePassService
+      .getBattlePass(creatorId)
+      .catch((error) => {
+        throw new HttpException(error.message, 500);
+      });
+    return {
+      price: battlePassDB.price,
+      currency: battlePassDB.currency,
+      name: battlePassDB.name,
+      description: battlePassDB.description,
+      seasonId: seasonId.toNumber(),
+      address: contract.address,
+    };
+  }
+
   @Get('battlepass/season/:creatorId')
   async getSeasonId(@Param('creatorId') creatorId: number) {
     const seasonId = await this.battlePassService.getSeasonId(creatorId);
