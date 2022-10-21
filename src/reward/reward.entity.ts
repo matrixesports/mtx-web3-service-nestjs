@@ -1,4 +1,4 @@
-import { Requirements } from 'src/graphql.schema';
+import { Requirements, Reward } from 'src/graphql.schema';
 
 export class LootdropRS {
   creatorId: number;
@@ -8,4 +8,14 @@ export class LootdropRS {
   start: string;
   end: string;
   qty: number;
+}
+
+export class LootdropInfo {
+  creatorId: number;
+  reward: Reward;
+  threshold: number;
+  requirements: Requirements;
+  start: Date;
+  end: Date;
+  url: string;
 }
