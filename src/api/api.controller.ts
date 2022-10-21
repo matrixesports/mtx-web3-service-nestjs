@@ -43,6 +43,7 @@ import {
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import * as moment from 'moment';
+import { LootdropInfo } from 'src/reward/reward.entity';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -357,7 +358,7 @@ export class ApiController {
         createLootdropDto.rewardId,
         1,
       );
-      this.tcpClient.emit('drop-activated', {
+      const lootdrop: LootdropInfo = {
         creatorId: createLootdropDto.creatorId,
         reward: reward,
         threshold: createLootdropDto.threshold,
@@ -365,7 +366,17 @@ export class ApiController {
         start,
         end,
         url: shortUrl,
-      });
+      };
+
+      this.tcpClient.emit('drop-activated', lootdrop);
+      // persist the lootdrop as long as the lootdrop is active
+      await this.redis.set(
+        `${lootdrop.creatorId}-lootdrop`,
+        JSON.stringify(lootdrop),
+        'EX',
+        ttl,
+      );
+
       return { success: true };
     } catch (error) {
       this.logger.error({
