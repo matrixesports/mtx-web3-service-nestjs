@@ -364,7 +364,8 @@ export class BattlePassService {
     userAddress: string,
     level: number,
   ): Promise<RequiredFieldsResponse> {
-    if (level != 1) return null;
+    // Removed the level check
+    // if (level != 1) return null;
     const battlePassDB = await this.getBattlePass(creatorId);
     if (
       battlePassDB.required_user_social_options.length == 0 &&
