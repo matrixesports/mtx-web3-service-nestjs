@@ -13,7 +13,7 @@ import { ChainService } from 'src/chain/chain.service';
 import { Logger } from '@nestjs/common';
 import { Requirements } from 'src/graphql.schema';
 import { Warn } from 'src/common/error.interceptor';
-import { LootdropRS } from './reward.entity';
+import { LootdropInfo, LootdropRS } from './reward.entity';
 import { GetLootdropDto } from './reward.dto';
 import { RewardService } from './reward.service';
 import { LeaderboardService } from 'src/leaderboard/leaderboard.service';
@@ -86,6 +86,13 @@ export class LootdropResolver {
   @Query('getLootdrop')
   async getlootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
     return this.rewardService.getlootdrop(creatorId);
+  }
+
+  @Query('activeLootdrop')
+  async getActiveLootdrop(
+    @Args('creatorId') creatorId: number,
+  ): Promise<LootdropInfo> {
+    return this.rewardService.getActiveLootdrop(creatorId);
   }
 
   @Mutation('claimLootdrop')

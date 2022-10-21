@@ -3,7 +3,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { Warn } from 'src/common/error.interceptor';
 import { plainToInstance } from 'class-transformer';
-import { LootdropRS } from './reward.entity';
+import { LootdropInfo, LootdropRS } from './reward.entity';
 
 export class RewardService {
   private readonly logger = new Logger(RewardService.name);
@@ -38,5 +38,10 @@ export class RewardService {
         });
       await this.redis.sadd(target + '-list', userAddress);
     }
+  }
+
+  async getActiveLootdrop(creatorId: number) {
+    const data = await this.redis.get(`${creatorId}-lootdrop`);
+    return JSON.parse(data) as LootdropInfo;
   }
 }
