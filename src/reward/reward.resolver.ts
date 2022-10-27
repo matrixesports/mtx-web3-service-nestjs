@@ -97,6 +97,7 @@ export class LootdropResolver {
   ) {
     const userAddress: string = context.req.headers['user-address'];
     const lootdrop = await this.rewardService.getlootdrop(creatorId);
+    await this.battlePassService.checkRequiredFields(creatorId, userAddress);
     let userThreshold: number;
     switch (lootdrop.requirements) {
       case Requirements.ALLXP:
@@ -143,6 +144,7 @@ export class LootdropResolver {
     if (userThreshold < lootdrop.threshold)
       throw new Warn('User Cannot Meet Requirements!');
     await this.rewardService.setLootdropQty(creatorId, userAddress);
+
     const bpAddress = await this.battlePassService.getBattlePassAddress(
       creatorId,
     );

@@ -127,10 +127,10 @@ export class PremiumBattlePassUser {
 }
 
 export class Reward {
-    id?: Nullable<BigInt>;
+    id: BigInt;
     qty: BigInt;
-    metadata?: Nullable<RewardMetadata>;
-    rewardType?: Nullable<RewardType>;
+    metadata: RewardMetadata;
+    rewardType: RewardType;
     creatorId: number;
 }
 

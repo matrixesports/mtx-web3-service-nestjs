@@ -44,6 +44,7 @@ import Redis from 'ioredis';
 import * as moment from 'moment';
 import { LootdropReward, LootdropRS } from 'src/reward/reward.entity';
 import { RewardService } from 'src/reward/reward.service';
+import { ApiOkResponse } from '@nestjs/swagger';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -106,6 +107,7 @@ export class ApiController {
     return { reputation };
   }
 
+  @ApiOkResponse({ type: LootdropReward })
   @Get('lootdrop/:creatorId')
   async getLootdrop(
     @Param('creatorId') creatorId: number,

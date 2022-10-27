@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { MetadataDB } from './metadata.entity';
-import { Reward, RewardType } from 'src/graphql.schema';
+import { RewardType } from 'src/graphql.schema';
+import { Reward } from 'src/reward/reward.entity';
 
 @Injectable()
 export class MetadataService {

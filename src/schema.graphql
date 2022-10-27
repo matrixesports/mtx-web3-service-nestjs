@@ -79,10 +79,10 @@ type PremiumBattlePassUser {
 }
 
 type Reward {
-  id: BigInt
+  id: BigInt!
   qty: BigInt!
-  metadata: RewardMetadata
-  rewardType: RewardType
+  metadata: RewardMetadata!
+  rewardType: RewardType!
   creatorId: Int!
 }
 
