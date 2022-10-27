@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Requirements } from 'src/graphql.schema';
+import { LootdropBase } from 'src/reward/reward.entity';
 
 abstract class MintToken {
   @ApiProperty({ type: String })
@@ -73,7 +74,7 @@ export class CreateSeasonDto implements IBattlePass {
   levelDetails: any;
 }
 
-export class CreateLootdropDto implements IBattlePass {
+export class CreateLootdropDto implements LootdropBase, IBattlePass {
   @ApiProperty({ type: Number })
   creatorId: number;
   @ApiProperty({ type: Number })

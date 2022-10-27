@@ -9,5 +9,5 @@ export class GetLootdropDto implements LootdropRS {
   start: string;
   end: string;
   qty: number;
-  shortUrl: string;
+  url: string;
 }

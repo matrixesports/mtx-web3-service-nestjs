@@ -191,6 +191,6 @@ export class LootdropResolver {
 
   @ResolveField()
   url(@Parent() parent: GetLootdropDto) {
-    return parent.shortUrl;
+    return parent.url;
   }
 }

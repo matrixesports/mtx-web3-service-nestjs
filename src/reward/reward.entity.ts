@@ -1,7 +1,17 @@
-import { CreateLootdropDto } from 'src/api/api.dto';
-import { Requirements } from 'src/graphql.schema';
+import { Requirements, Reward } from 'src/graphql.schema';
 
-export class LootdropRS implements CreateLootdropDto {
+export abstract class LootdropBase {
+  creatorId: number;
+  rewardId?: number;
+  reward?: Reward;
+  requirements: Requirements;
+  threshold: number;
+  start: string | Date;
+  end: string | Date;
+  qty?: number;
+}
+
+export class LootdropRS implements LootdropBase {
   creatorId: number;
   rewardId: number;
   requirements: Requirements;
@@ -9,5 +19,15 @@ export class LootdropRS implements CreateLootdropDto {
   start: string;
   end: string;
   qty: number;
-  shortUrl: string;
+  url: string;
+}
+
+export class LootdropAlert implements LootdropBase {
+  creatorId: number;
+  reward?: Reward;
+  requirements: Requirements;
+  threshold: number;
+  start: Date;
+  end: Date;
+  url: string;
 }

@@ -42,7 +42,7 @@ import {
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import * as moment from 'moment';
-import { LootdropRS } from 'src/reward/reward.entity';
+import { LootdropAlert, LootdropRS } from 'src/reward/reward.entity';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -338,7 +338,7 @@ export class ApiController {
         : Math.floor((end.getTime() - nw.getTime()) / 1000);
 
     const target = `lootdrop-${createLootdropDto.creatorId}`;
-    const lootdrop: LootdropRS = { ...createLootdropDto, shortUrl };
+    const lootdrop: LootdropRS = { ...createLootdropDto, url: shortUrl };
     await this.redis.set(target, JSON.stringify(lootdrop), 'EX', ttl);
     await this.redis.set(target + '-qty', createLootdropDto.qty, 'EX', ttl);
     await this.redis.del(target + '-list');
@@ -347,7 +347,7 @@ export class ApiController {
       createLootdropDto.rewardId,
       1,
     );
-    const alert = {
+    const alert: LootdropAlert = {
       creatorId: createLootdropDto.creatorId,
       requirements: createLootdropDto.requirements,
       threshold: createLootdropDto.threshold,
@@ -356,6 +356,7 @@ export class ApiController {
       end,
       url: shortUrl,
     };
+
     this.tcpClient.emit('drop-activated', alert);
     return { success: true };
   }
