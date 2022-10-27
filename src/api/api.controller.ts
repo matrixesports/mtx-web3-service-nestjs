@@ -342,7 +342,21 @@ export class ApiController {
     await this.redis.set(target, JSON.stringify(lootdrop), 'EX', ttl);
     await this.redis.set(target + '-qty', createLootdropDto.qty, 'EX', ttl);
     await this.redis.del(target + '-list');
-    this.tcpClient.emit('drop-activated', lootdrop);
+    const reward = await this.metadataService.createRewardObj(
+      createLootdropDto.creatorId,
+      createLootdropDto.rewardId,
+      1,
+    );
+    const alert = {
+      creatorId: createLootdropDto.creatorId,
+      requirements: createLootdropDto.requirements,
+      threshold: createLootdropDto.threshold,
+      reward,
+      start,
+      end,
+      url: shortUrl,
+    };
+    this.tcpClient.emit('drop-activated', alert);
     return { success: true };
   }
 }
