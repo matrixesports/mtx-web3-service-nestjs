@@ -13,16 +13,17 @@ import { ChainService } from 'src/chain/chain.service';
 import { Logger } from '@nestjs/common';
 import { Requirements } from 'src/graphql.schema';
 import { Warn } from 'src/common/error.interceptor';
-import { LootdropInfo, LootdropRS } from './reward.entity';
+import { LootdropRS } from './reward.entity';
 import { GetLootdropDto } from './reward.dto';
 import { RewardService } from './reward.service';
 import { LeaderboardService } from 'src/leaderboard/leaderboard.service';
+import { MetadataService } from 'src/metadata/metadata.service';
 
 @Resolver('LootboxOption')
 export class LootboxResolver {
   constructor(
     private chainService: ChainService,
-    private battlePassService: BattlePassService,
+    private metadataService: MetadataService,
   ) {}
 
   @Query()
@@ -56,7 +57,7 @@ export class LootboxResolver {
       const rewardsInOption = [];
       for (let y = 0; y < option[0].ids.length; y++) {
         rewardsInOption.push(
-          await this.battlePassService.createRewardObj(
+          await this.metadataService.createRewardObj(
             creatorId,
             option[0].ids[y].toNumber(),
             option[0].qtys[y].toNumber(),
@@ -81,18 +82,12 @@ export class LootdropResolver {
     private battlePassService: BattlePassService,
     private rewardService: RewardService,
     private leaderboardService: LeaderboardService,
+    private metadataService: MetadataService,
   ) {}
 
   @Query('getLootdrop')
   async getlootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
     return this.rewardService.getlootdrop(creatorId);
-  }
-
-  @Query('activeLootdrop')
-  async getActiveLootdrop(
-    @Args('creatorId') creatorId: number,
-  ): Promise<LootdropInfo> {
-    return this.rewardService.getActiveLootdrop(creatorId);
   }
 
   @Mutation('claimLootdrop')
@@ -148,19 +143,26 @@ export class LootdropResolver {
     if (userThreshold < lootdrop.threshold)
       throw new Warn('User Cannot Meet Requirements!');
     await this.rewardService.setLootdropQty(creatorId, userAddress);
-
-    await this.battlePassService.mint(
+    const bpAddress = await this.battlePassService.getBattlePassAddress(
       creatorId,
-      userAddress,
+    );
+    const metadata = await this.metadataService.getMetadata(
+      creatorId,
       lootdrop.rewardId,
-      1,
+    );
+    await this.battlePassService.redeemItemHelper(
+      lootdrop.rewardId,
+      userAddress,
+      creatorId,
+      bpAddress,
+      metadata,
     );
     return { success: true };
   }
 
   @ResolveField()
   async reward(@Parent() parent: GetLootdropDto) {
-    return await this.battlePassService.createRewardObj(
+    return await this.metadataService.createRewardObj(
       parent.creatorId,
       parent.rewardId,
       1,
@@ -185,5 +187,10 @@ export class LootdropResolver {
   @ResolveField()
   end(@Parent() parent: GetLootdropDto) {
     return new Date(parent.end);
+  }
+
+  @ResolveField()
+  url(@Parent() parent: GetLootdropDto) {
+    return parent.shortUrl;
   }
 }

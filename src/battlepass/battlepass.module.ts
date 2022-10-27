@@ -15,6 +15,7 @@ import { MetadataModule } from 'src/metadata/metadata.module';
     BattlePassService,
     UserResolver,
     PremiumUserResolver,
+    MetadataModule,
   ],
   imports: [TypeOrmModule.forFeature([BattlePassDB]), MetadataModule],
   controllers: [],

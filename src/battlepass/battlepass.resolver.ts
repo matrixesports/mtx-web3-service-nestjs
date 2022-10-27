@@ -70,7 +70,6 @@ export class BattlePassResolver {
     const missingFields = await this.battlePassService.checkRequiredFields(
       creatorId,
       userAddress,
-      level,
     );
     if (missingFields != null) {
       return {
@@ -183,7 +182,12 @@ export class BattlePassResolver {
 
   @ResolveField()
   async levelInfo(@Parent() parent: GetBattlePassChildDto) {
-    return await this.battlePassService.getLevelInfo(parent);
+    return await this.battlePassService.getLevelInfo(
+      parent.creatorId,
+      parent.contract,
+      parent.seasonId,
+      parent.maxLevel,
+    );
   }
 }
 

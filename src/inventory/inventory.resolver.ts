@@ -11,6 +11,7 @@ import { ethers } from 'ethers';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Redeemed, RedeemStatus, Reward } from 'src/graphql.schema';
+import { MetadataService } from 'src/metadata/metadata.service';
 import { GetInventoryChildDto } from './inventory.dto';
 import { InventoryService } from './inventory.service';
 
@@ -21,6 +22,7 @@ export class InventoryResolver {
     private battlePassService: BattlePassService,
     private configService: ConfigService,
     private chainService: ChainService,
+    private metadataService: MetadataService,
   ) {}
 
   @ResolveField()
@@ -40,7 +42,7 @@ export class InventoryResolver {
       for (let y = 0; y < owned.length; y++) {
         let reward: Reward;
         try {
-          reward = await this.battlePassService.createRewardObj(
+          reward = await this.metadataService.createRewardObj(
             allBattlePasses[x].creator_id,
             ethers.BigNumber.from(owned[y].id.tokenId).toNumber(),
             parseInt(owned[y].balance),
@@ -84,7 +86,7 @@ export class InventoryResolver {
         // qty is length of statuses to signify how many have been redeemed
         let reward: Reward;
         try {
-          reward = await this.battlePassService.createRewardObj(
+          reward = await this.metadataService.createRewardObj(
             parseInt(creatorId),
             parseInt(itemId),
             temp[creatorId][itemId].length,

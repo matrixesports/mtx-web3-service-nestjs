@@ -10,7 +10,6 @@ import axios from 'axios';
 import { MetadataDB } from 'src/metadata/metadata.entity';
 import { plainToInstance } from 'class-transformer';
 import {
-  GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
   RequiredFieldsBody,
   RequiredFieldsResponse,
@@ -40,9 +39,14 @@ export class BattlePassService {
   /*
 |========================| WEB3 CALLS |========================|
 */
-  async getLevelInfo(dto: GetBattlePassChildDto) {
+  async getLevelInfo(
+    creatorId: number,
+    contract: BattlePass,
+    seasonId: number,
+    maxLevel: number,
+  ) {
     let levelInfo: LevelInfo[];
-    const target = `level-info-${dto.creatorId}`;
+    const target = `level-info-${creatorId}`;
     const cache = await this.redis.get(target).catch((error) => {
       this.logger.error({
         operation: 'Cache Read',
@@ -52,30 +56,30 @@ export class BattlePassService {
     if (cache == null) {
       levelInfo = [];
       const calls: ContractCall[] = [];
-      for (let x = 0; x <= dto.maxLevel; x++) {
+      for (let x = 0; x <= maxLevel; x++) {
         calls.push({
           reference: 'seasonInfo',
-          address: dto.contract.address,
-          abi: [dto.contract.interface.getFunction('seasonInfo')],
+          address: contract.address,
+          abi: [contract.interface.getFunction('seasonInfo')],
           method: 'seasonInfo',
-          params: [dto.seasonId, x],
+          params: [seasonId, x],
           value: 0,
         });
       }
       const results = await this.chainService.multicall(calls);
       for (let x = 0; x < results.length; x++) {
-        const seasonInfo = dto.contract.interface.decodeFunctionResult(
+        const seasonInfo = contract.interface.decodeFunctionResult(
           'seasonInfo',
           results[x].returnData[1],
         );
-        const freeReward = await this.createRewardObj(
-          dto.creatorId,
+        const freeReward = await this.metadataService.createRewardObj(
+          creatorId,
           seasonInfo.freeRewardId.toNumber(),
           seasonInfo.freeRewardQty.toNumber(),
         );
 
-        const premiumReward = await this.createRewardObj(
-          dto.creatorId,
+        const premiumReward = await this.metadataService.createRewardObj(
+          creatorId,
           seasonInfo.premiumRewardId.toNumber(),
           seasonInfo.premiumRewardQty.toNumber(),
         );
@@ -218,7 +222,11 @@ export class BattlePassService {
       id = rewardGiven.freeRewardId.toNumber();
       qty = rewardGiven.freeRewardQty.toNumber();
     }
-    const reward = await this.createRewardObj(creatorId, id, qty);
+    const reward = await this.metadataService.createRewardObj(
+      creatorId,
+      id,
+      qty,
+    );
     return { bpAddress: bp.address, reward: [reward] };
   }
 
@@ -274,7 +282,7 @@ export class BattlePassService {
       const rewards: Reward[] = [];
       for (let y = 0; y < option[1].length; y++) {
         rewards.push(
-          await this.createRewardObj(
+          await this.metadataService.createRewardObj(
             creatorId,
             option[1][y].toNumber(),
             option[2][y].toNumber(),
@@ -283,7 +291,11 @@ export class BattlePassService {
       }
       return { bpAddress: bp.address, reward: rewards, metadata };
     } else {
-      const reward = await this.createRewardObj(creatorId, id, qty);
+      const reward = await this.metadataService.createRewardObj(
+        creatorId,
+        id,
+        qty,
+      );
       return { bpAddress: bp.address, reward: [reward], metadata };
     }
   }
@@ -362,10 +374,7 @@ export class BattlePassService {
   async checkRequiredFields(
     creatorId: number,
     userAddress: string,
-    level: number,
   ): Promise<RequiredFieldsResponse> {
-    // Removed the level check
-    // if (level != 1) return null;
     const battlePassDB = await this.getBattlePass(creatorId);
     if (
       battlePassDB.required_user_social_options.length == 0 &&
@@ -453,21 +462,5 @@ export class BattlePassService {
     } catch (e) {
       console.log('Twitch Service Failed');
     }
-  }
-
-  /*
-|========================| OPERATIONS |========================|
-*/
-
-  async createRewardObj(creatorId: number, id: number, qty: number) {
-    if (id == 0) return null;
-    const metadata = await this.metadataService.getMetadata(creatorId, id);
-    return {
-      id,
-      qty,
-      metadata,
-      rewardType: metadata.reward_type,
-      creatorId,
-    } as Reward;
   }
 }

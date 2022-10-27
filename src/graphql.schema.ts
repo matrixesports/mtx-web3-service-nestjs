@@ -208,6 +208,7 @@ export class Lootdrop {
     threshold: number;
     start: Date;
     end: Date;
+    url: string;
 }
 
 export type BigInt = unknown;

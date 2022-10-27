@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   UseFilters,
-  Logger,
   Inject,
 } from '@nestjs/common';
 import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
@@ -43,12 +42,11 @@ import {
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import * as moment from 'moment';
-import { LootdropInfo } from 'src/reward/reward.entity';
+import { LootdropRS } from 'src/reward/reward.entity';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
 export class ApiController {
-  private readonly logger = new Logger(ApiController.name);
   constructor(
     private chainService: ChainService,
     private craftingService: CraftingService,
@@ -253,10 +251,17 @@ export class ApiController {
     const contract = await this.chainService.getBattlePassContract(
       createSeasonDto.creatorId,
     );
-    // todo invalidate cache
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
     await (await bp.newSeason(levelInfo, fee)).wait(1);
+    const seasonId = (await contract.seasonId()).toNumber();
+    const maxLevel = (await contract.getMaxLevel(seasonId)).toNumber();
+    await this.battlePassService.getLevelInfo(
+      createSeasonDto.creatorId,
+      contract,
+      seasonId,
+      maxLevel,
+    );
     return { success: true };
   }
 
@@ -308,6 +313,15 @@ export class ApiController {
 
   @Post('create/lootdrop')
   async createLootdrop(@Body() createLootdropDto: CreateLootdropDto) {
+    const urlpayload = {
+      creatorId: createLootdropDto.creatorId,
+    };
+    const {
+      data: { shortUrl },
+    } = await axios.post<ShortUrl>(
+      `${this.config.get<string>('SERVICE.urlShortenerService')}/createurl`,
+      urlpayload,
+    );
     const start = moment
       .utc(createLootdropDto.start)
       .utcOffset('-07:00')
@@ -322,67 +336,13 @@ export class ApiController {
       nw > start
         ? Math.floor((end.getTime() - start.getTime()) / 1000)
         : Math.floor((end.getTime() - nw.getTime()) / 1000);
+
     const target = `lootdrop-${createLootdropDto.creatorId}`;
-    try {
-      await this.redis.set(
-        target,
-        JSON.stringify(createLootdropDto),
-        'EX',
-        ttl,
-      );
-      await this.redis.set(target + '-qty', createLootdropDto.qty, 'EX', ttl);
-      await this.redis.del(target + '-list');
-    } catch (error) {
-      this.logger.error({
-        operation: 'Cache Write',
-        error,
-      });
-      throw error;
-    }
-
-    // the url service payload
-    const urlpayload = {
-      creatorId: createLootdropDto.creatorId,
-    };
-    // make the call to the url service with the creator id
-    try {
-      const {
-        data: { shortUrl },
-      } = await axios.post<ShortUrl>(
-        `${this.config.get<string>('SERVICE.urlShortenerService')}/createurl`,
-        urlpayload,
-      );
-      // then call the twitch service to show the alert on stream
-      const reward = await this.battlePassService.createRewardObj(
-        createLootdropDto.creatorId,
-        createLootdropDto.rewardId,
-        1,
-      );
-      const lootdrop: LootdropInfo = {
-        creatorId: createLootdropDto.creatorId,
-        reward: reward,
-        threshold: createLootdropDto.threshold,
-        requirements: createLootdropDto.requirements,
-        start,
-        end,
-        url: shortUrl,
-      };
-
-      this.tcpClient.emit('drop-activated', lootdrop);
-      // persist the lootdrop as long as the lootdrop is active
-      await this.redis.set(
-        `${lootdrop.creatorId}-lootdrop`,
-        JSON.stringify(lootdrop),
-        'EX',
-        ttl,
-      );
-
-      return { success: true };
-    } catch (error) {
-      this.logger.error({
-        operation: 'Shorten Lootdrop url',
-        error,
-      });
-    }
+    const lootdrop: LootdropRS = { ...createLootdropDto, shortUrl };
+    await this.redis.set(target, JSON.stringify(lootdrop), 'EX', ttl);
+    await this.redis.set(target + '-qty', createLootdropDto.qty, 'EX', ttl);
+    await this.redis.del(target + '-list');
+    this.tcpClient.emit('drop-activated', lootdrop);
+    return { success: true };
   }
 }

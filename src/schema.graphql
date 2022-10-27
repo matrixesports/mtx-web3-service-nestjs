@@ -219,6 +219,7 @@ type Lootdrop {
   threshold: Int!
   start: Date!
   end: Date!
+  url: String!
 }
 
 
