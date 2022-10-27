@@ -8,5 +8,6 @@ import { RewardService } from './reward.service';
 @Module({
   providers: [LootboxResolver, LootdropResolver, RewardService],
   imports: [BattlePassModule, LeaderboardModule, MetadataModule],
+  exports: [RewardService],
 })
 export class RewardModule {}

@@ -42,7 +42,8 @@ import {
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import * as moment from 'moment';
-import { LootdropAlert, LootdropRS } from 'src/reward/reward.entity';
+import { LootdropReward, LootdropRS } from 'src/reward/reward.entity';
+import { RewardService } from 'src/reward/reward.service';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -53,13 +54,10 @@ export class ApiController {
     private battlePassService: BattlePassService,
     @InjectRedis() private readonly redis: Redis,
     private metadataService: MetadataService,
+    private rewardService: RewardService,
     private config: ConfigService,
     @Inject('TWITCH_SERVICE') private tcpClient: ClientProxy,
   ) {}
-
-  /*
-|========================| GET |========================|
-*/
 
   @Get('battlepass/check/:creatorId')
   async check(@Param('creatorId') creatorId: number) {
@@ -108,9 +106,26 @@ export class ApiController {
     return { reputation };
   }
 
-  /*
-|========================| POST |========================|
-*/
+  @Get('lootdrop/:creatorId')
+  async getLootdrop(
+    @Param('creatorId') creatorId: number,
+  ): Promise<LootdropReward> {
+    const cache = await this.rewardService.getlootdrop(creatorId);
+    const reward = await this.metadataService.createRewardObj(
+      creatorId,
+      cache.rewardId,
+      1,
+    );
+    return {
+      creatorId,
+      reward,
+      requirements: cache.requirements,
+      threshold: cache.threshold,
+      start: cache.start,
+      end: cache.end,
+      url: cache.url,
+    };
+  }
 
   @Post('mint/prempass')
   async mintPremiumPass(@Body() mintPremPassDto: MintPremPassDto) {
@@ -347,13 +362,13 @@ export class ApiController {
       createLootdropDto.rewardId,
       1,
     );
-    const alert: LootdropAlert = {
+    const alert: LootdropReward = {
       creatorId: createLootdropDto.creatorId,
       requirements: createLootdropDto.requirements,
       threshold: createLootdropDto.threshold,
       reward,
-      start,
-      end,
+      start: start.toString(),
+      end: start.toString(),
       url: shortUrl,
     };
 

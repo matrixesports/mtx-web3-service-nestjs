@@ -4,6 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BattlePassModule } from 'src/battlepass/battlepass.module';
 import { CraftingModule } from 'src/crafting/crafting.module';
 import { MetadataModule } from 'src/metadata/metadata.module';
+import { RewardModule } from 'src/reward/reward.module';
 import { ApiController } from './api.controller';
 
 @Module({
@@ -12,6 +13,7 @@ import { ApiController } from './api.controller';
     CraftingModule,
     BattlePassModule,
     MetadataModule,
+    RewardModule,
     ClientsModule.registerAsync([
       {
         name: 'TWITCH_SERVICE',

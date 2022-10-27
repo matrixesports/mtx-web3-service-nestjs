@@ -6,8 +6,8 @@ export abstract class LootdropBase {
   reward?: Reward;
   requirements: Requirements;
   threshold: number;
-  start: string | Date;
-  end: string | Date;
+  start: string;
+  end: string;
   qty?: number;
 }
 
@@ -22,12 +22,12 @@ export class LootdropRS implements LootdropBase {
   url: string;
 }
 
-export class LootdropAlert implements LootdropBase {
+export class LootdropReward implements LootdropBase {
   creatorId: number;
-  reward?: Reward;
+  reward: Reward;
   requirements: Requirements;
   threshold: number;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
   url: string;
 }
