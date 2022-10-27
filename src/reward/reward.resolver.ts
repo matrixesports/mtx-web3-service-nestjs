@@ -97,7 +97,19 @@ export class LootdropResolver {
   ) {
     const userAddress: string = context.req.headers['user-address'];
     const lootdrop = await this.rewardService.getlootdrop(creatorId);
-    await this.battlePassService.checkRequiredFields(creatorId, userAddress);
+    const missingFields = await this.battlePassService.checkRequiredFields(
+      creatorId,
+      userAddress,
+    );
+    if (missingFields != null) {
+      return {
+        success: true,
+        missingFields: {
+          payment: missingFields.missing_user_payment_options,
+          social: missingFields.missing_user_social_options,
+        },
+      };
+    }
     let userThreshold: number;
     switch (lootdrop.requirements) {
       case Requirements.ALLXP:
@@ -144,7 +156,6 @@ export class LootdropResolver {
     if (userThreshold < lootdrop.threshold)
       throw new Warn('User Cannot Meet Requirements!');
     await this.rewardService.setLootdropQty(creatorId, userAddress);
-
     const bpAddress = await this.battlePassService.getBattlePassAddress(
       creatorId,
     );
