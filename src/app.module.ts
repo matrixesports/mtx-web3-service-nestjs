@@ -108,7 +108,7 @@ import { ApiModule } from './api/api.module';
       useFactory: async (config: ConfigService) => {
         return {
           type: 'postgres',
-          url: config.get('storage').postgres,
+          url: config.get<string>('storage.postgres'),
           autoLoadEntities: true,
         };
       },
@@ -128,7 +128,7 @@ import { ApiModule } from './api/api.module';
         debug: true, // stacktrace for error context
         formatError: (err) => {
           const message =
-            err.message.search(config.get('rpc').url) > 0
+            err.message.search(config.get<string>('rpc.url')) > 0
               ? 'on-chain error'
               : err.message;
           return new GraphQLError(message);
@@ -148,7 +148,7 @@ import { ApiModule } from './api/api.module';
       ): Promise<RedisModuleOptions> => {
         return {
           config: {
-            url: config.get('storage').redis,
+            url: config.get<string>('storage.redis'),
           },
         };
       },

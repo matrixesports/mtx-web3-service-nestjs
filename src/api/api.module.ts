@@ -34,8 +34,8 @@ import { ApiController } from './api.controller';
         useFactory: (config: ConfigService) => ({
           transport: Transport.TCP,
           options: {
-            host: config.get<string>('microservice.twitch.host'),
-            port: config.get<number>('microservice.twitch.port'),
+            host: config.get<string>('microservice.discord.host'),
+            port: config.get<number>('microservice.discord.port'),
           },
         }),
       },

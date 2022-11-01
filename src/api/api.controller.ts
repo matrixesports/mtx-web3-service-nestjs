@@ -57,7 +57,8 @@ export class ApiController {
     private metadataService: MetadataService,
     private rewardService: RewardService,
     private config: ConfigService,
-    @Inject('TWITCH_SERVICE') private tcpClient: ClientProxy,
+    @Inject('TWITCH_SERVICE') private twitchClient: ClientProxy,
+    @Inject('DISCORD_SERVICE') private discordClient: ClientProxy,
   ) {}
 
   @Get('battlepass/check/:creatorId')
@@ -374,7 +375,8 @@ export class ApiController {
       url: shortUrl,
     };
 
-    this.tcpClient.emit('drop-activated', alert);
+    this.twitchClient.emit<LootdropReward>('drop-activated', alert);
+    this.discordClient.emit<LootdropReward>('drop-activated', alert);
     return { success: true };
   }
 }
