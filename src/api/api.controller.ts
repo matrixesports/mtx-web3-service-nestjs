@@ -371,7 +371,7 @@ export class ApiController {
       threshold: createLootdropDto.threshold,
       reward,
       start: start.toString(),
-      end: start.toString(),
+      end: end.toString(),
       url: shortUrl,
     };
 
