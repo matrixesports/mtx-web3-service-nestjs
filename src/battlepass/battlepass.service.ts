@@ -408,7 +408,7 @@ export class BattlePassService {
     };
     const missingRedeemFields = await axios.post(
       `${this.configService.get<string>(
-        'microservice.user.url',
+        'microservice.user.host',
       )}/api/user/missingRedeemFields`,
       requiredFieldsBody,
     );
@@ -452,7 +452,7 @@ export class BattlePassService {
     };
     await axios.post(
       `${this.configService.get<string>(
-        'microservice.ticket.url',
+        'microservice.ticket.host',
       )}/api/ticket/redemption`,
       ticketRedeemBody,
     );
@@ -466,7 +466,7 @@ export class BattlePassService {
     try {
       await axios.post(
         `${this.configService.get<string>(
-          'microservice.twitch.url',
+          'microservice.twitch.host',
         )}/redemptions/redemption`,
         twitchRedeemBody,
       );
