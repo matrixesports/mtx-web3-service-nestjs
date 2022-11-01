@@ -2,12 +2,10 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LevelInfo, Reward, RewardType } from 'src/graphql.schema';
-import { MetadataService } from 'src/metadata/metadata.service';
 import { DataSource, Repository } from 'typeorm';
 import { parse } from 'postgres-array';
 import { BattlePassDB } from './battlepass.entity';
 import axios from 'axios';
-import { MetadataDB } from 'src/metadata/metadata.entity';
 import { plainToInstance } from 'class-transformer';
 import {
   GetBattlePassUserInfoChildDto,
@@ -24,6 +22,8 @@ import Redis from 'ioredis';
 import { BattlePass } from 'abi/typechain';
 import { Warn } from 'src/common/error.interceptor';
 import { ClientProxy } from '@nestjs/microservices';
+import { InventoryService } from 'src/inventory/inventory.service';
+import { MetadataDB } from 'src/inventory/inventory.entity';
 
 @Injectable()
 export class BattlePassService {
@@ -34,7 +34,7 @@ export class BattlePassService {
     private battlePassRepository: Repository<BattlePassDB>,
     @Inject('DISCORD_SERVICE') private discordClient: ClientProxy,
     @InjectRedis() private readonly redis: Redis,
-    private metadataService: MetadataService,
+    private inventoryService: InventoryService,
     private chainService: ChainService,
     private dataSource: DataSource,
   ) {}
@@ -75,13 +75,13 @@ export class BattlePassService {
           'seasonInfo',
           results[x].returnData[1],
         );
-        const freeReward = await this.metadataService.createRewardObj(
+        const freeReward = await this.inventoryService.createRewardObj(
           creatorId,
           seasonInfo.freeRewardId.toNumber(),
           seasonInfo.freeRewardQty.toNumber(),
         );
 
-        const premiumReward = await this.metadataService.createRewardObj(
+        const premiumReward = await this.inventoryService.createRewardObj(
           creatorId,
           seasonInfo.premiumRewardId.toNumber(),
           seasonInfo.premiumRewardQty.toNumber(),
@@ -233,7 +233,7 @@ export class BattlePassService {
       id = rewardGiven.freeRewardId.toNumber();
       qty = rewardGiven.freeRewardQty.toNumber();
     }
-    const reward = await this.metadataService.createRewardObj(
+    const reward = await this.inventoryService.createRewardObj(
       creatorId,
       id,
       qty,
@@ -278,8 +278,8 @@ export class BattlePassService {
       id = rewardGiven.freeRewardId.toNumber();
       qty = rewardGiven.freeRewardQty.toNumber();
     }
-    const metadata = await this.metadataService.getMetadata(creatorId, id);
-    if (metadata.reward_type === RewardType.LOOTBOX) {
+    const metadata = await this.inventoryService.getMetadata(creatorId, id);
+    if (metadata.rewardType === RewardType.LOOTBOX) {
       const logs = [];
       for (let i = 0; i < rc.logs.length; i++) {
         try {
@@ -293,7 +293,7 @@ export class BattlePassService {
       const rewards: Reward[] = [];
       for (let y = 0; y < option[1].length; y++) {
         rewards.push(
-          await this.metadataService.createRewardObj(
+          await this.inventoryService.createRewardObj(
             creatorId,
             option[1][y].toNumber(),
             option[2][y].toNumber(),
@@ -302,7 +302,7 @@ export class BattlePassService {
       }
       return { bpAddress: bp.address, reward: rewards, metadata };
     } else {
-      const reward = await this.metadataService.createRewardObj(
+      const reward = await this.inventoryService.createRewardObj(
         creatorId,
         id,
         qty,

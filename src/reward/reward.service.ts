@@ -2,7 +2,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { Warn } from 'src/common/error.interceptor';
 import { plainToInstance } from 'class-transformer';
-import { LootdropRS } from './reward.entity';
+import { LootdropRS } from './reward.dto';
 
 export class RewardService {
   constructor(@InjectRedis() private readonly redis: Redis) {}

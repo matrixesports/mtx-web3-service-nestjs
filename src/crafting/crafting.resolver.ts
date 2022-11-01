@@ -11,14 +11,14 @@ import { ChainService } from 'src/chain/chain.service';
 import { Reward } from 'src/graphql.schema';
 import { CraftingService } from './crafting.service';
 import { GetRecipeDto } from './crafting.dto';
-import { MetadataService } from 'src/metadata/metadata.service';
+import { InventoryService } from 'src/inventory/inventory.service';
 
 @Resolver('Recipe')
 export class CraftingResolver {
   constructor(
     private chainService: ChainService,
     private craftingService: CraftingService,
-    private metadataService: MetadataService,
+    private inventoryService: InventoryService,
   ) {}
 
   /*
@@ -145,7 +145,7 @@ export class CraftingResolver {
   async inputIngredients(@Parent() parent: GetRecipeDto) {
     const rewards: Reward[] = [];
     for (let i = 0; i < parent.recipe.input.battlePasses.length; i++) {
-      const reward = await this.metadataService.createRewardObj(
+      const reward = await this.inventoryService.createRewardObj(
         parent.creatorId,
         parent.recipe.input.ids[i],
         parent.recipe.input.qtys[i],
@@ -159,7 +159,7 @@ export class CraftingResolver {
   async outputIngredients(@Parent() parent: GetRecipeDto) {
     const rewards: Reward[] = [];
     for (let i = 0; i < parent.recipe.output.battlePasses.length; i++) {
-      const reward = await this.metadataService.createRewardObj(
+      const reward = await this.inventoryService.createRewardObj(
         parent.creatorId,
         parent.recipe.output.ids[i],
         parent.recipe.output.qtys[i],

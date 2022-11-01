@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { InventoryResolver } from './inventory.resolver';
-import { BattlePassModule } from 'src/battlepass/battlepass.module';
-import { MetadataModule } from 'src/metadata/metadata.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { InventoryDB, MetadataDB } from './inventory.entity';
 
 @Module({
   providers: [InventoryService, InventoryResolver],
-  imports: [BattlePassModule, MetadataModule],
+  imports: [TypeOrmModule.forFeature([InventoryDB, MetadataDB])],
+  exports: [InventoryService],
 })
 export class InventoryModule {}

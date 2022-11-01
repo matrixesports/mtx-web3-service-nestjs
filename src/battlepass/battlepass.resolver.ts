@@ -9,20 +9,20 @@ import {
 } from '@nestjs/graphql';
 import { ChainService } from 'src/chain/chain.service';
 import { Reward, RewardType } from 'src/graphql.schema';
-import { MetadataService } from 'src/metadata/metadata.service';
 import { BattlePassService } from './battlepass.service';
 import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
 } from './battlepass.dto';
-import { MetadataDB } from 'src/metadata/metadata.entity';
+import { InventoryService } from 'src/inventory/inventory.service';
+import { MetadataDB } from 'src/inventory/inventory.entity';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
   constructor(
     private chainService: ChainService,
     private battlePassService: BattlePassService,
-    private metadataService: MetadataService,
+    private inventoryService: InventoryService,
   ) {}
 
   /*
@@ -92,7 +92,7 @@ export class BattlePassResolver {
         level,
         premium,
       );
-      if (claimInfo.metadata.reward_type === RewardType.REDEEMABLE)
+      if (claimInfo.metadata.rewardType === RewardType.REDEEMABLE)
         await this.battlePassService.redeemItemHelper(
           claimInfo.metadata.id,
           userAddress,
@@ -120,7 +120,7 @@ export class BattlePassResolver {
     const bpAddress = await this.battlePassService.getBattlePassAddress(
       creatorId,
     );
-    const metadata = await this.metadataService.getMetadata(creatorId, itemId);
+    const metadata = await this.inventoryService.getMetadata(creatorId, itemId);
     await this.battlePassService.burn(creatorId, userAddress, itemId, 1);
     await this.battlePassService.redeemItemHelper(
       itemId,

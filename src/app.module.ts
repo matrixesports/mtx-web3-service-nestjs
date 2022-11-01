@@ -14,7 +14,6 @@ import { ScalarModule } from './scalar/scalar.module';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { BattlePassModule } from './battlepass/battlepass.module';
 import { ChainModule } from './chain/chain.module';
-import { MetadataModule } from './metadata/metadata.module';
 import { RewardModule } from './reward/reward.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { CraftingModule } from './crafting/crafting.module';
@@ -160,7 +159,6 @@ import { ApiModule } from './api/api.module';
     ScalarModule,
     BattlePassModule,
     ChainModule,
-    MetadataModule,
     RewardModule,
     InventoryModule,
     CraftingModule,

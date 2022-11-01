@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Requirements } from 'src/graphql.schema';
-import { LootdropBase } from 'src/reward/reward.entity';
+import { LootdropBase } from 'src/reward/reward.dto';
 
 abstract class MintToken {
   @ApiProperty({ type: String })

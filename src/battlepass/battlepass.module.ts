@@ -7,9 +7,9 @@ import {
 import { BattlePassService } from './battlepass.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BattlePassDB } from './battlepass.entity';
-import { MetadataModule } from 'src/metadata/metadata.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { InventoryModule } from 'src/inventory/inventory.module';
 
 @Module({
   providers: [
@@ -20,7 +20,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   imports: [
     TypeOrmModule.forFeature([BattlePassDB]),
-    MetadataModule,
+    InventoryModule,
     ClientsModule.registerAsync([
       {
         name: 'DISCORD_SERVICE',

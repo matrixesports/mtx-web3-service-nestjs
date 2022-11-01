@@ -7,11 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import axios from 'axios';
-import { ethers } from 'ethers';
-import { BattlePassService } from 'src/battlepass/battlepass.service';
-import { ChainService } from 'src/chain/chain.service';
 import { Redeemed, RedeemStatus, Reward } from 'src/graphql.schema';
-import { MetadataService } from 'src/metadata/metadata.service';
 import { GetInventoryChildDto } from './inventory.dto';
 import { InventoryService } from './inventory.service';
 
@@ -19,37 +15,26 @@ import { InventoryService } from './inventory.service';
 export class InventoryResolver {
   constructor(
     private inventoryService: InventoryService,
-    private battlePassService: BattlePassService,
     private configService: ConfigService,
-    private chainService: ChainService,
-    private metadataService: MetadataService,
   ) {}
 
   @ResolveField()
   async default(@Parent() parent: GetInventoryChildDto) {
     const defaultRewards: Reward[] = [];
-    const allBattlePasses = await this.battlePassService.getBattlePasses();
+    const inventory = await this.inventoryService.getInventory(
+      parent.userAddress,
+    );
 
-    for (let x = 0; x < allBattlePasses.length; x++) {
-      const contract = await this.chainService.getBattlePassContract(
-        allBattlePasses[x].creator_id,
-      );
-
-      const owned = await this.inventoryService.getNFTSOwnedForUser(
-        [contract.address],
-        parent.userAddress,
-      );
-      for (let y = 0; y < owned.length; y++) {
-        let reward: Reward;
-        try {
-          reward = await this.metadataService.createRewardObj(
-            allBattlePasses[x].creator_id,
-            ethers.BigNumber.from(owned[y].id.tokenId).toNumber(),
-            parseInt(owned[y].balance),
-          );
-          defaultRewards.push(reward);
-        } catch (e) {}
-      }
+    for (let i = 0; i < inventory.length; i++) {
+      let reward: Reward;
+      try {
+        reward = await this.inventoryService.createRewardObj(
+          inventory[i].creatorId,
+          inventory[i].asset,
+          inventory[i].balance,
+        );
+        defaultRewards.push(reward);
+      } catch (e) {}
     }
     return defaultRewards;
   }
@@ -58,7 +43,7 @@ export class InventoryResolver {
   //get all tickets for a user
   async redeemed(@Parent() parent: GetInventoryChildDto) {
     const res = await axios.get(
-      `${this.configService.get('SERVICE').ticketService}/api/ticket`,
+      `${this.configService.get('microservice.ticket.url')}/api/ticket`,
       { params: { userAddress: parent.userAddress } },
     );
     const userRedeemedInfo: UserRedeemedRes[] = res.data;
@@ -86,7 +71,7 @@ export class InventoryResolver {
         // qty is length of statuses to signify how many have been redeemed
         let reward: Reward;
         try {
-          reward = await this.metadataService.createRewardObj(
+          reward = await this.inventoryService.createRewardObj(
             parseInt(creatorId),
             parseInt(itemId),
             temp[creatorId][itemId].length,

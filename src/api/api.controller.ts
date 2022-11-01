@@ -24,7 +24,6 @@ import {
 } from 'src/common/filters';
 import { CraftingService } from 'src/crafting/crafting.service';
 import { RewardType } from 'src/graphql.schema';
-import { MetadataService } from 'src/metadata/metadata.service';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
@@ -42,9 +41,10 @@ import {
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import * as moment from 'moment';
-import { LootdropReward, LootdropRS } from 'src/reward/reward.entity';
 import { RewardService } from 'src/reward/reward.service';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { InventoryService } from 'src/inventory/inventory.service';
+import { LootdropReward, LootdropRS } from 'src/reward/reward.dto';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -54,7 +54,7 @@ export class ApiController {
     private craftingService: CraftingService,
     private battlePassService: BattlePassService,
     @InjectRedis() private readonly redis: Redis,
-    private metadataService: MetadataService,
+    private inventoryService: InventoryService,
     private rewardService: RewardService,
     private config: ConfigService,
     @Inject('TWITCH_SERVICE') private twitchClient: ClientProxy,
@@ -114,7 +114,7 @@ export class ApiController {
     @Param('creatorId') creatorId: number,
   ): Promise<LootdropReward> {
     const cache = await this.rewardService.getlootdrop(creatorId);
-    const reward = await this.metadataService.createRewardObj(
+    const reward = await this.inventoryService.createRewardObj(
       creatorId,
       cache.rewardId,
       1,
@@ -234,7 +234,7 @@ export class ApiController {
     const fee = await this.chainService.getMaticFeeData();
     await (await bp.newLootbox(lootboxOption, fee)).wait(1);
     const lootboxId = await bp.lootboxId();
-    await this.metadataService
+    await this.inventoryService
       .addMetadata(
         createLootboxDto.creatorId,
         lootboxId.toNumber(),
@@ -357,7 +357,7 @@ export class ApiController {
     await this.redis.set(target, JSON.stringify(lootdrop), 'EX', ttl);
     await this.redis.set(target + '-qty', createLootdropDto.qty, 'EX', ttl);
     await this.redis.del(target + '-list');
-    const reward = await this.metadataService.createRewardObj(
+    const reward = await this.inventoryService.createRewardObj(
       createLootdropDto.creatorId,
       createLootdropDto.rewardId,
       1,

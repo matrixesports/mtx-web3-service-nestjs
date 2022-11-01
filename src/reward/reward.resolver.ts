@@ -13,17 +13,16 @@ import { ChainService } from 'src/chain/chain.service';
 import { Logger } from '@nestjs/common';
 import { Requirements } from 'src/graphql.schema';
 import { Warn } from 'src/common/error.interceptor';
-import { LootdropRS } from './reward.entity';
-import { GetLootdropDto } from './reward.dto';
 import { RewardService } from './reward.service';
 import { LeaderboardService } from 'src/leaderboard/leaderboard.service';
-import { MetadataService } from 'src/metadata/metadata.service';
+import { GetLootdropDto, LootdropRS } from './reward.dto';
+import { InventoryService } from 'src/inventory/inventory.service';
 
 @Resolver('LootboxOption')
 export class LootboxResolver {
   constructor(
     private chainService: ChainService,
-    private metadataService: MetadataService,
+    private inventoryService: InventoryService,
   ) {}
 
   @Query()
@@ -57,7 +56,7 @@ export class LootboxResolver {
       const rewardsInOption = [];
       for (let y = 0; y < option[0].ids.length; y++) {
         rewardsInOption.push(
-          await this.metadataService.createRewardObj(
+          await this.inventoryService.createRewardObj(
             creatorId,
             option[0].ids[y].toNumber(),
             option[0].qtys[y].toNumber(),
@@ -82,7 +81,7 @@ export class LootdropResolver {
     private battlePassService: BattlePassService,
     private rewardService: RewardService,
     private leaderboardService: LeaderboardService,
-    private metadataService: MetadataService,
+    private inventoryService: InventoryService,
   ) {}
 
   @Query('getLootdrop')
@@ -159,7 +158,7 @@ export class LootdropResolver {
     const bpAddress = await this.battlePassService.getBattlePassAddress(
       creatorId,
     );
-    const metadata = await this.metadataService.getMetadata(
+    const metadata = await this.inventoryService.getMetadata(
       creatorId,
       lootdrop.rewardId,
     );
@@ -175,7 +174,7 @@ export class LootdropResolver {
 
   @ResolveField()
   async reward(@Parent() parent: GetLootdropDto) {
-    return await this.metadataService.createRewardObj(
+    return await this.inventoryService.createRewardObj(
       parent.creatorId,
       parent.rewardId,
       1,

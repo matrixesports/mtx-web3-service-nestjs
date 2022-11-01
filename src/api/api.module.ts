@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BattlePassModule } from 'src/battlepass/battlepass.module';
 import { CraftingModule } from 'src/crafting/crafting.module';
-import { MetadataModule } from 'src/metadata/metadata.module';
+import { InventoryModule } from 'src/inventory/inventory.module';
 import { RewardModule } from 'src/reward/reward.module';
 import { ApiController } from './api.controller';
 
@@ -12,7 +12,7 @@ import { ApiController } from './api.controller';
   imports: [
     CraftingModule,
     BattlePassModule,
-    MetadataModule,
+    InventoryModule,
     RewardModule,
     ClientsModule.registerAsync([
       {
