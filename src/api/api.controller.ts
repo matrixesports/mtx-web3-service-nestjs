@@ -376,7 +376,7 @@ export class ApiController {
     };
 
     this.twitchClient.emit<LootdropReward>('drop-activated', alert);
-    this.discordClient.emit<LootdropReward>('drop-activated', alert);
+    this.discordClient.send<LootdropReward>('lootdrop_alert', alert);
     return { success: true };
   }
 }
