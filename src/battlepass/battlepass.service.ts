@@ -407,9 +407,9 @@ export class BattlePassService {
       required_user_payment_options,
     };
     const missingRedeemFields = await axios.post(
-      `${
-        this.configService.get('SERVICE').userService
-      }/api/user/missingRedeemFields`,
+      `${this.configService.get<string>(
+        'microservice.user.url',
+      )}/api/user/missingRedeemFields`,
       requiredFieldsBody,
     );
     if (
@@ -451,9 +451,9 @@ export class BattlePassService {
       itemAddress: address,
     };
     await axios.post(
-      `${
-        this.configService.get('SERVICE').ticketService
-      }/api/ticket/redemption`,
+      `${this.configService.get<string>(
+        'microservice.ticket.url',
+      )}/api/ticket/redemption`,
       ticketRedeemBody,
     );
     const twitchRedeemBody: TwitchRedeemBody = {
@@ -465,9 +465,9 @@ export class BattlePassService {
     };
     try {
       await axios.post(
-        `${
-          this.configService.get('SERVICE').twitchService
-        }/redemptions/redemption`,
+        `${this.configService.get<string>(
+          'microservice.twitch.url',
+        )}/redemptions/redemption`,
         twitchRedeemBody,
       );
     } catch (e) {

@@ -41,7 +41,7 @@ import { ApiModule } from './api/api.module';
             return req['params']['0'] === 'graphql' ? true : false;
           },
         },
-        customErrorObject: (req, res, error, val) => {
+        customErrorObject: (_req, _res, _error, val) => {
           // no error context for info logs
           delete val['err'];
           return {
@@ -89,6 +89,10 @@ import { ApiModule } from './api/api.module';
         TWITCH_SERVICE_PORT: Joi.number().required(),
         DEV_TWITCH_SERVICE_HOST: Joi.string().required(),
         DEV_TWITCH_SERVICE_PORT: Joi.number().required(),
+        URL_SERVICE_HOST: Joi.string().required(),
+        URL_SERVICE_PORT: Joi.number().required(),
+        DEV_URL_SERVICE_HOST: Joi.string().required(),
+        DEV_URL_SERVICE_PORT: Joi.number().required(),
         DISCORD_BOT_HOST: Joi.string().required(),
         DISCORD_BOT_PORT: Joi.number().required(),
         DEV_DISCORD_BOT_HOST: Joi.string().required(),

@@ -337,7 +337,7 @@ export class ApiController {
     const {
       data: { shortUrl },
     } = await axios.post<ShortUrl>(
-      `${this.config.get<string>('SERVICE.urlShortenerService')}/createurl`,
+      `${this.config.get<string>('microservice.url.url')}/createurl`,
       urlpayload,
     );
     const start = moment
