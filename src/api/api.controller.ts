@@ -373,12 +373,7 @@ export class ApiController {
     };
 
     this.twitchClient.emit<LootdropReward>('drop-activated', alert);
-    await axios.post(
-      `${this.config.get<string>(
-        'microservice.discord.host',
-      )}/discord/lootdrop/active`,
-      alert,
-    );
+    this.discordClient.emit<LootdropReward>('active_lootdrop', alert);
     return { success: true };
   }
 }

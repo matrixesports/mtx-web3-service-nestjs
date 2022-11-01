@@ -59,22 +59,27 @@ export default () => {
       twitch: {
         host: twitchHost,
         port: twitchPort,
+        url: 'http://' + twitchHost + ':' + twitchPort,
       },
       discord: {
         host: discordHost,
         port: discordPort,
+        url: 'http://' + discordHost + ':' + discordPort,
       },
       ticket: {
         host: ticketHost,
         port: ticketPort,
+        url: 'http://' + ticketHost + ':' + ticketPort,
       },
       user: {
         host: userHost,
         port: userPort,
+        url: 'http://' + userHost + ':' + userPort,
       },
       url: {
         host: urlHost,
         port: urlPort,
+        url: 'http://' + urlHost + ':' + urlPort,
       },
     },
   };
