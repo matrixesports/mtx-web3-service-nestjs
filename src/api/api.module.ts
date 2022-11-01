@@ -27,6 +27,18 @@ import { ApiController } from './api.controller';
           },
         }),
       },
+      {
+        name: 'DISCORD_SERVICE',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (config: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            host: config.get<string>('microservice.twitch.host'),
+            port: config.get<number>('microservice.twitch.port'),
+          },
+        }),
+      },
     ]),
   ],
 })

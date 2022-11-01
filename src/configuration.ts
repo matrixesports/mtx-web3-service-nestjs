@@ -1,33 +1,43 @@
 export default () => {
-  let db;
-  let rs;
-  let ticketService;
-  let userService;
-  let twitchService;
-  let craftingProxy;
-  let bpFactory;
-  let urlShortenerService: string;
+  let postgres: string, redis: string;
+  let ticketHost: string, ticketPort: number;
+  let userHost: string, userPort: number;
+  let twitchHost: string, twitchPort: number;
+  let urlHost: string, urlPort: number;
+  let discordHost: string, discordPort: number;
+  let craftingProxy: string, bpFactory: string;
 
   if (process.env.ZEET_ENVIRONMENT == 'main') {
-    db = process.env.DB_WEB3_SERVICE_URL;
-    rs = process.env.RS_WEB3_SERVICE_URL;
-    ticketService = process.env.TICKET_SERVICE_URL;
-    userService = process.env.USER_SERVICE_URL;
-    twitchService = process.env.TWITCH_SERVICE_URL;
+    postgres = process.env.DATABASE_URL;
+    redis = process.env.REDIS_URL;
+    ticketHost = process.env.TICKET_SERVICE_HOST;
+    ticketPort = parseInt(process.env.TICKET_SERVICE_PORT);
+    userHost = process.env.USER_SERVICE_HOST;
+    userPort = parseInt(process.env.USER_SERVICE_PORT);
+    twitchHost = process.env.TWITCH_SERVICE_HOST;
+    twitchPort = parseInt(process.env.TWITCH_SERVICE_PORT);
+    urlHost = process.env.URL_SERVICE_HOST;
+    urlPort = parseInt(process.env.URL_SERVICE_PORT);
+    discordHost = process.env.DISCORD_BOT_HOST;
+    discordPort = parseInt(process.env.DISCORD_BOT_PORT);
     craftingProxy = process.env.CRAFTING_PROXY;
     bpFactory = process.env.BP_FACTORY;
-    urlShortenerService = process.env.URL_SHORTENER_SERVICE_URL;
   } else {
-    db = process.env.DB_STAGING_WEB3_SERVICE_URL;
-    rs = process.env.RS_STAGING_WEB3_SERVICE_URL;
-    ticketService = process.env.STAGING_TICKET_SERVICE_URL;
-    userService = process.env.STAGING_USER_SERVICE_URL;
-    twitchService = process.env.STAGING_TWITCH_SERVICE_URL;
-    craftingProxy = process.env.TEST_CRAFTING_PROXY;
-    bpFactory = process.env.TEST_BP_FACTORY;
-    urlShortenerService = process.env.TEST_URL_SHORTENER_SERVICE_URL;
+    postgres = process.env.DEV_DATABASE_URL;
+    redis = process.env.DEV_REDIS_URL;
+    ticketHost = process.env.DEV_TICKET_SERVICE_HOST;
+    ticketPort = parseInt(process.env.DEV_TICKET_SERVICE_PORT);
+    userHost = process.env.DEV_USER_SERVICE_HOST;
+    userPort = parseInt(process.env.DEV_USER_SERVICE_PORT);
+    twitchHost = process.env.DEV_TWITCH_SERVICE_HOST;
+    twitchPort = parseInt(process.env.DEV_TWITCH_SERVICE_PORT);
+    urlHost = process.env.DEV_URL_SERVICE_HOST;
+    urlPort = parseInt(process.env.DEV_URL_SERVICE_PORT);
+    discordHost = process.env.DEV_DISCORD_BOT_HOST;
+    discordPort = parseInt(process.env.DEV_DISCORD_BOT_PORT);
+    craftingProxy = process.env.DEV_CRAFTING_PROXY;
+    bpFactory = process.env.DEV_BP_FACTORY;
   }
-
   const config = {
     PVT_KEY: process.env.PVT_KEY,
     PUB_ADDR: process.env.PUB_ADDR,
@@ -41,18 +51,35 @@ export default () => {
       bpFactory,
       craftingProxy,
     },
-    db,
-    rs,
-    SERVICE: {
-      ticketService,
-      userService,
-      twitchService,
-      urlShortenerService,
+    storage: {
+      postgres,
+      redis,
     },
     microservice: {
       twitch: {
-        host: process.env.TWITCH_MICROSERVICE_HOST,
-        port: parseInt(process.env.TWITCH_MICROSERVICE_PORT),
+        host: twitchHost,
+        port: twitchPort,
+        url: twitchHost + twitchPort,
+      },
+      discord: {
+        host: discordHost,
+        port: discordPort,
+        url: discordHost + discordPort,
+      },
+      ticket: {
+        host: ticketHost,
+        port: ticketPort,
+        url: ticketHost + ticketPort,
+      },
+      user: {
+        host: userHost,
+        port: userPort,
+        url: userHost + userPort,
+      },
+      url: {
+        host: urlHost,
+        port: urlPort,
+        url: urlHost + urlPort,
       },
     },
   };
