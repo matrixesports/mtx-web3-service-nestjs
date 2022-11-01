@@ -346,10 +346,7 @@ export class ApiController {
       .toDate();
     const end = moment.utc(createLootdropDto.end).utcOffset('-07:00').toDate();
     if (start > end) throw new HttpException('Start Must Be Before End!', 500);
-    const nw = moment
-      .utc(new Date().toLocaleString('en-US'))
-      .utcOffset('-07:00')
-      .toDate();
+    const nw = moment().utcOffset('-07:00').toDate();
     const ttl =
       nw > start
         ? Math.floor((end.getTime() - start.getTime()) / 1000)
@@ -376,7 +373,12 @@ export class ApiController {
     };
 
     this.twitchClient.emit<LootdropReward>('drop-activated', alert);
-    this.discordClient.send<LootdropReward>('active_lootdrop', alert);
+    await axios.post(
+      `${this.config.get<string>(
+        'microservice.discord.host',
+      )}/discord/lootdrop/active`,
+      alert,
+    );
     return { success: true };
   }
 }
