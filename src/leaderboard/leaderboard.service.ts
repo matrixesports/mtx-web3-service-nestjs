@@ -194,6 +194,7 @@ export class LeaderboardService {
         )}/api/creator/${creatorId}/followers`,
       )
       .catch((error) => {
+        console.log(error);
         throw new Error('Fetching Leaderboard Failed!');
       });
     return res.data;
