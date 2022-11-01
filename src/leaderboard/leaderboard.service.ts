@@ -189,9 +189,9 @@ export class LeaderboardService {
     // return res.data;
     const res = await axios
       .get(
-        `${
-          this.configService.get('SERVICE').userService
-        }/api/creator/${creatorId}/followers`,
+        `${this.configService.get<string>(
+          'microservice.discord.host',
+        )}/api/creator/${creatorId}/followers`,
       )
       .catch((error) => {
         throw new Error('Fetching Leaderboard Failed!');
