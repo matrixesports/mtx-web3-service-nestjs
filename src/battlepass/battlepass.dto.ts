@@ -15,6 +15,8 @@ export class GetBattlePassUserInfoChildDto extends GetBattlePassChildDto {
 }
 
 export class LevelUpAlert {
+  @ApiProperty({ type: Number })
+  creatorId: number;
   @ApiProperty({ type: String })
   userAddress: string;
   @ApiProperty({ type: Number })
