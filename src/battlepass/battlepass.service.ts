@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LevelInfo, Reward, RewardType } from 'src/graphql.schema';
@@ -11,6 +11,7 @@ import { MetadataDB } from 'src/metadata/metadata.entity';
 import { plainToInstance } from 'class-transformer';
 import {
   GetBattlePassUserInfoChildDto,
+  LevelUpAlert,
   RequiredFieldsBody,
   RequiredFieldsResponse,
   TicketRedeemBody,
@@ -22,6 +23,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { BattlePass } from 'abi/typechain';
 import { Warn } from 'src/common/error.interceptor';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class BattlePassService {
@@ -30,6 +32,7 @@ export class BattlePassService {
     private configService: ConfigService,
     @InjectRepository(BattlePassDB)
     private battlePassRepository: Repository<BattlePassDB>,
+    @Inject('DISCORD_SERVICE') private discordClient: ClientProxy,
     @InjectRedis() private readonly redis: Redis,
     private metadataService: MetadataService,
     private chainService: ChainService,
@@ -183,7 +186,14 @@ export class BattlePassService {
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
+    const lvl = (await bp.level(userAddress, seasonId)).toNumber();
     await (await bp.giveXp(seasonId, xp, userAddress, fee)).wait(1);
+    const newlvl = (await bp.level(userAddress, seasonId)).toNumber();
+    if (lvl == newlvl)
+      this.discordClient.emit<LevelUpAlert>('level-up', {
+        userAddress,
+        newlvl,
+      });
   }
 
   async claimReward(
