@@ -136,6 +136,7 @@ export class BattlePassResolver {
       bpAddress,
       metadata,
     );
+    await this.inventoryService.decreaseBalance(userAddress, creatorId, itemId);
     return { success: true };
   }
 
