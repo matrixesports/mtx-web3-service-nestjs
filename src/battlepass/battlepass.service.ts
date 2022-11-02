@@ -251,7 +251,12 @@ export class BattlePassService {
       id,
       qty,
     );
-    this.inventoryService.increaseBalance(userAddress, creatorId, id, qty);
+    await this.inventoryService.increaseBalance(
+      userAddress,
+      creatorId,
+      id,
+      qty,
+    );
     return { bpAddress: bp.address, reward: [reward] };
   }
 
@@ -321,7 +326,12 @@ export class BattlePassService {
         id,
         qty,
       );
-      this.inventoryService.increaseBalance(userAddress, creatorId, id, qty);
+      await this.inventoryService.increaseBalance(
+        userAddress,
+        creatorId,
+        id,
+        qty,
+      );
       return { bpAddress: bp.address, reward: [reward], metadata };
     }
   }
