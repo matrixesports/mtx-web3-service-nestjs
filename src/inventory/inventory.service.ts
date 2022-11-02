@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RewardType } from 'src/graphql.schema';
 import { Reward } from 'src/reward/reward.dto';
-import { DataSource, Repository } from 'typeorm';
+import {
+  DataSource,
+  DeleteResult,
+  InsertResult,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { InventoryDB, MetadataDB } from './inventory.entity';
 
 @Injectable()
@@ -15,6 +21,39 @@ export class InventoryService {
     private dataSource: DataSource,
   ) {}
 
+  async decreaseBalance(
+    userAddress: string,
+    creatorId: number,
+    rewardId: number,
+  ) {
+    const asset = await this.getAsset(userAddress, creatorId, rewardId);
+    if (asset.balance - 1 <= 0) this.delAsset(userAddress, creatorId, rewardId);
+    else {
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      let res: UpdateResult;
+      try {
+        res = await queryRunner.manager
+          .createQueryBuilder()
+          .update(InventoryDB)
+          .set({ balance: () => 'balance - 1' })
+          .where('inv.userAddress = :userAddress', { userAddress })
+          .andWhere('inv.creatorId = :creatorId', { creatorId })
+          .andWhere('inv.rewardId = :rewardId', { rewardId })
+          .execute();
+        await queryRunner.commitTransaction();
+      } catch (err) {
+        await queryRunner.rollbackTransaction();
+        res = null;
+      } finally {
+        await queryRunner.release();
+      }
+      if (res) return;
+      throw new Error('Decrease Balance For Asset Failed!');
+    }
+  }
+
   async getInventory(userAddress: string) {
     const inv = await this.inventoryRepository
       .createQueryBuilder('inv')
@@ -23,6 +62,72 @@ export class InventoryService {
       .getMany();
     if (inv) return inv;
     throw new Error('UserAddress Not Found!');
+  }
+
+  async getAsset(userAddress: string, creatorId: number, rewardId: number) {
+    const asset = await this.inventoryRepository
+      .createQueryBuilder('inv')
+      .select()
+      .where('inv.userAddress = :userAddress', { userAddress })
+      .andWhere('inv.creatorId = :creatorId', { creatorId })
+      .andWhere('inv.rewardId = :rewardId', { rewardId })
+      .getOne();
+    if (asset) return asset;
+    throw new Error('Asset Not Found!');
+  }
+
+  async increaseBalance(
+    userAddress: string,
+    creatorId: number,
+    rewardId: number,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    let res: UpdateResult;
+    try {
+      res = await queryRunner.manager
+        .createQueryBuilder()
+        .update(InventoryDB)
+        .set({ balance: () => 'balance + 1' })
+        .where('inv.userAddress = :userAddress', { userAddress })
+        .andWhere('inv.creatorId = :creatorId', { creatorId })
+        .andWhere('inv.rewardId = :rewardId', { rewardId })
+        .execute();
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      res = null;
+    } finally {
+      await queryRunner.release();
+    }
+    if (res) return;
+    throw new Error('Increase Balance For Asset Failed!');
+  }
+
+  async delAsset(userAddress: string, creatorId: number, rewardId: number) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    let res: DeleteResult;
+    try {
+      res = await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from(InventoryDB)
+        .where('inv.userAddress = :userAddress', { userAddress })
+        .andWhere('inv.creatorId = :creatorId', { creatorId })
+        .andWhere('inv.rewardId = :rewardId', { rewardId })
+        .execute();
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      res = null;
+    } finally {
+      await queryRunner.release();
+    }
+    if (res) return;
+    throw new Error('Remove Asset Failed!');
   }
 
   async getMetadata(creatorId: number, metadataId: number) {
@@ -47,7 +152,7 @@ export class InventoryService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    let metadata;
+    let metadata: InsertResult;
     try {
       metadata = await queryRunner.manager
         .createQueryBuilder()

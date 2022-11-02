@@ -107,6 +107,13 @@ export class BattlePassResolver {
         level,
         premium,
       );
+    for (let i = 0; i < claimInfo.reward.length; i++) {
+      await this.inventoryService.increaseBalance(
+        userAddress,
+        creatorId,
+        claimInfo.reward[i].id as number,
+      );
+    }
     return { success: true, reward: claimInfo.reward };
   }
 
