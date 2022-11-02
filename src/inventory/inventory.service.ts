@@ -47,12 +47,15 @@ export class InventoryService {
     userAddress: string,
     creatorId: number,
     rewardId: number,
+    qty: number,
   ) {
     let isnew: boolean;
-    await this.getAsset(userAddress, creatorId, rewardId).catch(() => {
-      isnew = true;
-    });
-    if (isnew) this.newAsset(userAddress, creatorId, rewardId, 1);
+    const asset = await this.getAsset(userAddress, creatorId, rewardId).catch(
+      () => {
+        isnew = true;
+      },
+    );
+    if (isnew) this.newAsset(userAddress, creatorId, rewardId, qty);
     else {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
@@ -62,7 +65,7 @@ export class InventoryService {
         res = await queryRunner.manager
           .createQueryBuilder()
           .update(InventoryDB)
-          .set({ balance: () => 'balance + 1' })
+          .set({ balance: (asset as InventoryDB).balance + qty })
           .where('inv.userAddress = :userAddress', { userAddress })
           .andWhere('inv.creatorId = :creatorId', { creatorId })
           .andWhere('inv.rewardId = :rewardId', { rewardId })
@@ -84,9 +87,12 @@ export class InventoryService {
     userAddress: string,
     creatorId: number,
     rewardId: number,
+    qty: number,
   ) {
     const asset = await this.getAsset(userAddress, creatorId, rewardId);
-    if (asset.balance - 1 <= 0) this.delAsset(userAddress, creatorId, rewardId);
+    if (asset.balance - qty == 0)
+      this.delAsset(userAddress, creatorId, rewardId);
+    else if (asset.balance - qty <= 0) throw new Error('Inventory Failure!');
     else {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
@@ -96,7 +102,7 @@ export class InventoryService {
         res = await queryRunner.manager
           .createQueryBuilder()
           .update(InventoryDB)
-          .set({ balance: () => 'balance - 1' })
+          .set({ balance: asset.balance - qty })
           .where('inv.userAddress = :userAddress', { userAddress })
           .andWhere('inv.creatorId = :creatorId', { creatorId })
           .andWhere('inv.rewardId = :rewardId', { rewardId })

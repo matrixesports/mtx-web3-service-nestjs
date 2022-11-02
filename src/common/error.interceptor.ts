@@ -13,6 +13,7 @@ import { GraphQLError } from 'graphql';
 //https://github.com/iamolegga/nestjs-pino/blob/master/src/LoggerErrorInterceptor.ts
 @Injectable()
 export class ErrorInterceptor implements NestInterceptor {
+  logger = new Logger(ErrorInterceptor.name);
   intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -21,19 +22,18 @@ export class ErrorInterceptor implements NestInterceptor {
       catchError((error) =>
         throwError(() => {
           // const response = context.switchToHttp().getResponse();
-          const logger = new Logger(ErrorInterceptor.name);
           if (error.constructor.name == Warn.name) {
-            logger.warn(error);
+            this.logger.warn(error);
           } else if (error?.code in codes)
-            return this.parseEthersError(error, logger);
-          else logger.error(error);
+            return this.parseEthersError(error, this.logger);
+          else this.logger.error(error);
           return error;
         }),
       ),
     );
   }
 
-  parseEthersError(error: any, logger) {
+  parseEthersError(error: any, logger: Logger) {
     if (error.error?.code in codes) {
       if (error.error.error?.code in codes) {
         const newerr = new EthersException(

@@ -160,6 +160,12 @@ export class BattlePassService {
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
     await (await bp.mint(userAddress, id, qty, fee)).wait(1);
+    await this.inventoryService.increaseBalance(
+      userAddress,
+      creatorId,
+      id,
+      qty,
+    );
   }
 
   async burn(creatorId: number, userAddress: string, id: number, qty: number) {
@@ -169,6 +175,7 @@ export class BattlePassService {
       console.log(err);
       throw new Warn('Transaction Reverted!');
     });
+    this.inventoryService.decreaseBalance(userAddress, creatorId, id, qty);
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
@@ -238,6 +245,7 @@ export class BattlePassService {
       id,
       qty,
     );
+    this.inventoryService.increaseBalance(userAddress, creatorId, id, qty);
     return { bpAddress: bp.address, reward: [reward] };
   }
 
@@ -307,6 +315,7 @@ export class BattlePassService {
         id,
         qty,
       );
+      this.inventoryService.increaseBalance(userAddress, creatorId, id, qty);
       return { bpAddress: bp.address, reward: [reward], metadata };
     }
   }

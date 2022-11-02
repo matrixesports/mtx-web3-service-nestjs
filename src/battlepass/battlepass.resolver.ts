@@ -85,6 +85,7 @@ export class BattlePassResolver {
       reward: Reward[];
       metadata?: MetadataDB;
     };
+
     if (autoRedeem) {
       claimInfo = await this.battlePassService.claimRewardAtomic(
         creatorId,
@@ -107,13 +108,6 @@ export class BattlePassResolver {
         level,
         premium,
       );
-    for (let i = 0; i < claimInfo.reward.length; i++) {
-      await this.inventoryService.increaseBalance(
-        userAddress,
-        creatorId,
-        claimInfo.reward[i].id as number,
-      );
-    }
     return { success: true, reward: claimInfo.reward };
   }
 
@@ -136,7 +130,6 @@ export class BattlePassResolver {
       bpAddress,
       metadata,
     );
-    await this.inventoryService.decreaseBalance(userAddress, creatorId, itemId);
     return { success: true };
   }
 
