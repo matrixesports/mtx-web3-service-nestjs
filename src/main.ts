@@ -19,7 +19,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  fs.writeFile('api.json', JSON.stringify(document), function (err) {
+  fs.writeFile('docs/api.json', JSON.stringify(document), function (err) {
     if (err) {
       console.log(err);
     }
