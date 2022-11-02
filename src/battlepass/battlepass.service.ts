@@ -180,6 +180,12 @@ export class BattlePassService {
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
     await (await bp.burn(userAddress, id, qty, fee)).wait(1);
+    await this.inventoryService.decreaseBalance(
+      userAddress,
+      creatorId,
+      id,
+      qty,
+    );
   }
 
   async giveXp(creatorId: number, userAddress: string, xp: number) {

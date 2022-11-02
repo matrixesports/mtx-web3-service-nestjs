@@ -55,7 +55,7 @@ export class InventoryService {
         isnew = true;
       },
     );
-    if (isnew) this.newAsset(userAddress, creatorId, rewardId, qty);
+    if (isnew) await this.newAsset(userAddress, creatorId, rewardId, qty);
     else {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
@@ -91,7 +91,7 @@ export class InventoryService {
   ) {
     const asset = await this.getAsset(userAddress, creatorId, rewardId);
     if (asset.balance - qty == 0)
-      this.delAsset(userAddress, creatorId, rewardId);
+      await this.delAsset(userAddress, creatorId, rewardId);
     else if (asset.balance - qty <= 0) throw new Error('Inventory Failure!');
     else {
       const queryRunner = this.dataSource.createQueryRunner();
