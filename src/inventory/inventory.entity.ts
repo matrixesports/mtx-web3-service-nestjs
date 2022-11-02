@@ -9,11 +9,11 @@ export class InventoryDB {
   @PrimaryColumn({ name: 'creator_id' })
   creatorId: number;
 
-  @PrimaryColumn()
-  asset: number;
+  @PrimaryColumn({ name: 'asset' })
+  rewardId: number;
 
-  @Column()
-  balance: number;
+  @Column({ name: 'balance' })
+  qty: number;
 }
 
 @Entity('metadata')

@@ -65,7 +65,7 @@ export class InventoryService {
         res = await queryRunner.manager
           .createQueryBuilder()
           .update(InventoryDB)
-          .set({ balance: (asset as InventoryDB).balance + qty })
+          .set({ qty: (asset as InventoryDB).qty + qty })
           .where('inv.userAddress = :userAddress', { userAddress })
           .andWhere('inv.creatorId = :creatorId', { creatorId })
           .andWhere('inv.rewardId = :rewardId', { rewardId })
@@ -90,9 +90,9 @@ export class InventoryService {
     qty: number,
   ) {
     const asset = await this.getAsset(userAddress, creatorId, rewardId);
-    if (asset.balance - qty == 0)
+    if (asset.qty - qty == 0)
       await this.delAsset(userAddress, creatorId, rewardId);
-    else if (asset.balance - qty <= 0) throw new Error('Inventory Failure!');
+    else if (asset.qty - qty <= 0) throw new Error('Inventory Failure!');
     else {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
@@ -102,7 +102,7 @@ export class InventoryService {
         res = await queryRunner.manager
           .createQueryBuilder()
           .update(InventoryDB)
-          .set({ balance: asset.balance - qty })
+          .set({ qty: asset.qty - qty })
           .where('inv.userAddress = :userAddress', { userAddress })
           .andWhere('inv.creatorId = :creatorId', { creatorId })
           .andWhere('inv.rewardId = :rewardId', { rewardId })
@@ -162,8 +162,8 @@ export class InventoryService {
         .values({
           userAddress,
           creatorId,
-          asset: rewardId,
-          balance: qty,
+          rewardId,
+          qty,
         })
         .execute();
       await queryRunner.commitTransaction();
