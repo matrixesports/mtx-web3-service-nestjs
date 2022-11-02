@@ -21,6 +21,65 @@ export class InventoryService {
     private dataSource: DataSource,
   ) {}
 
+  async getInventory(userAddress: string) {
+    const inv = await this.inventoryRepository
+      .createQueryBuilder('inv')
+      .select()
+      .where('inv.userAddress = :userAddress', { userAddress })
+      .getMany();
+    if (inv) return inv;
+    throw new Error('UserAddress Not Found!');
+  }
+
+  async getAsset(userAddress: string, creatorId: number, rewardId: number) {
+    const asset = await this.inventoryRepository
+      .createQueryBuilder('inv')
+      .select()
+      .where('inv.userAddress = :userAddress', { userAddress })
+      .andWhere('inv.creatorId = :creatorId', { creatorId })
+      .andWhere('inv.rewardId = :rewardId', { rewardId })
+      .getOne();
+    if (asset) return asset;
+    throw new Error('Asset Not Found!');
+  }
+
+  async increaseBalance(
+    userAddress: string,
+    creatorId: number,
+    rewardId: number,
+  ) {
+    let isnew: boolean;
+    await this.getAsset(userAddress, creatorId, rewardId).catch(() => {
+      isnew = true;
+    });
+    if (isnew) this.newAsset(userAddress, creatorId, rewardId, 1);
+    else {
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      let res: UpdateResult;
+      try {
+        res = await queryRunner.manager
+          .createQueryBuilder()
+          .update(InventoryDB)
+          .set({ balance: () => 'balance + 1' })
+          .where('inv.userAddress = :userAddress', { userAddress })
+          .andWhere('inv.creatorId = :creatorId', { creatorId })
+          .andWhere('inv.rewardId = :rewardId', { rewardId })
+          .execute();
+        await queryRunner.commitTransaction();
+      } catch (err) {
+        console.log({ err });
+        await queryRunner.rollbackTransaction();
+        res = null;
+      } finally {
+        await queryRunner.release();
+      }
+      if (res) return;
+      throw new Error('Increase Balance For Asset Failed!');
+    }
+  }
+
   async decreaseBalance(
     userAddress: string,
     creatorId: number,
@@ -54,57 +113,6 @@ export class InventoryService {
     }
   }
 
-  async getInventory(userAddress: string) {
-    const inv = await this.inventoryRepository
-      .createQueryBuilder('inv')
-      .select()
-      .where('inv.userAddress = :userAddress', { userAddress })
-      .getMany();
-    if (inv) return inv;
-    throw new Error('UserAddress Not Found!');
-  }
-
-  async getAsset(userAddress: string, creatorId: number, rewardId: number) {
-    const asset = await this.inventoryRepository
-      .createQueryBuilder('inv')
-      .select()
-      .where('inv.userAddress = :userAddress', { userAddress })
-      .andWhere('inv.creatorId = :creatorId', { creatorId })
-      .andWhere('inv.rewardId = :rewardId', { rewardId })
-      .getOne();
-    if (asset) return asset;
-    throw new Error('Asset Not Found!');
-  }
-
-  async increaseBalance(
-    userAddress: string,
-    creatorId: number,
-    rewardId: number,
-  ) {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    let res: UpdateResult;
-    try {
-      res = await queryRunner.manager
-        .createQueryBuilder()
-        .update(InventoryDB)
-        .set({ balance: () => 'balance + 1' })
-        .where('inv.userAddress = :userAddress', { userAddress })
-        .andWhere('inv.creatorId = :creatorId', { creatorId })
-        .andWhere('inv.rewardId = :rewardId', { rewardId })
-        .execute();
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      res = null;
-    } finally {
-      await queryRunner.release();
-    }
-    if (res) return;
-    throw new Error('Increase Balance For Asset Failed!');
-  }
-
   async delAsset(userAddress: string, creatorId: number, rewardId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -118,6 +126,39 @@ export class InventoryService {
         .where('inv.userAddress = :userAddress', { userAddress })
         .andWhere('inv.creatorId = :creatorId', { creatorId })
         .andWhere('inv.rewardId = :rewardId', { rewardId })
+        .execute();
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      res = null;
+    } finally {
+      await queryRunner.release();
+    }
+    if (res) return;
+    throw new Error('Remove Asset Failed!');
+  }
+
+  async newAsset(
+    userAddress: string,
+    creatorId: number,
+    rewardId: number,
+    qty: number,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    let res: DeleteResult;
+    try {
+      res = await queryRunner.manager
+        .createQueryBuilder()
+        .insert()
+        .into(InventoryDB)
+        .values({
+          userAddress,
+          creatorId,
+          asset: rewardId,
+          balance: qty,
+        })
         .execute();
       await queryRunner.commitTransaction();
     } catch (err) {
