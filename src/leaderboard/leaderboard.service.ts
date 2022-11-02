@@ -190,7 +190,7 @@ export class LeaderboardService {
     const res = await axios
       .get(
         `${this.configService.get<string>(
-          'microservice.user.host',
+          'microservice.user.url',
         )}/api/creator/${creatorId}/followers`,
       )
       .catch((error) => {
