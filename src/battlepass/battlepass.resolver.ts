@@ -16,6 +16,12 @@ import {
 } from './battlepass.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MetadataDB } from 'src/inventory/inventory.entity';
+import {
+  BurnError,
+  ClaimRewardError,
+  InventoryError,
+  LevelInfoError,
+} from 'src/common/error.interceptor';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
@@ -93,6 +99,7 @@ export class BattlePassResolver {
         level,
         premium,
       );
+      if (!claimInfo) throw new ClaimRewardError();
       if (claimInfo.metadata.rewardType === RewardType.REDEEMABLE)
         await this.battlePassService.redeemItemHelper(
           claimInfo.metadata.id,
@@ -101,13 +108,15 @@ export class BattlePassResolver {
           claimInfo.bpAddress,
           claimInfo.metadata,
         );
-    } else
+    } else {
       claimInfo = await this.battlePassService.claimReward(
         creatorId,
         userAddress,
         level,
         premium,
       );
+      if (!claimInfo) throw new ClaimRewardError();
+    }
     return { success: true, reward: claimInfo.reward };
   }
 
@@ -122,7 +131,9 @@ export class BattlePassResolver {
       creatorId,
     );
     const metadata = await this.inventoryService.getMetadata(creatorId, itemId);
-    await this.battlePassService.burn(creatorId, userAddress, itemId, 1);
+    if (!metadata) throw new InventoryError();
+    if (!(await this.battlePassService.burn(creatorId, userAddress, itemId, 1)))
+      throw new BurnError();
     await this.battlePassService.redeemItemHelper(
       itemId,
       userAddress,
@@ -183,12 +194,14 @@ export class BattlePassResolver {
 
   @ResolveField()
   async levelInfo(@Parent() parent: GetBattlePassChildDto) {
-    return await this.battlePassService.getLevelInfo(
+    const lvls = await this.battlePassService.getLevelInfo(
       parent.creatorId,
       parent.contract,
       parent.seasonId,
       parent.maxLevel,
     );
+    if (lvls) return lvls;
+    throw new LevelInfoError();
   }
 }
 

@@ -82,3 +82,33 @@ export class Warn extends GraphQLError {
     super(message);
   }
 }
+
+export class InventoryError extends Error {
+  constructor() {
+    super('Inventory Failure!');
+  }
+}
+
+export class LevelInfoError extends Error {
+  constructor() {
+    super('BattlePass Info Failure!');
+  }
+}
+
+export class ClaimRewardError extends Error {
+  constructor() {
+    super('Claim Reward Failure!');
+  }
+}
+
+export class MintError extends Error {
+  constructor() {
+    super('Mint Asset Failure!');
+  }
+}
+
+export class BurnError extends Error {
+  constructor() {
+    super('Burn Asset Failure!');
+  }
+}

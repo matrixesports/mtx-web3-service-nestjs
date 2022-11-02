@@ -20,7 +20,7 @@ import { ChainService } from 'src/chain/chain.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { BattlePass } from 'abi/typechain';
-import { Warn } from 'src/common/error.interceptor';
+import { InventoryError, Warn } from 'src/common/error.interceptor';
 import { ClientProxy } from '@nestjs/microservices';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MetadataDB } from 'src/inventory/inventory.entity';
@@ -50,11 +50,9 @@ export class BattlePassService {
   ) {
     let levelInfo: LevelInfo[];
     const target = `level-info-${creatorId}`;
-    const cache = await this.redis.get(target).catch((error) => {
-      this.logger.error({
-        operation: 'Cache Read',
-        error,
-      });
+    let cache = await this.redis.get(target).catch((error) => {
+      this.logger.error('Cache Read', error);
+      cache = null;
     });
     if (cache == null) {
       levelInfo = [];
@@ -80,12 +78,13 @@ export class BattlePassService {
           seasonInfo.freeRewardId.toNumber(),
           seasonInfo.freeRewardQty.toNumber(),
         );
-
+        if (!freeReward) return null;
         const premiumReward = await this.inventoryService.createRewardObj(
           creatorId,
           seasonInfo.premiumRewardId.toNumber(),
           seasonInfo.premiumRewardQty.toNumber(),
         );
+        if (!premiumReward) return null;
         levelInfo.push({
           level: x,
           xpToCompleteLevel: seasonInfo.xpToCompleteLevel.toNumber(),
@@ -94,10 +93,7 @@ export class BattlePassService {
         });
       }
       await this.redis.set(target, JSON.stringify(levelInfo)).catch((error) => {
-        this.logger.error({
-          operation: 'Cache Write',
-          error,
-        });
+        this.logger.error('Cache Write', error);
       });
     } else {
       levelInfo = plainToInstance(
@@ -152,15 +148,12 @@ export class BattlePassService {
   async mint(creatorId: number, userAddress: string, id: number, qty: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    await bp.callStatic.mint(userAddress, id, qty).catch((err) => {
-      console.log(err);
-      throw new Warn('Transaction Reverted!');
-    });
+    await bp.callStatic.mint(userAddress, id, qty);
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
     await (await bp.mint(userAddress, id, qty, fee)).wait(1);
-    await this.inventoryService.increaseBalance(
+    return await this.inventoryService.increaseBalance(
       userAddress,
       creatorId,
       id,
@@ -171,16 +164,12 @@ export class BattlePassService {
   async burn(creatorId: number, userAddress: string, id: number, qty: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    await bp.callStatic.burn(userAddress, id, qty).catch((err) => {
-      console.log(err);
-      throw new Warn('Transaction Reverted!');
-    });
-    this.inventoryService.decreaseBalance(userAddress, creatorId, id, qty);
+    await bp.callStatic.burn(userAddress, id, qty);
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
     await (await bp.burn(userAddress, id, qty, fee)).wait(1);
-    await this.inventoryService.decreaseBalance(
+    return await this.inventoryService.decreaseBalance(
       userAddress,
       creatorId,
       id,
@@ -192,10 +181,7 @@ export class BattlePassService {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const seasonId = await contract.seasonId();
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    await bp.callStatic.giveXp(seasonId, xp, userAddress).catch((err) => {
-      console.log(err);
-      throw new Warn('Transaction Reverted!');
-    });
+    await bp.callStatic.giveXp(seasonId, xp, userAddress);
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
@@ -251,12 +237,16 @@ export class BattlePassService {
       id,
       qty,
     );
-    await this.inventoryService.increaseBalance(
-      userAddress,
-      creatorId,
-      id,
-      qty,
-    );
+    if (!reward) return null;
+    if (
+      !(await this.inventoryService.increaseBalance(
+        userAddress,
+        creatorId,
+        id,
+        qty,
+      ))
+    )
+      return null;
     return { bpAddress: bp.address, reward: [reward] };
   }
 
@@ -298,6 +288,7 @@ export class BattlePassService {
       qty = rewardGiven.freeRewardQty.toNumber();
     }
     const metadata = await this.inventoryService.getMetadata(creatorId, id);
+    if (!metadata) return null;
     if (metadata.rewardType === RewardType.LOOTBOX) {
       const logs = [];
       for (let i = 0; i < rc.logs.length; i++) {
@@ -311,13 +302,13 @@ export class BattlePassService {
       const option = await contract.getLootboxOptionByIdx(id, idxOpened);
       const rewards: Reward[] = [];
       for (let y = 0; y < option[1].length; y++) {
-        rewards.push(
-          await this.inventoryService.createRewardObj(
-            creatorId,
-            option[1][y].toNumber(),
-            option[2][y].toNumber(),
-          ),
+        const reward = await this.inventoryService.createRewardObj(
+          creatorId,
+          option[1][y].toNumber(),
+          option[2][y].toNumber(),
         );
+        if (!reward) return null;
+        rewards.push();
       }
       return { bpAddress: bp.address, reward: rewards, metadata };
     } else {
@@ -326,12 +317,16 @@ export class BattlePassService {
         id,
         qty,
       );
-      await this.inventoryService.increaseBalance(
-        userAddress,
-        creatorId,
-        id,
-        qty,
-      );
+      if (!reward) return null;
+      if (
+        !(await this.inventoryService.increaseBalance(
+          userAddress,
+          creatorId,
+          id,
+          qty,
+        ))
+      )
+        return null;
       return { bpAddress: bp.address, reward: [reward], metadata };
     }
   }
