@@ -30,8 +30,8 @@ export class InventoryResolver {
       try {
         reward = await this.inventoryService.createRewardObj(
           inventory[i].creatorId,
-          inventory[i].asset,
-          inventory[i].balance,
+          inventory[i].rewardId,
+          inventory[i].qty,
         );
         defaultRewards.push(reward);
       } catch (e) {}
