@@ -45,11 +45,6 @@ import { RewardService } from 'src/reward/reward.service';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { LootdropReward, LootdropRS } from 'src/reward/reward.dto';
-import {
-  InventoryError,
-  LevelInfoError,
-  MintError,
-} from 'src/common/error.interceptor';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -124,7 +119,6 @@ export class ApiController {
       cache.rewardId,
       1,
     );
-    if (!reward) throw new InventoryError();
     return {
       creatorId,
       reward,
@@ -141,29 +135,23 @@ export class ApiController {
     const seasonId = await this.battlePassService.getSeasonId(
       mintPremPassDto.creatorId,
     );
-    if (
-      !(await this.battlePassService.mint(
-        mintPremPassDto.creatorId,
-        mintPremPassDto.userAddress,
-        seasonId,
-        1,
-      ))
-    )
-      throw new MintError();
+    await this.battlePassService.mint(
+      mintPremPassDto.creatorId,
+      mintPremPassDto.userAddress,
+      seasonId,
+      1,
+    );
     return { success: true };
   }
 
   @Post('mint/reputation')
   async mintReputation(@Body() mintRepDto: MintRepDto) {
-    if (
-      !(await this.battlePassService.mint(
-        mintRepDto.creatorId,
-        mintRepDto.userAddress,
-        REPUTATION_TOKEN_ID,
-        mintRepDto.amount,
-      ))
-    )
-      throw new MintError();
+    await this.battlePassService.mint(
+      mintRepDto.creatorId,
+      mintRepDto.userAddress,
+      REPUTATION_TOKEN_ID,
+      mintRepDto.amount,
+    );
     return { success: true };
   }
 
@@ -246,17 +234,18 @@ export class ApiController {
     const fee = await this.chainService.getMaticFeeData();
     await (await bp.newLootbox(lootboxOption, fee)).wait(1);
     const lootboxId = await bp.lootboxId();
-    if (
-      !(await this.inventoryService.addMetadata(
+    await this.inventoryService
+      .addMetadata(
         createLootboxDto.creatorId,
         lootboxId.toNumber(),
         'TODO',
         'TODO',
         'TODO',
         RewardType.LOOTBOX,
-      ))
-    )
-      throw new InventoryError();
+      )
+      .catch((error) => {
+        throw new HttpException(error.message, 500);
+      });
     return {
       success: true,
       lootboxId: lootboxId.toNumber(),
@@ -285,15 +274,12 @@ export class ApiController {
     await (await bp.newSeason(levelInfo, fee)).wait(1);
     const seasonId = (await contract.seasonId()).toNumber();
     const maxLevel = (await contract.getMaxLevel(seasonId)).toNumber();
-    if (
-      !(await this.battlePassService.getLevelInfo(
-        createSeasonDto.creatorId,
-        contract,
-        seasonId,
-        maxLevel,
-      ))
-    )
-      throw new LevelInfoError();
+    await this.battlePassService.getLevelInfo(
+      createSeasonDto.creatorId,
+      contract,
+      seasonId,
+      maxLevel,
+    );
     return { success: true };
   }
 
@@ -376,7 +362,6 @@ export class ApiController {
       createLootdropDto.rewardId,
       1,
     );
-    if (!reward) throw new InventoryError();
     const alert: LootdropReward = {
       creatorId: createLootdropDto.creatorId,
       requirements: createLootdropDto.requirements,

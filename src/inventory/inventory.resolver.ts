@@ -24,15 +24,17 @@ export class InventoryResolver {
     const inventory = await this.inventoryService.getInventory(
       parent.userAddress,
     );
-    if (!inventory) throw new Error('Inventory Not Found!');
+
     for (let i = 0; i < inventory.length; i++) {
-      const reward = await this.inventoryService.createRewardObj(
-        inventory[i].creatorId,
-        inventory[i].rewardId,
-        inventory[i].qty,
-      );
-      if (!reward) continue;
-      defaultRewards.push(reward);
+      let reward: Reward;
+      try {
+        reward = await this.inventoryService.createRewardObj(
+          inventory[i].creatorId,
+          inventory[i].rewardId,
+          inventory[i].qty,
+        );
+        defaultRewards.push(reward);
+      } catch (e) {}
     }
     return defaultRewards;
   }
@@ -67,13 +69,15 @@ export class InventoryResolver {
     for (const creatorId in temp) {
       for (const itemId in temp[creatorId]) {
         // qty is length of statuses to signify how many have been redeemed
-        const reward = await this.inventoryService.createRewardObj(
-          parseInt(creatorId),
-          parseInt(itemId),
-          temp[creatorId][itemId].length,
-        );
-        if (!reward) continue;
-        redeemed.push({ reward, status: temp[creatorId][itemId] });
+        let reward: Reward;
+        try {
+          reward = await this.inventoryService.createRewardObj(
+            parseInt(creatorId),
+            parseInt(itemId),
+            temp[creatorId][itemId].length,
+          );
+          redeemed.push({ reward, status: temp[creatorId][itemId] });
+        } catch (e) {}
       }
     }
     return redeemed;

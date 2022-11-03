@@ -12,11 +12,7 @@ import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
 import { Logger } from '@nestjs/common';
 import { Requirements } from 'src/graphql.schema';
-import {
-  ClaimRewardError,
-  InventoryError,
-  Warn,
-} from 'src/common/error.interceptor';
+import { Warn } from 'src/common/error.interceptor';
 import { RewardService } from './reward.service';
 import { LeaderboardService } from 'src/leaderboard/leaderboard.service';
 import { GetLootdropDto, LootdropRS } from './reward.dto';
@@ -59,13 +55,13 @@ export class LootboxResolver {
       );
       const rewardsInOption = [];
       for (let y = 0; y < option[0].ids.length; y++) {
-        const reward = await this.inventoryService.createRewardObj(
-          creatorId,
-          option[0].ids[y].toNumber(),
-          option[0].qtys[y].toNumber(),
+        rewardsInOption.push(
+          await this.inventoryService.createRewardObj(
+            creatorId,
+            option[0].ids[y].toNumber(),
+            option[0].qtys[y].toNumber(),
+          ),
         );
-        if (!reward) throw new InventoryError();
-        rewardsInOption.push();
       }
       allOptions.push({
         reward: rewardsInOption,
@@ -166,7 +162,6 @@ export class LootdropResolver {
       creatorId,
       lootdrop.rewardId,
     );
-    if (!metadata) throw new ClaimRewardError();
     await this.battlePassService.redeemItemHelper(
       lootdrop.rewardId,
       userAddress,
@@ -179,12 +174,11 @@ export class LootdropResolver {
 
   @ResolveField()
   async reward(@Parent() parent: GetLootdropDto) {
-    const reward = await this.inventoryService.createRewardObj(
+    return await this.inventoryService.createRewardObj(
       parent.creatorId,
       parent.rewardId,
       1,
     );
-    if (!reward) throw new InventoryError();
   }
 
   @ResolveField()

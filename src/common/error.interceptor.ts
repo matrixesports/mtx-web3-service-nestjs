@@ -23,7 +23,7 @@ export class ErrorInterceptor implements NestInterceptor {
         throwError(() => {
           // const response = context.switchToHttp().getResponse();
           if (error.constructor.name == Warn.name) {
-            this.logger.warn(error);
+            if (error?.error) this.logger.warn(error.error);
           } else if (error?.code in codes)
             return this.parseEthersError(error, this.logger);
           else this.logger.error(error);
@@ -78,37 +78,9 @@ export class ErrorInterceptor implements NestInterceptor {
 
 // user facing errors
 export class Warn extends GraphQLError {
-  constructor(message: string) {
+  error: string;
+  constructor(message: string, error?: string) {
     super(message);
-  }
-}
-
-export class InventoryError extends Error {
-  constructor() {
-    super('Inventory Failure!');
-  }
-}
-
-export class LevelInfoError extends Error {
-  constructor() {
-    super('BattlePass Info Failure!');
-  }
-}
-
-export class ClaimRewardError extends Error {
-  constructor() {
-    super('Claim Reward Failure!');
-  }
-}
-
-export class MintError extends Error {
-  constructor() {
-    super('Mint Asset Failure!');
-  }
-}
-
-export class BurnError extends Error {
-  constructor() {
-    super('Burn Asset Failure!');
+    this.error = error;
   }
 }

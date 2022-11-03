@@ -1,13 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RewardType } from 'src/graphql.schema';
 import { Reward } from 'src/reward/reward.dto';
-import { DataSource, InsertResult, Repository } from 'typeorm';
+import {
+  DataSource,
+  DeleteResult,
+  InsertResult,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { InventoryDB, MetadataDB } from './inventory.entity';
 
 @Injectable()
 export class InventoryService {
-  private readonly logger = new Logger(InventoryService.name);
   constructor(
     @InjectRepository(InventoryDB)
     private inventoryRepository: Repository<InventoryDB>,
@@ -23,7 +28,7 @@ export class InventoryService {
       .where('inv.userAddress = :userAddress', { userAddress })
       .getMany();
     if (inv) return inv;
-    return null;
+    throw new Error('UserAddress Not Found!');
   }
 
   async getAsset(userAddress: string, creatorId: number, rewardId: number) {
@@ -35,7 +40,7 @@ export class InventoryService {
       .andWhere('inv.rewardId = :rewardId', { rewardId })
       .getOne();
     if (asset) return asset;
-    return null;
+    throw new Error('Asset Not Found!');
   }
 
   async increaseBalance(
@@ -44,14 +49,20 @@ export class InventoryService {
     rewardId: number,
     qty: number,
   ) {
-    const asset = await this.getAsset(userAddress, creatorId, rewardId);
-    if (!asset) await this.newAsset(userAddress, creatorId, rewardId, qty);
+    let isnew: boolean;
+    const asset = await this.getAsset(userAddress, creatorId, rewardId).catch(
+      () => {
+        isnew = true;
+      },
+    );
+    if (isnew) await this.newAsset(userAddress, creatorId, rewardId, qty);
     else {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
+      let res: UpdateResult;
       try {
-        await queryRunner.manager
+        res = await queryRunner.manager
           .createQueryBuilder()
           .update(InventoryDB)
           .set({ qty: (asset as InventoryDB).qty + qty })
@@ -60,14 +71,15 @@ export class InventoryService {
           .andWhere('inv.rewardId = :rewardId', { rewardId })
           .execute();
         await queryRunner.commitTransaction();
-        return true;
       } catch (err) {
-        this.logger.error('Inventory Balance Failure!', err);
+        console.log({ err });
         await queryRunner.rollbackTransaction();
+        res = null;
       } finally {
         await queryRunner.release();
       }
-      return false;
+      if (res) return;
+      throw new Error('Increase Balance For Asset Failed!');
     }
   }
 
@@ -78,16 +90,16 @@ export class InventoryService {
     qty: number,
   ) {
     const asset = await this.getAsset(userAddress, creatorId, rewardId);
-    if (!asset) return false;
-    if (asset.qty - qty < 0) return false;
-    else if (asset.qty - qty == 0)
+    if (asset.qty - qty == 0)
       await this.delAsset(userAddress, creatorId, rewardId);
+    else if (asset.qty - qty <= 0) throw new Error('Inventory Failure!');
     else {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
+      let res: UpdateResult;
       try {
-        await queryRunner.manager
+        res = await queryRunner.manager
           .createQueryBuilder()
           .update(InventoryDB)
           .set({ qty: asset.qty - qty })
@@ -96,14 +108,14 @@ export class InventoryService {
           .andWhere('inv.rewardId = :rewardId', { rewardId })
           .execute();
         await queryRunner.commitTransaction();
-        return true;
       } catch (err) {
-        this.logger.error('Inventory Balance Failure!', err);
         await queryRunner.rollbackTransaction();
+        res = null;
       } finally {
         await queryRunner.release();
       }
-      return false;
+      if (res) return;
+      throw new Error('Decrease Balance For Asset Failed!');
     }
   }
 
@@ -111,8 +123,9 @@ export class InventoryService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+    let res: DeleteResult;
     try {
-      await queryRunner.manager
+      res = await queryRunner.manager
         .createQueryBuilder()
         .delete()
         .from(InventoryDB)
@@ -121,14 +134,14 @@ export class InventoryService {
         .andWhere('inv.rewardId = :rewardId', { rewardId })
         .execute();
       await queryRunner.commitTransaction();
-      return true;
     } catch (err) {
-      this.logger.error('Inventory Asset Failure!', err);
       await queryRunner.rollbackTransaction();
+      res = null;
     } finally {
       await queryRunner.release();
     }
-    return false;
+    if (res) return;
+    throw new Error('Remove Asset Failed!');
   }
 
   async newAsset(
@@ -140,8 +153,9 @@ export class InventoryService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+    let res: DeleteResult;
     try {
-      const asset = await queryRunner.manager
+      res = await queryRunner.manager
         .createQueryBuilder()
         .insert()
         .into(InventoryDB)
@@ -153,14 +167,14 @@ export class InventoryService {
         })
         .execute();
       await queryRunner.commitTransaction();
-      return asset;
     } catch (err) {
-      this.logger.error('Inventory Asset Failure!', err);
       await queryRunner.rollbackTransaction();
+      res = null;
     } finally {
       await queryRunner.release();
     }
-    return null;
+    if (res) return;
+    throw new Error('Remove Asset Failed!');
   }
 
   async getMetadata(creatorId: number, metadataId: number) {
@@ -171,7 +185,7 @@ export class InventoryService {
       .andWhere('metadata.creatorId = :creatorId', { creatorId })
       .getOne();
     if (metadata) return metadata;
-    return null;
+    throw new Error('Metadata Not Found!');
   }
 
   async addMetadata(
@@ -202,19 +216,18 @@ export class InventoryService {
         .execute();
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.logger.error('Inventory Asset Failure!', err);
       await queryRunner.rollbackTransaction();
+      metadata = null;
     } finally {
       await queryRunner.release();
     }
     if (metadata) return metadata;
-    return null;
+    throw new Error('Insert Metadata Failed!');
   }
 
   async createRewardObj(creatorId: number, id: number, qty: number) {
     if (id == 0) return null;
     const metadata = await this.getMetadata(creatorId, id);
-    if (!metadata) return null;
     return {
       id,
       qty,
