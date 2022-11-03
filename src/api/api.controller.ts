@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import {
   Body,
   Controller,
@@ -42,9 +43,17 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import * as moment from 'moment';
 import { RewardService } from 'src/reward/reward.service';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { LootdropReward, LootdropRS } from 'src/reward/reward.dto';
+import {
+  LEADERBOARD_TOP3_ALERT,
+  LevelUpAlert,
+  LEVELUP_ALERT,
+  MINT_PREMIUM_PASS,
+  NEW_LOOTDROP_ALERT,
+  NEW_SEASON_ALERT,
+} from './api.alerts';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -376,4 +385,35 @@ export class ApiController {
     this.discordClient.emit<LootdropReward>('active_lootdrop', alert);
     return { success: true };
   }
+
+  /*
+|========================| ABSTRACT |========================|
+*
+* These functions are used to generate swagger UI
+*/
+
+  @ApiOkResponse({ type: LootdropReward })
+  @Post(NEW_LOOTDROP_ALERT)
+  @ApiTags('TCP EVENTS')
+  async _mock() {}
+
+  @ApiOkResponse({ type: LevelUpAlert })
+  @Post(LEVELUP_ALERT)
+  @ApiTags('TCP EVENTS')
+  async _mock_1() {}
+
+  @ApiOkResponse({ type: LevelUpAlert })
+  @Post(MINT_PREMIUM_PASS)
+  @ApiTags('TCP EVENTS')
+  async _mock_2() {}
+
+  @ApiOkResponse({ type: LevelUpAlert })
+  @Post(LEADERBOARD_TOP3_ALERT)
+  @ApiTags('TCP EVENTS')
+  async _mock_3() {}
+
+  @ApiOkResponse({ type: LevelUpAlert })
+  @Post(NEW_SEASON_ALERT)
+  @ApiTags('TCP EVENTS')
+  async _mock_4() {}
 }

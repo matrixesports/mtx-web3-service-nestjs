@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { BattlePass } from 'abi/typechain';
 import { BattlePassDB } from './battlepass.entity';
 
@@ -12,15 +11,6 @@ export class GetBattlePassChildDto {
 
 export class GetBattlePassUserInfoChildDto extends GetBattlePassChildDto {
   userAddress: string;
-}
-
-export class LevelUpAlert {
-  @ApiProperty({ type: Number })
-  creatorId: number;
-  @ApiProperty({ type: String })
-  userAddress: string;
-  @ApiProperty({ type: Number })
-  newlvl: number;
 }
 
 /*

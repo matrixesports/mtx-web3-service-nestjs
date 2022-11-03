@@ -14,9 +14,14 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
-    .setTitle('MTX Web3 Serive API')
-    .setDescription('MTX Web3 Serive API')
+    .setTitle('MTX Web3 Service API')
+    .setDescription('API Specification & TCP Events')
+    .setContact('bo', '', 'bo@mtx.gg')
     .setVersion('1.0')
+    .addTag(
+      'TCP EVENTS',
+      'Events emitted for on-chain actions, can be consumned by other services, eg. discord bot',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   fs.writeFile('docs/api.json', JSON.stringify(document), function (err) {

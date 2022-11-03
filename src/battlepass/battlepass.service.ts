@@ -9,7 +9,6 @@ import axios from 'axios';
 import { plainToInstance } from 'class-transformer';
 import {
   GetBattlePassUserInfoChildDto,
-  LevelUpAlert,
   RequiredFieldsBody,
   RequiredFieldsResponse,
   TicketRedeemBody,
@@ -24,6 +23,7 @@ import { Warn } from 'src/common/error.interceptor';
 import { ClientProxy } from '@nestjs/microservices';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MetadataDB } from 'src/inventory/inventory.entity';
+import { LevelUpAlert } from 'src/api/api.alerts';
 
 @Injectable()
 export class BattlePassService {
