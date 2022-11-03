@@ -19,4 +19,5 @@ export class LevelUpAlert {
   oldrank: number;
   @ApiProperty({ type: Number, description: 'New Season Xp Rank' })
   newrank: number;
+  message: string;
 }

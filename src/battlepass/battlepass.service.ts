@@ -194,10 +194,11 @@ export class BattlePassService {
     await (await bp.giveXp(seasonId, xp, userAddress, fee)).wait(1);
     const newlvl = (await bp.level(userAddress, seasonId)).toNumber();
     if (lvl != newlvl)
-      this.discordClient.send<LevelUpAlert>('level_up_alert', {
+      this.discordClient.emit('level_up_alert', {
         creatorId,
         userAddress,
         newlvl,
+        message: 'test',
       });
   }
 
