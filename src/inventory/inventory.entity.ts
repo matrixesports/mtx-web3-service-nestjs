@@ -1,8 +1,8 @@
 import { RewardType } from 'src/graphql.schema';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('inventory')
-export class InventoryDB {
+export class InventoryDB extends BaseEntity {
   @PrimaryColumn({ name: 'user_address' })
   userAddress: string;
 
@@ -17,7 +17,7 @@ export class InventoryDB {
 }
 
 @Entity('metadata')
-export class MetadataDB {
+export class MetadataDB extends BaseEntity {
   @PrimaryColumn({ name: 'creator_id' })
   creatorId: number;
 

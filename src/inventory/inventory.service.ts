@@ -43,19 +43,30 @@ export class InventoryService {
     throw new Error('Asset Not Found!');
   }
 
+  async getAssetNullable(
+    userAddress: string,
+    creatorId: number,
+    rewardId: number,
+  ) {
+    const asset = await this.inventoryRepository
+      .createQueryBuilder('inv')
+      .select()
+      .where('inv.userAddress = :userAddress', { userAddress })
+      .andWhere('inv.creatorId = :creatorId', { creatorId })
+      .andWhere('inv.rewardId = :rewardId', { rewardId })
+      .getOne();
+    if (asset) return asset;
+    return null;
+  }
+
   async increaseBalance(
     userAddress: string,
     creatorId: number,
     rewardId: number,
     qty: number,
   ) {
-    let isnew: boolean;
-    const asset = await this.getAsset(userAddress, creatorId, rewardId).catch(
-      () => {
-        isnew = true;
-      },
-    );
-    if (isnew) await this.newAsset(userAddress, creatorId, rewardId, qty);
+    const asset = await this.getAssetNullable(userAddress, creatorId, rewardId);
+    if (!asset) await this.newAsset(userAddress, creatorId, rewardId, qty);
     else {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
@@ -66,9 +77,9 @@ export class InventoryService {
           .createQueryBuilder()
           .update(InventoryDB)
           .set({ qty: (asset as InventoryDB).qty + qty })
-          .where('inv.userAddress = :userAddress', { userAddress })
-          .andWhere('inv.creatorId = :creatorId', { creatorId })
-          .andWhere('inv.rewardId = :rewardId', { rewardId })
+          .where('userAddress = :userAddress', { userAddress })
+          .andWhere('creatorId = :creatorId', { creatorId })
+          .andWhere('rewardId = :rewardId', { rewardId })
           .execute();
         await queryRunner.commitTransaction();
       } catch (err) {
@@ -103,9 +114,9 @@ export class InventoryService {
           .createQueryBuilder()
           .update(InventoryDB)
           .set({ qty: asset.qty - qty })
-          .where('inv.userAddress = :userAddress', { userAddress })
-          .andWhere('inv.creatorId = :creatorId', { creatorId })
-          .andWhere('inv.rewardId = :rewardId', { rewardId })
+          .where('userAddress = :userAddress', { userAddress })
+          .andWhere('creatorId = :creatorId', { creatorId })
+          .andWhere('rewardId = :rewardId', { rewardId })
           .execute();
         await queryRunner.commitTransaction();
       } catch (err) {
@@ -129,13 +140,14 @@ export class InventoryService {
         .createQueryBuilder()
         .delete()
         .from(InventoryDB)
-        .where('inv.userAddress = :userAddress', { userAddress })
-        .andWhere('inv.creatorId = :creatorId', { creatorId })
-        .andWhere('inv.rewardId = :rewardId', { rewardId })
+        .where('userAddress = :userAddress', { userAddress })
+        .andWhere('creatorId = :creatorId', { creatorId })
+        .andWhere('rewardId = :rewardId', { rewardId })
         .execute();
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
+      console.log(err);
       res = null;
     } finally {
       await queryRunner.release();
@@ -179,10 +191,10 @@ export class InventoryService {
 
   async getMetadata(creatorId: number, metadataId: number) {
     const metadata = await this.metadataRepository
-      .createQueryBuilder('metadata')
+      .createQueryBuilder('md')
       .select()
-      .where('metadata.id = :metadataId', { metadataId })
-      .andWhere('metadata.creatorId = :creatorId', { creatorId })
+      .where('md.id = :metadataId', { metadataId })
+      .andWhere('md.creatorId = :creatorId', { creatorId })
       .getOne();
     if (metadata) return metadata;
     throw new Error('Metadata Not Found!');
