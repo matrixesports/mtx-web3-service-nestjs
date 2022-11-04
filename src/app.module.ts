@@ -19,10 +19,10 @@ import { InventoryModule } from './inventory/inventory.module';
 import { CraftingModule } from './crafting/crafting.module';
 import { GraphQLPlugin } from './common/gql.plugin';
 import { GraphQLError } from 'graphql';
-import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { LoggerModule } from 'nestjs-pino';
 import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 import { ApiModule } from './api/api.module';
+import { MicroserviceModule } from './microservice/microservice.module';
 
 @Module({
   imports: [
@@ -163,7 +163,7 @@ import { ApiModule } from './api/api.module';
     InventoryModule,
     CraftingModule,
     ApiModule,
-    LeaderboardModule,
+    MicroserviceModule,
   ],
   providers: [GraphQLPlugin],
 })

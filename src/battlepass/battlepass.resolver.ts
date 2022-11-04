@@ -13,9 +13,12 @@ import { BattlePassService } from './battlepass.service';
 import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
+  GetSeasonXpRankingDto,
 } from './battlepass.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MetadataDB } from 'src/inventory/inventory.entity';
+import { ContractCall } from 'pilum';
+import { MicroserviceService } from 'src/microservice/microservice.service';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
@@ -23,6 +26,7 @@ export class BattlePassResolver {
     private chainService: ChainService,
     private battlePassService: BattlePassService,
     private inventoryService: InventoryService,
+    private microserviceService: MicroserviceService,
   ) {}
 
   /*
@@ -66,10 +70,11 @@ export class BattlePassResolver {
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-
-    const missingFields = await this.battlePassService.checkRequiredFields(
+    const battlePassDB = await this.battlePassService.getBattlePass(creatorId);
+    const missingFields = await this.microserviceService.checkRequiredFields(
       creatorId,
       userAddress,
+      battlePassDB,
     );
     if (missingFields != null) {
       return {
@@ -94,7 +99,7 @@ export class BattlePassResolver {
         premium,
       );
       if (claimInfo.metadata.rewardType === RewardType.REDEEMABLE)
-        await this.battlePassService.redeemItemHelper(
+        await this.microserviceService.redeemItemHelper(
           claimInfo.metadata.id,
           userAddress,
           creatorId,
@@ -118,12 +123,10 @@ export class BattlePassResolver {
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    const bpAddress = await this.battlePassService.getBattlePassAddress(
-      creatorId,
-    );
+    const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(creatorId, itemId);
     await this.battlePassService.burn(creatorId, userAddress, itemId, 1);
-    await this.battlePassService.redeemItemHelper(
+    await this.microserviceService.redeemItemHelper(
       itemId,
       userAddress,
       creatorId,
@@ -245,5 +248,154 @@ export class PremiumUserResolver {
     @Parent() parent: GetBattlePassUserInfoChildDto,
   ) {
     return await this.battlePassService.getUserRewards(parent, true);
+  }
+}
+
+abstract class RankingResolver {
+  @ResolveField()
+  name(@Parent() parent: GetSeasonXpRankingDto) {
+    return parent.name;
+  }
+
+  @ResolveField()
+  pfp(@Parent() parent: GetSeasonXpRankingDto) {
+    return parent.pfp;
+  }
+
+  @ResolveField()
+  rank(@Parent() parent: GetSeasonXpRankingDto) {
+    return (
+      parent.others.findIndex(
+        (other) => other.userAddress === parent.userAddress,
+      ) + 1
+    );
+  }
+
+  @ResolveField()
+  topPercent(@Parent() parent: GetSeasonXpRankingDto) {
+    const index = parent.others.findIndex(
+      (other) => other.userAddress === parent.userAddress,
+    );
+    const topPercent =
+      100 - ((parent.others.length - index) / parent.others.length) * 100;
+    return topPercent > 0.01 ? topPercent : 0.01;
+  }
+}
+
+@Resolver('SeasonRanking')
+export class SeasonRankingResolver extends RankingResolver {
+  constructor(
+    private battlePassService: BattlePassService,
+    private microserviceService: MicroserviceService,
+  ) {
+    super();
+  }
+  @Query()
+  async getSeasonXpRanking(
+    @Args('creatorId') creatorId: number,
+    @Args('seasonId') seasonId: number,
+  ) {
+    const followers = await this.microserviceService.getFollowers(creatorId);
+    return await this.battlePassService.getSeasonInfo(
+      creatorId,
+      seasonId,
+      followers,
+    );
+  }
+}
+
+@Resolver('ReputationRanking')
+export class ReputationRankingResolver extends RankingResolver {
+  constructor(
+    private battlePassService: BattlePassService,
+    private microserviceService: MicroserviceService,
+  ) {
+    super();
+  }
+  @Query()
+  async getReputationRankings(@Args('creatorId') creatorId: number) {
+    const followers = await this.microserviceService.getFollowers(creatorId);
+    return await this.battlePassService.getReputationInfo(creatorId, followers);
+  }
+
+  @Query()
+  async getReputationRanking(
+    @Args('creatorId') creatorId: number,
+    @Context() context,
+  ) {
+    const userAddress: string = context.req.headers['user-address'];
+    const followers = await this.microserviceService.getFollowers(creatorId);
+    const repInfos = await this.battlePassService.getReputationInfo(
+      creatorId,
+      followers,
+    );
+    return repInfos.find((info) => info.userAddress === userAddress);
+  }
+}
+
+@Resolver('AllSeasonRanking')
+export class AllSeasonRankingResolver extends RankingResolver {
+  constructor(private battlePassService: BattlePassService) {
+    super();
+  }
+  @Query()
+  async getAllXpRanking(@Args('creatorId') creatorId: number) {
+    return await this.battlePassService.getAllSeasonInfo(creatorId);
+  }
+}
+
+@Resolver('LootboxOption')
+export class LootboxResolver {
+  constructor(
+    private chainService: ChainService,
+    private inventoryService: InventoryService,
+  ) {}
+
+  @Query()
+  async getLootboxOptions(
+    @Args('creatorId') creatorId: number,
+    @Args('lootboxId') lootboxId: number,
+  ) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const lengthOfOptions = await contract.getLootboxOptionsLength(lootboxId);
+    const allOptions = [];
+    const calls: ContractCall[] = [];
+
+    for (let x = 0; x < lengthOfOptions.toNumber(); x++) {
+      calls.push({
+        reference: 'getLootboxOptionByIdx',
+        address: contract.address,
+        abi: [contract.interface.getFunction('getLootboxOptionByIdx')],
+        method: 'getLootboxOptionByIdx',
+        params: [lootboxId, x],
+        value: 0,
+      });
+    }
+    const results = await this.chainService.multicall(calls);
+    for (let x = 0; x < lengthOfOptions.toNumber(); x++) {
+      //for some reason it return an array lol
+      //arrays have len 1. keep an eye out for this
+      const option = contract.interface.decodeFunctionResult(
+        'getLootboxOptionByIdx',
+        results[x].returnData[1],
+      );
+      const rewardsInOption = [];
+      for (let y = 0; y < option[0].ids.length; y++) {
+        rewardsInOption.push(
+          await this.inventoryService.createRewardObj(
+            creatorId,
+            option[0].ids[y].toNumber(),
+            option[0].qtys[y].toNumber(),
+          ),
+        );
+      }
+      allOptions.push({
+        reward: rewardsInOption,
+        probability:
+          option[0].rarityRange[1].toNumber() -
+          option[0].rarityRange[0].toNumber(),
+      });
+    }
+    return allOptions;
   }
 }

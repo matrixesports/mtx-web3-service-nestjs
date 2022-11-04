@@ -3,10 +3,87 @@ import Redis from 'ioredis';
 import { Warn } from 'src/common/error.interceptor';
 import { plainToInstance } from 'class-transformer';
 import { LootdropRS } from './reward.dto';
+import { Injectable } from '@nestjs/common';
+import { ChainService } from 'src/chain/chain.service';
+import { MicroserviceService } from 'src/microservice/microservice.service';
+import { InventoryService } from 'src/inventory/inventory.service';
+import { Requirements } from 'src/graphql.schema';
+import { BattlePassService } from 'src/battlepass/battlepass.service';
 
+@Injectable()
 export class RewardService {
-  constructor(@InjectRedis() private readonly redis: Redis) {}
+  constructor(
+    @InjectRedis() private readonly redis: Redis,
+    private chainService: ChainService,
+    private microserviceService: MicroserviceService,
+    private inventoryService: InventoryService,
+    private battlePassService: BattlePassService,
+  ) {}
 
+  async claimLootdrop(creatorId: number, userAddress: string) {
+    const lootdrop = await this.getlootdrop(creatorId);
+    // TODO UPDATE WITH CONTACTT UNFO
+    let userThreshold: number;
+    switch (lootdrop.requirements) {
+      case Requirements.ALLXP:
+        userThreshold = await this.battlePassService.getOneAllSeasonInfo(
+          creatorId,
+          userAddress,
+        );
+        if (userThreshold == null) throw new Error('On-Chain Error!');
+        if (userThreshold < lootdrop.threshold)
+          throw new Warn(
+            `You need ${
+              lootdrop.threshold - userThreshold
+            } more XP to claim this Lootdrop!`,
+          );
+        break;
+      case Requirements.REPUTATION:
+        userThreshold = await this.battlePassService.getBalance(
+          creatorId,
+          userAddress,
+          lootdrop.rewardId,
+        );
+        if (userThreshold < lootdrop.threshold)
+          throw new Warn(
+            `You need ${
+              lootdrop.threshold - userThreshold
+            } more Reputation to claim this Lootdrop!`,
+          );
+        break;
+      case Requirements.SEASONXP:
+        userThreshold = await this.battlePassService.getXp(
+          creatorId,
+          userAddress,
+        );
+        if (userThreshold < lootdrop.threshold)
+          throw new Warn(
+            `You need ${
+              lootdrop.threshold - userThreshold
+            } more XP to claim this Lootdrop!`,
+          );
+        break;
+      default:
+        throw new Error('Invalid Lootdrop!');
+    }
+    if (userThreshold < lootdrop.threshold)
+      throw new Warn('User Cannot Meet Requirements!');
+    await this.setLootdropQty(creatorId, userAddress);
+    const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
+    const metadata = await this.inventoryService.getMetadata(
+      creatorId,
+      lootdrop.rewardId,
+    );
+    await this.microserviceService.redeemItemHelper(
+      lootdrop.rewardId,
+      userAddress,
+      creatorId,
+      bpAddress,
+      metadata,
+    );
+    this.microserviceService.sendClaimLootdropAlert(creatorId, userAddress);
+    return { success: true };
+  }
   async getlootdrop(creatorId: number): Promise<LootdropRS> {
     const target = `lootdrop-${creatorId}`;
     const cache = await this.redis.get(target);

@@ -90,8 +90,3 @@ export class CreateLootdropDto implements LootdropBase, IBattlePass {
   @ApiProperty({ type: Number })
   qty: number;
 }
-
-export class ShortUrl {
-  @ApiProperty({ type: String })
-  shortUrl: string;
-}

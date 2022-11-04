@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import {
   Body,
   Controller,
@@ -7,7 +6,6 @@ import {
   Param,
   Post,
   UseFilters,
-  Inject,
 } from '@nestjs/common';
 import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
 import {
@@ -25,9 +23,6 @@ import {
 } from 'src/common/filters';
 import { CraftingService } from 'src/crafting/crafting.service';
 import { RewardType } from 'src/graphql.schema';
-import axios from 'axios';
-import { ConfigService } from '@nestjs/config';
-import { ClientProxy } from '@nestjs/microservices';
 import {
   CreateLootboxDto,
   CreateLootdropDto,
@@ -37,23 +32,15 @@ import {
   MintRepDto,
   MintXpDto,
   REPUTATION_TOKEN_ID,
-  ShortUrl,
 } from './api.dto';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import * as moment from 'moment';
 import { RewardService } from 'src/reward/reward.service';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse } from '@nestjs/swagger';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { LootdropReward, LootdropRS } from 'src/reward/reward.dto';
-import {
-  LEADERBOARD_TOP3_ALERT,
-  LevelUpAlert,
-  LEVELUP_ALERT,
-  MINT_PREMIUM_PASS,
-  NEW_LOOTDROP_ALERT,
-  NEW_SEASON_ALERT,
-} from './api.alerts';
+import { MicroserviceService } from 'src/microservice/microservice.service';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -65,9 +52,7 @@ export class ApiController {
     @InjectRedis() private readonly redis: Redis,
     private inventoryService: InventoryService,
     private rewardService: RewardService,
-    private config: ConfigService,
-    @Inject('TWITCH_SERVICE') private twitchClient: ClientProxy,
-    @Inject('DISCORD_SERVICE') private discordClient: ClientProxy,
+    private microserviceService: MicroserviceService,
   ) {}
 
   @Get('battlepass/check/:creatorId')
@@ -340,14 +325,8 @@ export class ApiController {
 
   @Post('create/lootdrop')
   async createLootdrop(@Body() createLootdropDto: CreateLootdropDto) {
-    const urlpayload = {
-      creatorId: createLootdropDto.creatorId,
-    };
-    const {
-      data: { shortUrl },
-    } = await axios.post<ShortUrl>(
-      `${this.config.get<string>('microservice.url.url')}/createurl`,
-      urlpayload,
+    const shortUrl = await this.microserviceService.createUrl(
+      createLootdropDto.creatorId,
     );
     const start = moment
       .utc(createLootdropDto.start)
@@ -380,40 +359,7 @@ export class ApiController {
       end: end.toString(),
       url: shortUrl,
     };
-
-    this.twitchClient.emit<LootdropReward>('drop-activated', alert);
-    this.discordClient.emit<LootdropReward>('active_lootdrop', alert);
+    this.microserviceService.sendNewLootdropAlert(alert);
     return { success: true };
   }
-
-  /*
-|========================| ABSTRACT |========================|
-*
-* These functions are used to generate swagger UI
-*/
-
-  @ApiOkResponse({ type: LootdropReward })
-  @Post(NEW_LOOTDROP_ALERT)
-  @ApiTags('TCP EVENTS')
-  async _mock() {}
-
-  @ApiOkResponse({ type: LevelUpAlert })
-  @Post(LEVELUP_ALERT)
-  @ApiTags('TCP EVENTS')
-  async _mock_1() {}
-
-  @ApiOkResponse({ type: LevelUpAlert })
-  @Post(MINT_PREMIUM_PASS)
-  @ApiTags('TCP EVENTS')
-  async _mock_2() {}
-
-  @ApiOkResponse({ type: LevelUpAlert })
-  @Post(LEADERBOARD_TOP3_ALERT)
-  @ApiTags('TCP EVENTS')
-  async _mock_3() {}
-
-  @ApiOkResponse({ type: LevelUpAlert })
-  @Post(NEW_SEASON_ALERT)
-  @ApiTags('TCP EVENTS')
-  async _mock_4() {}
 }

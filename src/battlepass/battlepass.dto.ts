@@ -13,37 +13,16 @@ export class GetBattlePassUserInfoChildDto extends GetBattlePassChildDto {
   userAddress: string;
 }
 
-/*
-|========================| DEFINITIONS |========================|
-*/
-
-export interface TicketRedeemBody {
+export class GetSeasonXpRankingDto {
+  userAddress: string;
+  id: string;
+  pfp: string;
   name: string;
-  description: string;
-  image: string;
-  creatorId: number;
-  itemId: number;
-  userAddress: string;
-  itemAddress: string;
+  total: number;
+  others: { total: number; userAddress: string }[];
 }
 
-export interface TwitchRedeemBody {
-  name: string;
-  description: string;
-  image: string;
-  creatorId: number;
-  itemId: number;
+export type Ranking = {
   userAddress: string;
-  itemAddress: string;
-}
-
-export interface RequiredFieldsBody {
-  userAddress: string;
-  required_user_social_options: string[];
-  required_user_payment_options: string[];
-}
-
-export interface RequiredFieldsResponse {
-  missing_user_social_options: string[];
-  missing_user_payment_options: string[];
-}
+  total: number;
+};

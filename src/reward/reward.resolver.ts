@@ -7,83 +7,15 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { ContractCall } from 'pilum';
-import { BattlePassService } from 'src/battlepass/battlepass.service';
-import { ChainService } from 'src/chain/chain.service';
-import { Inject, Logger } from '@nestjs/common';
-import { Requirements } from 'src/graphql.schema';
-import { Warn } from 'src/common/error.interceptor';
 import { RewardService } from './reward.service';
-import { LeaderboardService } from 'src/leaderboard/leaderboard.service';
 import { GetLootdropDto, LootdropRS } from './reward.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
-import { ClientProxy } from '@nestjs/microservices';
-
-@Resolver('LootboxOption')
-export class LootboxResolver {
-  constructor(
-    private chainService: ChainService,
-    private inventoryService: InventoryService,
-  ) {}
-
-  @Query()
-  async getLootboxOptions(
-    @Args('creatorId') creatorId: number,
-    @Args('lootboxId') lootboxId: number,
-  ) {
-    const contract = await this.chainService.getBattlePassContract(creatorId);
-    const lengthOfOptions = await contract.getLootboxOptionsLength(lootboxId);
-    const allOptions = [];
-    const calls: ContractCall[] = [];
-
-    for (let x = 0; x < lengthOfOptions.toNumber(); x++) {
-      calls.push({
-        reference: 'getLootboxOptionByIdx',
-        address: contract.address,
-        abi: [contract.interface.getFunction('getLootboxOptionByIdx')],
-        method: 'getLootboxOptionByIdx',
-        params: [lootboxId, x],
-        value: 0,
-      });
-    }
-    const results = await this.chainService.multicall(calls);
-    for (let x = 0; x < lengthOfOptions.toNumber(); x++) {
-      //for some reason it return an array lol
-      //arrays have len 1. keep an eye out for this
-      const option = contract.interface.decodeFunctionResult(
-        'getLootboxOptionByIdx',
-        results[x].returnData[1],
-      );
-      const rewardsInOption = [];
-      for (let y = 0; y < option[0].ids.length; y++) {
-        rewardsInOption.push(
-          await this.inventoryService.createRewardObj(
-            creatorId,
-            option[0].ids[y].toNumber(),
-            option[0].qtys[y].toNumber(),
-          ),
-        );
-      }
-      allOptions.push({
-        reward: rewardsInOption,
-        probability:
-          option[0].rarityRange[1].toNumber() -
-          option[0].rarityRange[0].toNumber(),
-      });
-    }
-    return allOptions;
-  }
-}
 
 @Resolver('Lootdrop')
 export class LootdropResolver {
-  private readonly logger = new Logger(LootdropResolver.name);
   constructor(
-    private battlePassService: BattlePassService,
     private rewardService: RewardService,
-    private leaderboardService: LeaderboardService,
     private inventoryService: InventoryService,
-    @Inject('TWITCH_SERVICE') private twitchService: ClientProxy,
   ) {}
 
   @Query('getLootdrop')
@@ -97,86 +29,7 @@ export class LootdropResolver {
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    const lootdrop = await this.rewardService.getlootdrop(creatorId);
-    const missingFields = await this.battlePassService.checkRequiredFields(
-      creatorId,
-      userAddress,
-    );
-    if (missingFields != null) {
-      return {
-        success: true,
-        missingFields: {
-          payment: missingFields.missing_user_payment_options,
-          social: missingFields.missing_user_social_options,
-        },
-      };
-    }
-    let userThreshold: number;
-    switch (lootdrop.requirements) {
-      case Requirements.ALLXP:
-        userThreshold = await this.leaderboardService.getOneAllSeasonInfo(
-          creatorId,
-          userAddress,
-        );
-        if (userThreshold == null) throw new Error('On-Chain Error!');
-        if (userThreshold < lootdrop.threshold)
-          throw new Warn(
-            `You need ${
-              lootdrop.threshold - userThreshold
-            } more XP to claim this Lootdrop!`,
-          );
-        break;
-      case Requirements.REPUTATION:
-        userThreshold = await this.battlePassService.getBalance(
-          creatorId,
-          userAddress,
-          lootdrop.rewardId,
-        );
-        if (userThreshold < lootdrop.threshold)
-          throw new Warn(
-            `You need ${
-              lootdrop.threshold - userThreshold
-            } more Reputation to claim this Lootdrop!`,
-          );
-        break;
-      case Requirements.SEASONXP:
-        userThreshold = await this.battlePassService.getXp(
-          creatorId,
-          userAddress,
-        );
-        if (userThreshold < lootdrop.threshold)
-          throw new Warn(
-            `You need ${
-              lootdrop.threshold - userThreshold
-            } more XP to claim this Lootdrop!`,
-          );
-        break;
-      default:
-        throw new Error('Invalid Lootdrop!');
-    }
-    if (userThreshold < lootdrop.threshold)
-      throw new Warn('User Cannot Meet Requirements!');
-    await this.rewardService.setLootdropQty(creatorId, userAddress);
-    const bpAddress = await this.battlePassService.getBattlePassAddress(
-      creatorId,
-    );
-    const metadata = await this.inventoryService.getMetadata(
-      creatorId,
-      lootdrop.rewardId,
-    );
-    await this.battlePassService.redeemItemHelper(
-      lootdrop.rewardId,
-      userAddress,
-      creatorId,
-      bpAddress,
-      metadata,
-    );
-    const redeemInfo = {
-      userAddress,
-      creatorId,
-    };
-    this.twitchService.emit('lootdrop-claimed', redeemInfo);
-    return { success: true };
+    return this.rewardService.claimLootdrop(creatorId, userAddress);
   }
 
   @ResolveField()

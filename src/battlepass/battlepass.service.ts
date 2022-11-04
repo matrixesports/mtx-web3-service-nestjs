@@ -1,40 +1,32 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LevelInfo, Reward, RewardType } from 'src/graphql.schema';
 import { DataSource, Repository } from 'typeorm';
-import { parse } from 'postgres-array';
 import { BattlePassDB } from './battlepass.entity';
-import axios from 'axios';
 import { plainToInstance } from 'class-transformer';
 import {
   GetBattlePassUserInfoChildDto,
-  RequiredFieldsBody,
-  RequiredFieldsResponse,
-  TicketRedeemBody,
-  TwitchRedeemBody,
+  GetSeasonXpRankingDto,
 } from './battlepass.dto';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
-import { BattlePass } from 'abi/typechain';
+import { BattlePass, BattlePass__factory } from 'abi/typechain';
 import { Warn } from 'src/common/error.interceptor';
-import { ClientProxy } from '@nestjs/microservices';
 import { InventoryService } from 'src/inventory/inventory.service';
-import { MetadataDB } from 'src/inventory/inventory.entity';
-import { LevelUpAlert } from 'src/api/api.alerts';
+import { MicroserviceService } from 'src/microservice/microservice.service';
 
 @Injectable()
 export class BattlePassService {
   private readonly logger = new Logger(BattlePassService.name);
+  REPUTATION_ID = 1000;
   constructor(
-    private configService: ConfigService,
     @InjectRepository(BattlePassDB)
     private battlePassRepository: Repository<BattlePassDB>,
-    @Inject('DISCORD_SERVICE') private discordClient: ClientProxy,
     @InjectRedis() private readonly redis: Redis,
     private inventoryService: InventoryService,
+    private microserviceService: MicroserviceService,
     private chainService: ChainService,
     private dataSource: DataSource,
   ) {}
@@ -190,16 +182,19 @@ export class BattlePassService {
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
-    const lvl = (await bp.level(userAddress, seasonId)).toNumber();
+
+    const oldlvl = (await bp.level(userAddress, seasonId)).toNumber();
     await (await bp.giveXp(seasonId, xp, userAddress, fee)).wait(1);
     const newlvl = (await bp.level(userAddress, seasonId)).toNumber();
-    if (lvl != newlvl)
-      this.discordClient.emit('level_up_alert', {
+
+    if (oldlvl != newlvl) {
+      this.microserviceService.sendLevelUpAlert(
         creatorId,
         userAddress,
+        oldlvl,
         newlvl,
-        message: 'test',
-      });
+      );
+    }
   }
 
   async claimReward(
@@ -328,14 +323,156 @@ export class BattlePassService {
     }
   }
 
-  async getBattlePassAddress(creatorId: number) {
+  async getReputationInfo(creatorId: number, followers: any[]) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
-    const bp = this.chainService.getSignerContract(contract) as BattlePass;
-    return bp.address;
+    const addresses = [];
+    const ids = [];
+    for (let i = 0; i < followers.length; i++) {
+      const follower = followers[i];
+      addresses.push(follower.userAddress);
+      ids.push(this.REPUTATION_ID);
+    }
+    const results = await contract.balanceOfBatch(addresses, ids);
+    const dtos: GetSeasonXpRankingDto[] = [];
+    const others: { total: number; userAddress: string }[] = [];
+    for (let i = 0; i < results.length; i++) {
+      const follower = followers[i];
+      others.push({
+        total: results[i].toNumber(),
+        userAddress: follower.userAddress,
+      });
+      dtos.push({
+        id: follower.id,
+        userAddress: follower.userAddress,
+        pfp: follower?.pfp,
+        name: follower?.name,
+        total: results[i].toNumber(),
+        others,
+      });
+    }
+    others.sort((a, b) => b.total - a.total);
+    return dtos;
   }
-  /*
-|========================| REPOSITORY |========================|
-*/
+
+  async getSeasonInfo(creatorId: number, seasonId: number, followers: any[]) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const iface = BattlePass__factory.createInterface();
+    const fragment = iface.getFunction('userInfo');
+    const calls: ContractCall[] = [];
+    for (let i = 0; i < followers.length; i++) {
+      const follower = followers[i];
+      calls.push({
+        reference: 'userInfo',
+        address: contract.address,
+        abi: [fragment],
+        method: 'userInfo',
+        params: [follower.userAddress, seasonId],
+        value: 0,
+      });
+    }
+    const results = await this.chainService.multicall(calls);
+    if (results == null) return null;
+    const dtos: GetSeasonXpRankingDto[] = [];
+    const others: { total: number; userAddress: string }[] = [];
+    for (let i = 0; i < results.length; i++) {
+      const follower = followers[i];
+      const userInfo = iface.decodeFunctionResult(
+        'userInfo',
+        results[i].returnData[1],
+      );
+      others.push({
+        total: userInfo.xp.toNumber(),
+        userAddress: follower.userAddress,
+      });
+      dtos.push({
+        id: follower.id,
+        userAddress: follower.userAddress,
+        pfp: follower?.pfp,
+        name: follower?.name,
+        total: userInfo.xp.toNumber(),
+        others,
+      });
+    }
+    others.sort((a, b) => b.total - a.total);
+    return dtos;
+  }
+
+  async getAllSeasonInfo(creatorId: number) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const followers = await this.microserviceService.getFollowers(creatorId);
+    const iface = BattlePass__factory.createInterface();
+    const fragment = iface.getFunction('userInfo');
+    const seasonId = (await contract.seasonId()).toNumber();
+    const calls: ContractCall[] = [];
+    for (let i = 0; i < followers.length; i++) {
+      const follower = followers[i];
+      for (let season = 1; season <= seasonId; season++) {
+        calls.push({
+          reference: 'userInfo',
+          address: contract.address,
+          abi: [fragment],
+          method: 'userInfo',
+          params: [follower.userAddress, season],
+          value: 0,
+        });
+      }
+    }
+    const results = await this.chainService.multicall(calls);
+    if (results == null) return null;
+    const dtos: GetSeasonXpRankingDto[] = [];
+    const others: { total: number; userAddress: string }[] = [];
+    for (let i = 0; i < followers.length; i++) {
+      const follower = followers[i];
+      let total = 0;
+      for (let season = 0; season < seasonId; season++) {
+        const userInfo = iface.decodeFunctionResult(
+          'userInfo',
+          results[i * seasonId + season].returnData[1],
+        );
+        total += userInfo.xp.toNumber();
+      }
+      others.push({ total, userAddress: follower.userAddress });
+      dtos.push({
+        id: follower.id,
+        userAddress: follower.userAddress,
+        pfp: follower?.pfp,
+        name: follower?.name,
+        total,
+        others,
+      });
+    }
+    others.sort((a, b) => b.total - a.total);
+    return dtos;
+  }
+
+  async getOneAllSeasonInfo(creatorId: number, userAddress: string) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const iface = BattlePass__factory.createInterface();
+    const fragment = iface.getFunction('userInfo');
+    const seasonId = (await contract.seasonId()).toNumber();
+    const calls: ContractCall[] = [];
+    for (let season = 1; season <= seasonId; season++) {
+      calls.push({
+        reference: 'userInfo',
+        address: contract.address,
+        abi: [fragment],
+        method: 'userInfo',
+        params: [userAddress, season],
+        value: 0,
+      });
+    }
+    const results = await this.chainService.multicall(calls);
+    let xp = 0;
+    if (results == null) return null;
+    for (let i = 0; i < seasonId; i++) {
+      const userInfo = iface.decodeFunctionResult(
+        'userInfo',
+        results[i].returnData[1],
+      );
+      xp += userInfo.xp.toNumber();
+    }
+    return xp;
+  }
 
   async getBattlePass(creatorId: number) {
     const bp = await this.battlePassRepository
@@ -386,109 +523,5 @@ export class BattlePassService {
     }
     if (bp) return bp;
     throw new Error('Insert BattlePass Failed!');
-  }
-
-  /*
-|========================| SERVICE CALLS |========================|
-*/
-
-  /**
-   * check what contact info is needed for a season
-   * only called for level 1
-   * @param creatorId
-   * @param userAddress
-   * @param level
-   */
-  async checkRequiredFields(
-    creatorId: number,
-    userAddress: string,
-  ): Promise<RequiredFieldsResponse> {
-    const battlePassDB = await this.getBattlePass(creatorId);
-    if (
-      battlePassDB.required_user_social_options.length == 0 &&
-      battlePassDB.required_user_payment_options.length == 0
-    )
-      return;
-    //convert string to array
-    const required_user_social_options = parse(
-      battlePassDB.required_user_social_options,
-      (value) => value,
-    );
-    const required_user_payment_options = parse(
-      battlePassDB.required_user_payment_options,
-      (value) => value,
-    );
-    const requiredFieldsBody: RequiredFieldsBody = {
-      userAddress,
-      required_user_social_options,
-      required_user_payment_options,
-    };
-    const missingRedeemFields = await axios.post(
-      `${this.configService.get<string>(
-        'microservice.user.url',
-      )}/api/user/missingRedeemFields`,
-      requiredFieldsBody,
-    );
-    if (
-      missingRedeemFields.data.missing_user_payment_options.length != 0 ||
-      missingRedeemFields.data.missing_user_social_options.length != 0
-    ) {
-      return {
-        missing_user_payment_options:
-          missingRedeemFields.data.missing_user_payment_options,
-        missing_user_social_options:
-          missingRedeemFields.data.missing_user_social_options,
-      };
-    }
-    return null;
-  }
-
-  /**
-   * helper when item is redeemed
-   * @param itemId
-   * @param userAddress
-   * @param creatorId
-   * @param address
-   * @param metadata
-   */
-  async redeemItemHelper(
-    itemId: number,
-    userAddress: string,
-    creatorId: number,
-    address: string,
-    metadata: MetadataDB,
-  ) {
-    const ticketRedeemBody: TicketRedeemBody = {
-      name: metadata.name,
-      description: metadata.description,
-      image: metadata.image,
-      creatorId: creatorId,
-      itemId: itemId,
-      userAddress: userAddress,
-      itemAddress: address,
-    };
-    await axios.post(
-      `${this.configService.get<string>(
-        'microservice.ticket.url',
-      )}/api/ticket/redemption`,
-      ticketRedeemBody,
-    );
-    const twitchRedeemBody: TwitchRedeemBody = {
-      ...metadata,
-      creatorId: creatorId,
-      itemId: itemId,
-      userAddress: userAddress,
-      itemAddress: address,
-    };
-    try {
-      await axios.post(
-        `${this.configService.get<string>(
-          'microservice.twitch.url',
-        )}/redemptions/redemption`,
-        twitchRedeemBody,
-      );
-    } catch (e) {
-      console.log('Twitch Service Failed');
-    }
   }
 }

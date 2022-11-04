@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import {
+  AllSeasonRankingResolver,
   BattlePassResolver,
+  LootboxResolver,
   PremiumUserResolver,
+  ReputationRankingResolver,
+  SeasonRankingResolver,
   UserResolver,
 } from './battlepass.resolver';
 import { BattlePassService } from './battlepass.service';
@@ -10,6 +14,8 @@ import { BattlePassDB } from './battlepass.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { InventoryModule } from 'src/inventory/inventory.module';
+import { ChainModule } from 'src/chain/chain.module';
+import { MicroserviceModule } from 'src/microservice/microservice.module';
 
 @Module({
   providers: [
@@ -17,24 +23,16 @@ import { InventoryModule } from 'src/inventory/inventory.module';
     BattlePassService,
     UserResolver,
     PremiumUserResolver,
+    AllSeasonRankingResolver,
+    SeasonRankingResolver,
+    ReputationRankingResolver,
+    LootboxResolver,
   ],
   imports: [
+    ChainModule,
+    MicroserviceModule,
     TypeOrmModule.forFeature([BattlePassDB]),
     InventoryModule,
-    ClientsModule.registerAsync([
-      {
-        name: 'DISCORD_SERVICE',
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (config: ConfigService) => ({
-          transport: Transport.TCP,
-          options: {
-            host: config.get<string>('microservice.discord.host'),
-            port: config.get<number>('microservice.discord.port'),
-          },
-        }),
-      },
-    ]),
   ],
   controllers: [],
   exports: [BattlePassService],
