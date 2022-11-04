@@ -10,13 +10,14 @@ import {
 import { ContractCall } from 'pilum';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { Requirements } from 'src/graphql.schema';
 import { Warn } from 'src/common/error.interceptor';
 import { RewardService } from './reward.service';
 import { LeaderboardService } from 'src/leaderboard/leaderboard.service';
 import { GetLootdropDto, LootdropRS } from './reward.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Resolver('LootboxOption')
 export class LootboxResolver {
@@ -82,6 +83,7 @@ export class LootdropResolver {
     private rewardService: RewardService,
     private leaderboardService: LeaderboardService,
     private inventoryService: InventoryService,
+    @Inject('TWITCH_SERVICE') private twitchService: ClientProxy,
   ) {}
 
   @Query('getLootdrop')
@@ -169,6 +171,11 @@ export class LootdropResolver {
       bpAddress,
       metadata,
     );
+    const redeemInfo = {
+      userAddress,
+      creatorId,
+    };
+    this.twitchService.emit('lootdrop-claimed', redeemInfo);
     return { success: true };
   }
 
