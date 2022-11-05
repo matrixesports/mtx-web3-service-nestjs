@@ -41,6 +41,7 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { LootdropReward, LootdropRS } from 'src/reward/reward.dto';
 import { MicroserviceService } from 'src/microservice/microservice.service';
+import { PremPassAlert } from 'src/microservice/microservice.dto';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -134,6 +135,16 @@ export class ApiController {
       mintPremPassDto.userAddress,
       seasonId,
       1,
+    );
+    const streaks = await this.battlePassService.getStreaks(
+      mintPremPassDto.creatorId,
+      mintPremPassDto.userAddress,
+    );
+    this.microserviceService.sendPremPassAlert(
+      mintPremPassDto.creatorId,
+      mintPremPassDto.userAddress,
+      seasonId,
+      streaks,
     );
     return { success: true };
   }

@@ -234,6 +234,22 @@ export class BattlePassService {
     }
   }
 
+  async getStreaks(creatorId: number, userAddress: string) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const seasonId = (await contract.seasonId()).toNumber();
+    const addresses = [];
+    const ids = [];
+    for (let i = 1; i <= seasonId; i++) {
+      addresses.push(userAddress);
+      ids.push(i);
+    }
+    const results = await contract.balanceOfBatch(addresses, ids);
+    let counter = 0;
+    for (let i = 0; i < results.length; i++) {
+      counter = results[i].toNumber() != 0 ? counter++ : 0;
+    }
+    return counter;
+  }
   async claimReward(
     creatorId: number,
     userAddress: string,

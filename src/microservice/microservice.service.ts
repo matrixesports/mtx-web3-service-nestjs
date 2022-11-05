@@ -10,9 +10,10 @@ import {
   LEADERBOARD_ALERT,
   LevelUpAlert,
   LEVELUP_ALERT,
-  MINT_PREMIUM_PASS,
   NEW_LOOTDROP_ALERT,
   NEW_SEASON_ALERT,
+  PremPassAlert,
+  PREM_PASS_ALERT,
   RequiredFieldsBody,
   RequiredFieldsResponse,
   ShortUrl,
@@ -63,6 +64,21 @@ export class MicroserviceService {
 
   sendLeaderboardAlert(alert: LeaderboardAlert) {
     this.discordClient.emit<LeaderboardAlert>(LEADERBOARD_ALERT, alert);
+  }
+
+  sendPremPassAlert(
+    creatorId: number,
+    userAddress: string,
+    seasonId: number,
+    streaks: number,
+  ) {
+    const alert: PremPassAlert = {
+      creatorId,
+      userAddress,
+      seasonId,
+      streaks,
+    };
+    this.discordClient.emit<PremPassAlert>(PREM_PASS_ALERT, alert);
   }
 
   async createUrl(creatorId: number) {
@@ -230,8 +246,8 @@ export class MockController {
   @ApiTags('TCP EVENTS')
   async mock_2() {}
 
-  @ApiOkResponse({ type: LevelUpAlert })
-  @Post(MINT_PREMIUM_PASS)
+  @ApiOkResponse({ type: PremPassAlert })
+  @Post(PREM_PASS_ALERT)
   @ApiTags('TCP EVENTS')
   async mock_3() {}
 

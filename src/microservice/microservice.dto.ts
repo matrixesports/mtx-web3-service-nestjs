@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export const LEVELUP_ALERT = 'levelup';
 export const NEW_LOOTDROP_ALERT = 'new-lootdrop';
-export const MINT_PREMIUM_PASS = 'mint-prem-pass';
+export const PREM_PASS_ALERT = 'premium-pass';
 export const LEADERBOARD_ALERT = 'leaderboard';
 export const NEW_SEASON_ALERT = 'new-season';
 export const CLAIM_LOOTDROP_ALERT = 'claim-lootdrop';
@@ -42,6 +42,20 @@ export class LeaderboardAlert {
   pfp?: string;
   @ApiProperty({ type: String, required: false })
   name?: string;
+}
+
+export class PremPassAlert {
+  @ApiProperty({ type: Number })
+  creatorId: number;
+  @ApiProperty({ type: String })
+  userAddress: string;
+  @ApiProperty({ type: Number })
+  seasonId: number;
+  @ApiProperty({
+    type: Number,
+    description: 'Number of consecutive premium passes',
+  })
+  streaks: number;
 }
 
 export class ShortUrl {
