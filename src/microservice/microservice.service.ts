@@ -16,6 +16,7 @@ import {
   PREM_PASS_ALERT,
   RequiredFieldsBody,
   RequiredFieldsResponse,
+  SeasonAlert,
   ShortUrl,
   TicketRedeemBody,
   TwitchRedeemBody,
@@ -79,6 +80,10 @@ export class MicroserviceService {
       streaks,
     };
     this.discordClient.emit<PremPassAlert>(PREM_PASS_ALERT, alert);
+  }
+
+  sendSeasonAlert(alert: SeasonAlert) {
+    this.discordClient.emit<SeasonAlert>(NEW_SEASON_ALERT, alert);
   }
 
   async createUrl(creatorId: number) {
@@ -256,7 +261,7 @@ export class MockController {
   @ApiTags('TCP EVENTS')
   async mock_4() {}
 
-  @ApiOkResponse({ type: LevelUpAlert })
+  @ApiOkResponse({ type: SeasonAlert })
   @Post(NEW_SEASON_ALERT)
   @ApiTags('TCP EVENTS')
   async mock_5() {}

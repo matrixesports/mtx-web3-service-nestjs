@@ -58,6 +58,23 @@ export class PremPassAlert {
   streaks: number;
 }
 
+export class SeasonAlert {
+  @ApiProperty({ type: Number })
+  creatorId: number;
+  @ApiProperty({ type: Number })
+  seasonId: number;
+  @ApiProperty({ type: Number })
+  price: string;
+  @ApiProperty({ type: String })
+  currency: string;
+  @ApiProperty({ type: String, description: 'Name of the BattlePass' })
+  name: string;
+  @ApiProperty({ type: String, description: 'Description of the BattlePass' })
+  description: string;
+  @ApiProperty({ type: String, description: 'End date of the BattlePass' })
+  end: string;
+}
+
 export class ShortUrl {
   shortUrl: string;
 }

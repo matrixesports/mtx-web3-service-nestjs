@@ -41,7 +41,7 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { LootdropReward, LootdropRS } from 'src/reward/reward.dto';
 import { MicroserviceService } from 'src/microservice/microservice.service';
-import { PremPassAlert } from 'src/microservice/microservice.dto';
+import { PremPassAlert, SeasonAlert } from 'src/microservice/microservice.dto';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -285,6 +285,19 @@ export class ApiController {
       seasonId,
       maxLevel,
     );
+    const battlePassDB = await this.battlePassService.getBattlePass(
+      createSeasonDto.creatorId,
+    );
+    const alert: SeasonAlert = {
+      creatorId: createSeasonDto.creatorId,
+      seasonId,
+      price: battlePassDB.price,
+      currency: battlePassDB.currency,
+      name: battlePassDB.name,
+      description: battlePassDB.description,
+      end: battlePassDB.end_date.toString(),
+    };
+    this.microserviceService.sendSeasonAlert(alert);
     return { success: true };
   }
 
