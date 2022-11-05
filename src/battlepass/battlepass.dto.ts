@@ -13,7 +13,7 @@ export class GetBattlePassUserInfoChildDto extends GetBattlePassChildDto {
   userAddress: string;
 }
 
-export class GetSeasonXpRankingDto {
+export class GetRankingDto {
   userAddress: string;
   id: string;
   pfp: string;

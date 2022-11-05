@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export const LEVELUP_ALERT = 'levelup';
 export const NEW_LOOTDROP_ALERT = 'new-lootdrop';
 export const MINT_PREMIUM_PASS = 'mint-prem-pass';
-export const LEADERBOARD_TOP3_ALERT = 'leaderboard-top3';
+export const LEADERBOARD_ALERT = 'leaderboard';
 export const NEW_SEASON_ALERT = 'new-season';
 export const CLAIM_LOOTDROP_ALERT = 'claim-lootdrop';
 
@@ -23,6 +23,25 @@ export class ClaimLootdropAlert {
   creatorId: number;
   @ApiProperty({ type: String })
   userAddress: string;
+}
+
+export class LeaderboardAlert {
+  @ApiProperty({ type: Number })
+  creatorId: number;
+  @ApiProperty({ type: String })
+  userAddress: string;
+  @ApiProperty({ type: Number })
+  oldXpRank: number;
+  @ApiProperty({ type: Number })
+  newXpRank: number;
+  @ApiProperty({ type: Number })
+  oldRepRank: number;
+  @ApiProperty({ type: Number })
+  newRepRank: number;
+  @ApiProperty({ type: String, required: false })
+  pfp?: string;
+  @ApiProperty({ type: String, required: false })
+  name?: string;
 }
 
 export class ShortUrl {
@@ -58,4 +77,11 @@ export class RequiredFieldsBody {
 export class RequiredFieldsResponse {
   missing_user_social_options: string[];
   missing_user_payment_options: string[];
+}
+
+export class Follower {
+  id: string;
+  pfp?: string;
+  name?: string;
+  userAddress: string;
 }

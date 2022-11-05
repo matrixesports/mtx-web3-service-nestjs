@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MicroserviceService } from './microservice.service';
+import { MicroserviceService, MockController } from './microservice.service';
 
 @Module({
   providers: [MicroserviceService],
@@ -34,5 +34,6 @@ import { MicroserviceService } from './microservice.service';
     ]),
   ],
   exports: [MicroserviceService],
+  controllers: [MockController],
 })
 export class MicroserviceModule {}

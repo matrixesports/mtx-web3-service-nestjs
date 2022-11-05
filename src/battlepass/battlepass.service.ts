@@ -1,13 +1,10 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LevelInfo, Reward, RewardType } from 'src/graphql.schema';
 import { DataSource, Repository } from 'typeorm';
 import { BattlePassDB } from './battlepass.entity';
 import { plainToInstance } from 'class-transformer';
-import {
-  GetBattlePassUserInfoChildDto,
-  GetSeasonXpRankingDto,
-} from './battlepass.dto';
+import { GetBattlePassUserInfoChildDto, GetRankingDto } from './battlepass.dto';
 import { ContractCall } from 'pilum';
 import { ChainService } from 'src/chain/chain.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
@@ -16,6 +13,7 @@ import { BattlePass, BattlePass__factory } from 'abi/typechain';
 import { Warn } from 'src/common/error.interceptor';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MicroserviceService } from 'src/microservice/microservice.service';
+import { Follower, LeaderboardAlert } from 'src/microservice/microservice.dto';
 
 @Injectable()
 export class BattlePassService {
@@ -173,7 +171,7 @@ export class BattlePassService {
 
   async giveXp(creatorId: number, userAddress: string, xp: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
-    const seasonId = await contract.seasonId();
+    const seasonId = (await contract.seasonId()).toNumber();
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     await bp.callStatic.giveXp(seasonId, xp, userAddress).catch((err) => {
       console.log(err);
@@ -183,10 +181,36 @@ export class BattlePassService {
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
 
+    const followers = await this.microserviceService.getFollowers(creatorId);
+    const oldXpRankings: GetRankingDto = await this.getSeasonRanking(
+      creatorId,
+      seasonId,
+      followers,
+      userAddress,
+    );
+    const oldXpRank = this.getRank(oldXpRankings);
+    const oldRepRankings: GetRankingDto = await this.getReputationRanking(
+      creatorId,
+      followers,
+      userAddress,
+    );
+    const oldRepRank = this.getRank(oldRepRankings);
     const oldlvl = (await bp.level(userAddress, seasonId)).toNumber();
     await (await bp.giveXp(seasonId, xp, userAddress, fee)).wait(1);
     const newlvl = (await bp.level(userAddress, seasonId)).toNumber();
-
+    const newXpRankings: GetRankingDto = await this.getSeasonRanking(
+      creatorId,
+      seasonId,
+      followers,
+      userAddress,
+    );
+    const newXpRank = this.getRank(newXpRankings);
+    const newRepRankings: GetRankingDto = await this.getReputationRanking(
+      creatorId,
+      followers,
+      userAddress,
+    );
+    const newRepRank = this.getRank(newRepRankings);
     if (oldlvl != newlvl) {
       this.microserviceService.sendLevelUpAlert(
         creatorId,
@@ -194,6 +218,19 @@ export class BattlePassService {
         oldlvl,
         newlvl,
       );
+    }
+    if (oldXpRank != newXpRank || oldRepRank != newRepRank) {
+      const alert: LeaderboardAlert = {
+        creatorId,
+        userAddress,
+        oldXpRank,
+        newXpRank,
+        oldRepRank,
+        newRepRank,
+        pfp: oldXpRankings?.pfp,
+        name: oldXpRankings?.name,
+      };
+      this.microserviceService.sendLeaderboardAlert(alert);
     }
   }
 
@@ -323,7 +360,7 @@ export class BattlePassService {
     }
   }
 
-  async getReputationInfo(creatorId: number, followers: any[]) {
+  async getReputationRankings(creatorId: number, followers: Follower[]) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const addresses = [];
     const ids = [];
@@ -333,7 +370,7 @@ export class BattlePassService {
       ids.push(this.REPUTATION_ID);
     }
     const results = await contract.balanceOfBatch(addresses, ids);
-    const dtos: GetSeasonXpRankingDto[] = [];
+    const dtos: GetRankingDto[] = [];
     const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < results.length; i++) {
       const follower = followers[i];
@@ -354,7 +391,48 @@ export class BattlePassService {
     return dtos;
   }
 
-  async getSeasonInfo(creatorId: number, seasonId: number, followers: any[]) {
+  async getReputationRanking(
+    creatorId: number,
+    followers: Follower[],
+    userAddress: string,
+  ) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const addresses = [];
+    const ids = [];
+    for (let i = 0; i < followers.length; i++) {
+      const follower = followers[i];
+      addresses.push(follower.userAddress);
+      ids.push(this.REPUTATION_ID);
+    }
+    const results = await contract.balanceOfBatch(addresses, ids);
+    const index = followers.findIndex(
+      (follower) => follower.userAddress === userAddress,
+    );
+    const dto: GetRankingDto = {
+      id: followers[index].id,
+      userAddress: followers[index].userAddress,
+      pfp: followers[index]?.pfp,
+      name: followers[index]?.name,
+      total: 0,
+      others: [],
+    };
+    for (let i = 0; i < results.length; i++) {
+      const follower = followers[i];
+      dto.others.push({
+        total: results[i].toNumber(),
+        userAddress: follower.userAddress,
+      });
+      if (i == index) dto.total = results[i].toNumber();
+    }
+    dto.others.sort((a, b) => b.total - a.total);
+    return dto;
+  }
+
+  async getSeasonRankings(
+    creatorId: number,
+    seasonId: number,
+    followers: Follower[],
+  ) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const iface = BattlePass__factory.createInterface();
     const fragment = iface.getFunction('userInfo');
@@ -372,7 +450,7 @@ export class BattlePassService {
     }
     const results = await this.chainService.multicall(calls);
     if (results == null) return null;
-    const dtos: GetSeasonXpRankingDto[] = [];
+    const dtos: GetRankingDto[] = [];
     const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < results.length; i++) {
       const follower = followers[i];
@@ -397,6 +475,56 @@ export class BattlePassService {
     return dtos;
   }
 
+  async getSeasonRanking(
+    creatorId: number,
+    seasonId: number,
+    followers: Follower[],
+    userAddress,
+  ) {
+    const contract = await this.chainService.getBattlePassContract(creatorId);
+    const iface = BattlePass__factory.createInterface();
+    const fragment = iface.getFunction('userInfo');
+    const calls: ContractCall[] = [];
+    for (let i = 0; i < followers.length; i++) {
+      const follower = followers[i];
+      calls.push({
+        reference: 'userInfo',
+        address: contract.address,
+        abi: [fragment],
+        method: 'userInfo',
+        params: [follower.userAddress, seasonId],
+        value: 0,
+      });
+    }
+    const results = await this.chainService.multicall(calls);
+    if (results == null) return null;
+    const index = followers.findIndex(
+      (follower) => follower.userAddress === userAddress,
+    );
+    const dto: GetRankingDto = {
+      id: followers[index].id,
+      userAddress: followers[index].userAddress,
+      pfp: followers[index]?.pfp,
+      name: followers[index]?.name,
+      total: 0,
+      others: [],
+    };
+    for (let i = 0; i < results.length; i++) {
+      const follower = followers[i];
+      const userInfo = iface.decodeFunctionResult(
+        'userInfo',
+        results[i].returnData[1],
+      );
+      dto.others.push({
+        total: userInfo.xp.toNumber(),
+        userAddress: follower.userAddress,
+      });
+      if (i == index) dto.total = userInfo.xp.toNumber();
+    }
+    dto.others.sort((a, b) => b.total - a.total);
+    return dto;
+  }
+
   async getAllSeasonInfo(creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const followers = await this.microserviceService.getFollowers(creatorId);
@@ -419,7 +547,7 @@ export class BattlePassService {
     }
     const results = await this.chainService.multicall(calls);
     if (results == null) return null;
-    const dtos: GetSeasonXpRankingDto[] = [];
+    const dtos: GetRankingDto[] = [];
     const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < followers.length; i++) {
       const follower = followers[i];
@@ -472,6 +600,21 @@ export class BattlePassService {
       xp += userInfo.xp.toNumber();
     }
     return xp;
+  }
+
+  getRank(dto: GetRankingDto) {
+    return (
+      dto.others.findIndex((other) => other.userAddress === dto.userAddress) + 1
+    );
+  }
+
+  getTopPercent(dto: GetRankingDto) {
+    const index = dto.others.findIndex(
+      (other) => other.userAddress === dto.userAddress,
+    );
+    const topPercent =
+      100 - ((dto.others.length - index) / dto.others.length) * 100;
+    return topPercent > 0.01 ? topPercent : 0.01;
   }
 
   async getBattlePass(creatorId: number) {

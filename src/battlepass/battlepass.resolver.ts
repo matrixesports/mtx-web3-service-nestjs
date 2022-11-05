@@ -13,7 +13,7 @@ import { BattlePassService } from './battlepass.service';
 import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
-  GetSeasonXpRankingDto,
+  GetRankingDto,
 } from './battlepass.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MetadataDB } from 'src/inventory/inventory.entity';
@@ -251,71 +251,51 @@ export class PremiumUserResolver {
   }
 }
 
-abstract class RankingResolver {
-  @ResolveField()
-  name(@Parent() parent: GetSeasonXpRankingDto) {
-    return parent.name;
-  }
-
-  @ResolveField()
-  pfp(@Parent() parent: GetSeasonXpRankingDto) {
-    return parent.pfp;
-  }
-
-  @ResolveField()
-  rank(@Parent() parent: GetSeasonXpRankingDto) {
-    return (
-      parent.others.findIndex(
-        (other) => other.userAddress === parent.userAddress,
-      ) + 1
-    );
-  }
-
-  @ResolveField()
-  topPercent(@Parent() parent: GetSeasonXpRankingDto) {
-    const index = parent.others.findIndex(
-      (other) => other.userAddress === parent.userAddress,
-    );
-    const topPercent =
-      100 - ((parent.others.length - index) / parent.others.length) * 100;
-    return topPercent > 0.01 ? topPercent : 0.01;
-  }
-}
-
 @Resolver('SeasonRanking')
-export class SeasonRankingResolver extends RankingResolver {
+export class SeasonRankingResolver {
   constructor(
     private battlePassService: BattlePassService,
     private microserviceService: MicroserviceService,
-  ) {
-    super();
-  }
+  ) {}
+
   @Query()
   async getSeasonXpRanking(
     @Args('creatorId') creatorId: number,
     @Args('seasonId') seasonId: number,
   ) {
     const followers = await this.microserviceService.getFollowers(creatorId);
-    return await this.battlePassService.getSeasonInfo(
+    return await this.battlePassService.getSeasonRankings(
       creatorId,
       seasonId,
       followers,
     );
   }
+
+  @ResolveField()
+  rank(@Parent() parent: GetRankingDto) {
+    return this.battlePassService.getRank(parent);
+  }
+
+  @ResolveField()
+  topPercent(@Parent() parent: GetRankingDto) {
+    return this.battlePassService.getTopPercent(parent);
+  }
 }
 
 @Resolver('ReputationRanking')
-export class ReputationRankingResolver extends RankingResolver {
+export class ReputationRankingResolver {
   constructor(
     private battlePassService: BattlePassService,
     private microserviceService: MicroserviceService,
-  ) {
-    super();
-  }
+  ) {}
+
   @Query()
   async getReputationRankings(@Args('creatorId') creatorId: number) {
     const followers = await this.microserviceService.getFollowers(creatorId);
-    return await this.battlePassService.getReputationInfo(creatorId, followers);
+    return await this.battlePassService.getReputationRankings(
+      creatorId,
+      followers,
+    );
   }
 
   @Query()
@@ -325,22 +305,41 @@ export class ReputationRankingResolver extends RankingResolver {
   ) {
     const userAddress: string = context.req.headers['user-address'];
     const followers = await this.microserviceService.getFollowers(creatorId);
-    const repInfos = await this.battlePassService.getReputationInfo(
+    return this.battlePassService.getReputationRanking(
       creatorId,
       followers,
+      userAddress,
     );
-    return repInfos.find((info) => info.userAddress === userAddress);
+  }
+
+  @ResolveField()
+  rank(@Parent() parent: GetRankingDto) {
+    return this.battlePassService.getRank(parent);
+  }
+
+  @ResolveField()
+  topPercent(@Parent() parent: GetRankingDto) {
+    return this.battlePassService.getTopPercent(parent);
   }
 }
 
 @Resolver('AllSeasonRanking')
-export class AllSeasonRankingResolver extends RankingResolver {
-  constructor(private battlePassService: BattlePassService) {
-    super();
-  }
+export class AllSeasonRankingResolver {
+  constructor(private battlePassService: BattlePassService) {}
+
   @Query()
   async getAllXpRanking(@Args('creatorId') creatorId: number) {
     return await this.battlePassService.getAllSeasonInfo(creatorId);
+  }
+
+  @ResolveField()
+  rank(@Parent() parent: GetRankingDto) {
+    return this.battlePassService.getRank(parent);
+  }
+
+  @ResolveField()
+  topPercent(@Parent() parent: GetRankingDto) {
+    return this.battlePassService.getTopPercent(parent);
   }
 }
 

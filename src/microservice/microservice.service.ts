@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Inject, Injectable, Post } from '@nestjs/common';
+import { Controller, Inject, Injectable, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { BattlePassDB } from 'src/battlepass/battlepass.entity';
 import {
   ClaimLootdropAlert,
   CLAIM_LOOTDROP_ALERT,
-  LEADERBOARD_TOP3_ALERT,
+  LeaderboardAlert,
+  LEADERBOARD_ALERT,
   LevelUpAlert,
   LEVELUP_ALERT,
   MINT_PREMIUM_PASS,
@@ -58,6 +59,10 @@ export class MicroserviceService {
       newlvl,
     };
     this.discordClient.emit<LevelUpAlert>(LEVELUP_ALERT, alert);
+  }
+
+  sendLeaderboardAlert(alert: LeaderboardAlert) {
+    this.discordClient.emit<LeaderboardAlert>(LEADERBOARD_ALERT, alert);
   }
 
   async createUrl(creatorId: number) {
@@ -200,12 +205,16 @@ export class MicroserviceService {
       console.log('Twitch Service Failed');
     }
   }
-  /*
+}
+
+/*
 |========================| ABSTRACT |========================|
 *
 * These functions are used to generate swagger UI
 */
 
+@Controller('')
+export class MockController {
   @ApiOkResponse({ type: LootdropReward })
   @Post(NEW_LOOTDROP_ALERT)
   @ApiTags('TCP EVENTS')
@@ -226,8 +235,8 @@ export class MicroserviceService {
   @ApiTags('TCP EVENTS')
   async mock_3() {}
 
-  @ApiOkResponse({ type: LevelUpAlert })
-  @Post(LEADERBOARD_TOP3_ALERT)
+  @ApiOkResponse({ type: LeaderboardAlert })
+  @Post(LEADERBOARD_ALERT)
   @ApiTags('TCP EVENTS')
   async mock_4() {}
 
