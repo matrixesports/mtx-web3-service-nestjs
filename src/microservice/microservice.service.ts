@@ -112,15 +112,15 @@ export class MicroserviceService {
     return res.data;
   }
 
-  //   GET: {USER_SERVICE_URL}/api/user/:userAddress
-  // Header: { api-token: "*KwAx?YeekQzpwfvf8y@2J#p2Tt@J9QtbC=Zb33G+M6GK8Qg+f7J&Q4gD5Fj3A8h" }
-
-  // Response: { name: string, pfp: string }
-
   async getUserInfo(userAddress: string) {
     const res = await axios
       .get<UserInfo>(
         `${this.configService.get<string>('microservice.user.url')}/api/user/${userAddress}`,
+        {
+          headers: {
+            'api-token': this.configService.get<string>('microservice.user.token'),
+          },
+        },
       )
       .catch((err) => {
         throw new Err('User Service Failed', err, userAddress);

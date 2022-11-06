@@ -1,7 +1,7 @@
 export default () => {
   let postgres: string, redis: string;
   let ticketHost: string, ticketPort: number;
-  let userHost: string, userPort: number;
+  let userHost: string, userPort: number, userApiToken: string;
   let twitchHost: string, twitchPort: number;
   let urlHost: string, urlPort: number;
   let discordHost: string, discordPort: number;
@@ -14,6 +14,7 @@ export default () => {
     ticketPort = parseInt(process.env.TICKET_SERVICE_PORT);
     userHost = process.env.USER_SERVICE_HOST;
     userPort = parseInt(process.env.USER_SERVICE_PORT);
+    userApiToken = process.env.USER_SERVICE_API_TOKEN;
     twitchHost = process.env.TWITCH_SERVICE_HOST;
     twitchPort = parseInt(process.env.TWITCH_SERVICE_PORT);
     urlHost = process.env.URL_SERVICE_HOST;
@@ -29,6 +30,7 @@ export default () => {
     ticketPort = parseInt(process.env.DEV_TICKET_SERVICE_PORT);
     userHost = process.env.DEV_USER_SERVICE_HOST;
     userPort = parseInt(process.env.DEV_USER_SERVICE_PORT);
+    userApiToken = process.env.DEV_USER_SERVICE_API_TOKEN;
     twitchHost = process.env.DEV_TWITCH_SERVICE_HOST;
     twitchPort = parseInt(process.env.DEV_TWITCH_SERVICE_PORT);
     urlHost = process.env.DEV_URL_SERVICE_HOST;
@@ -75,6 +77,7 @@ export default () => {
         host: userHost,
         port: userPort,
         url: 'http://' + userHost + ':' + userPort,
+        token: userApiToken,
       },
       url: {
         host: urlHost,
