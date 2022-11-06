@@ -8,12 +8,6 @@ import { ApiController } from './api.controller';
 
 @Module({
   controllers: [ApiController],
-  imports: [
-    CraftingModule,
-    BattlePassModule,
-    InventoryModule,
-    RewardModule,
-    MicroserviceModule,
-  ],
+  imports: [CraftingModule, BattlePassModule, InventoryModule, RewardModule, MicroserviceModule],
 })
 export class ApiModule {}

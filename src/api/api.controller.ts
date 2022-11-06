@@ -1,26 +1,10 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpException,
-  Param,
-  Post,
-  UseFilters,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Param, Post, UseFilters } from '@nestjs/common';
 import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
-import {
-  BattlePass,
-  LevelInfoStruct,
-  LootboxOptionStruct,
-} from 'abi/typechain/BattlePass';
+import { BattlePass, LevelInfoStruct, LootboxOptionStruct } from 'abi/typechain/BattlePass';
 import { IngredientsStruct } from 'abi/typechain/Crafting';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ChainService } from 'src/chain/chain.service';
-import {
-  EthersFilter,
-  IResponseError,
-  TypeORMFilter,
-} from 'src/common/filters';
+import { EthersFilter, IResponseError, TypeORMFilter } from 'src/common/filters';
 import { CraftingService } from 'src/crafting/crafting.service';
 import { RewardType } from 'src/graphql.schema';
 import {
@@ -41,7 +25,7 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { LootdropReward, LootdropRS } from 'src/reward/reward.dto';
 import { MicroserviceService } from 'src/microservice/microservice.service';
-import { PremPassAlert, SeasonAlert } from 'src/microservice/microservice.dto';
+import { LootdropAlert, PremPassAlert, SeasonAlert } from 'src/microservice/microservice.dto';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -69,11 +53,9 @@ export class ApiController {
   async getBattlePassDB(@Param('creatorId') creatorId: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const seasonId = await contract.seasonId();
-    const battlePassDB = await this.battlePassService
-      .getBattlePass(creatorId)
-      .catch((error) => {
-        throw new HttpException(error.message, 500);
-      });
+    const battlePassDB = await this.battlePassService.getBattlePass(creatorId).catch((error) => {
+      throw new HttpException(error.message, 500);
+    });
     return {
       price: battlePassDB.price,
       currency: battlePassDB.currency,
@@ -105,15 +87,9 @@ export class ApiController {
 
   @ApiOkResponse({ type: LootdropReward })
   @Get('lootdrop/:creatorId')
-  async getLootdrop(
-    @Param('creatorId') creatorId: number,
-  ): Promise<LootdropReward> {
+  async getLootdrop(@Param('creatorId') creatorId: number): Promise<LootdropReward> {
     const cache = await this.rewardService.getlootdrop(creatorId);
-    const reward = await this.inventoryService.createRewardObj(
-      creatorId,
-      cache.rewardId,
-      1,
-    );
+    const reward = await this.inventoryService.createRewardObj(creatorId, cache.rewardId, 1);
     return {
       creatorId,
       reward,
@@ -127,9 +103,7 @@ export class ApiController {
 
   @Post('mint/prempass')
   async mintPremiumPass(@Body() mintPremPassDto: MintPremPassDto) {
-    const seasonId = await this.battlePassService.getSeasonId(
-      mintPremPassDto.creatorId,
-    );
+    const seasonId = await this.battlePassService.getSeasonId(mintPremPassDto.creatorId);
     await this.battlePassService.mint(
       mintPremPassDto.creatorId,
       mintPremPassDto.userAddress,
@@ -140,12 +114,16 @@ export class ApiController {
       mintPremPassDto.creatorId,
       mintPremPassDto.userAddress,
     );
-    this.microserviceService.sendPremPassAlert(
-      mintPremPassDto.creatorId,
-      mintPremPassDto.userAddress,
+    const userInfo = await this.microserviceService.getUserInfo(mintPremPassDto.userAddress);
+    const alert: PremPassAlert = {
+      creatorId: mintPremPassDto.creatorId,
+      userAddress: mintPremPassDto.userAddress,
+      name: userInfo.name,
+      pfp: userInfo.pfp,
       seasonId,
       streaks,
-    );
+    };
+    this.microserviceService.sendPremPassAlert(alert);
     return { success: true };
   }
 
@@ -182,9 +160,7 @@ export class ApiController {
     ) as BattlePassFactory;
     const fee = await this.chainService.getMaticFeeData();
     const rc = await (await bpFactory.deployBattlePass(creatorId, fee)).wait(1);
-    const event = rc.events.find(
-      (event: any) => event.event === 'BattlePassDeployed',
-    );
+    const event = rc.events.find((event: any) => event.event === 'BattlePassDeployed');
     if (!event) {
       return {
         success: false,
@@ -232,9 +208,7 @@ export class ApiController {
         description: 'Joint Probability != Max Probability',
       };
     }
-    const contract = await this.chainService.getBattlePassContract(
-      createLootboxDto.creatorId,
-    );
+    const contract = await this.chainService.getBattlePassContract(createLootboxDto.creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
     await (await bp.newLootbox(lootboxOption, fee)).wait(1);
@@ -263,17 +237,14 @@ export class ApiController {
     for (let i = 0; i < createSeasonDto.levelDetails.length; i++) {
       const info = createSeasonDto.levelDetails[i];
       levelInfo.push({
-        xpToCompleteLevel:
-          i != createSeasonDto.levelDetails.length - 1 ? info.xp : 0,
+        xpToCompleteLevel: i != createSeasonDto.levelDetails.length - 1 ? info.xp : 0,
         freeRewardId: info.freeId,
         freeRewardQty: info.freeQty,
         premiumRewardId: info.premId,
         premiumRewardQty: info.premQty,
       });
     }
-    const contract = await this.chainService.getBattlePassContract(
-      createSeasonDto.creatorId,
-    );
+    const contract = await this.chainService.getBattlePassContract(createSeasonDto.creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const fee = await this.chainService.getMaticFeeData();
     await (await bp.newSeason(levelInfo, fee)).wait(1);
@@ -285,9 +256,7 @@ export class ApiController {
       seasonId,
       maxLevel,
     );
-    const battlePassDB = await this.battlePassService.getBattlePass(
-      createSeasonDto.creatorId,
-    );
+    const battlePassDB = await this.battlePassService.getBattlePass(createSeasonDto.creatorId);
     const alert: SeasonAlert = {
       creatorId: createSeasonDto.creatorId,
       seasonId,
@@ -311,9 +280,7 @@ export class ApiController {
     };
     for (let i = 0; i < createRecipeDto.inputIngredients.length; i++) {
       const ingredient = createRecipeDto.inputIngredients[i];
-      const address = await this.chainService.getBattlePassAddress(
-        ingredient.creatorId,
-      );
+      const address = await this.chainService.getBattlePassAddress(ingredient.creatorId);
       inputIngredients.battlePasses.push(address);
       inputIngredients.ids.push(ingredient.id);
       inputIngredients.qtys.push(ingredient.qty);
@@ -325,9 +292,7 @@ export class ApiController {
     };
     for (let i = 0; i < createRecipeDto.outputIngredients.length; i++) {
       const ingredient = createRecipeDto.outputIngredients[i];
-      const address = await this.chainService.getBattlePassAddress(
-        ingredient.creatorId,
-      );
+      const address = await this.chainService.getBattlePassAddress(ingredient.creatorId);
       outputIngredients.battlePasses.push(address);
       outputIngredients.ids.push(ingredient.id);
       outputIngredients.qtys.push(ingredient.qty);
@@ -339,23 +304,16 @@ export class ApiController {
     );
     const event = Crafting__factory.createInterface().parseLog(rc.logs[0]);
     const recipeId = event.args['recipeId'].toNumber();
-    this.craftingService
-      .addRecipe(createRecipeDto.creatorId, recipeId)
-      .catch((error) => {
-        throw new HttpException(error.message, 500);
-      });
+    this.craftingService.addRecipe(createRecipeDto.creatorId, recipeId).catch((error) => {
+      throw new HttpException(error.message, 500);
+    });
     return { success: true };
   }
 
   @Post('create/lootdrop')
   async createLootdrop(@Body() createLootdropDto: CreateLootdropDto) {
-    const shortUrl = await this.microserviceService.createUrl(
-      createLootdropDto.creatorId,
-    );
-    const start = moment
-      .utc(createLootdropDto.start)
-      .utcOffset('-07:00')
-      .toDate();
+    const shortUrl = await this.microserviceService.createUrl(createLootdropDto.creatorId);
+    const start = moment.utc(createLootdropDto.start).utcOffset('-07:00').toDate();
     const end = moment.utc(createLootdropDto.end).utcOffset('-07:00').toDate();
     if (start > end) throw new HttpException('Start Must Be Before End!', 500);
     const nw = moment().utcOffset('-07:00').toDate();
@@ -363,7 +321,6 @@ export class ApiController {
       nw > start
         ? Math.floor((end.getTime() - start.getTime()) / 1000)
         : Math.floor((end.getTime() - nw.getTime()) / 1000);
-
     const target = `lootdrop-${createLootdropDto.creatorId}`;
     const lootdrop: LootdropRS = { ...createLootdropDto, url: shortUrl };
     await this.redis.set(target, JSON.stringify(lootdrop), 'EX', ttl);
@@ -374,7 +331,7 @@ export class ApiController {
       createLootdropDto.rewardId,
       1,
     );
-    const alert: LootdropReward = {
+    const alert: LootdropAlert = {
       creatorId: createLootdropDto.creatorId,
       requirements: createLootdropDto.requirements,
       threshold: createLootdropDto.threshold,
@@ -383,7 +340,7 @@ export class ApiController {
       end: end.toString(),
       url: shortUrl,
     };
-    this.microserviceService.sendNewLootdropAlert(alert);
+    this.microserviceService.sendLootdropAlert(alert);
     return { success: true };
   }
 }

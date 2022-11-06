@@ -1,14 +1,6 @@
-import {
-  Args,
-  Context,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { ChainService } from 'src/chain/chain.service';
-import { Reward, RewardType } from 'src/graphql.schema';
+import { ClaimRewardResponse, MutationResponse, Reward, RewardType } from 'src/graphql.schema';
 import { BattlePassService } from './battlepass.service';
 import {
   GetBattlePassChildDto,
@@ -34,9 +26,7 @@ export class BattlePassResolver {
 */
 
   @Query()
-  async getBattlePass(
-    @Args('creatorId') creatorId: number,
-  ): Promise<GetBattlePassChildDto> {
+  async getBattlePass(@Args('creatorId') creatorId: number): Promise<GetBattlePassChildDto> {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const seasonId = (await contract.seasonId()).toNumber();
     const maxLevel = (await contract.getMaxLevel(seasonId)).toNumber();
@@ -61,28 +51,24 @@ export class BattlePassResolver {
    * if level == 1 then check for required fields; assumes there will always be a reward at level 1
    * make sure u only give 1 lootbox, will not open all of them
    */
-  @Mutation()
+  @Mutation(() => ClaimRewardResponse)
   async claimReward(
     @Args('creatorId') creatorId: number,
     @Args('level') level: number,
     @Args('premium') premium: boolean,
     @Args('autoRedeem') autoRedeem: boolean,
     @Context() context,
-  ) {
+  ): Promise<ClaimRewardResponse> {
     const userAddress: string = context.req.headers['user-address'];
     const battlePassDB = await this.battlePassService.getBattlePass(creatorId);
     const missingFields = await this.microserviceService.checkRequiredFields(
-      creatorId,
       userAddress,
       battlePassDB,
     );
     if (missingFields != null) {
       return {
         success: true,
-        missingFields: {
-          payment: missingFields.missing_user_payment_options,
-          social: missingFields.missing_user_social_options,
-        },
+        missingFields,
       };
     }
     let claimInfo: {
@@ -99,7 +85,7 @@ export class BattlePassResolver {
         premium,
       );
       if (claimInfo.metadata.rewardType === RewardType.REDEEMABLE)
-        await this.microserviceService.redeemItemHelper(
+        await this.microserviceService.sendRedeemAlert(
           claimInfo.metadata.id,
           userAddress,
           creatorId,
@@ -107,16 +93,11 @@ export class BattlePassResolver {
           claimInfo.metadata,
         );
     } else
-      claimInfo = await this.battlePassService.claimReward(
-        creatorId,
-        userAddress,
-        level,
-        premium,
-      );
+      claimInfo = await this.battlePassService.claimReward(creatorId, userAddress, level, premium);
     return { success: true, reward: claimInfo.reward };
   }
 
-  @Mutation()
+  @Mutation(() => MutationResponse)
   async redeemReward(
     @Args('creatorId') creatorId: number,
     @Args('itemId') itemId: number,
@@ -126,7 +107,7 @@ export class BattlePassResolver {
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(creatorId, itemId);
     await this.battlePassService.burn(creatorId, userAddress, itemId, 1);
-    await this.microserviceService.redeemItemHelper(
+    await this.microserviceService.sendRedeemAlert(
       itemId,
       userAddress,
       creatorId,
@@ -200,17 +181,12 @@ export class UserResolver {
   constructor(private battlePassService: BattlePassService) {}
   @ResolveField()
   async xp(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    const userInfo = await parent.contract.userInfo(
-      parent.userAddress,
-      parent.seasonId,
-    );
+    const userInfo = await parent.contract.userInfo(parent.userAddress, parent.seasonId);
     return userInfo.xp.toNumber();
   }
   @ResolveField()
   async level(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    return (
-      await parent.contract.level(parent.userAddress, parent.seasonId)
-    ).toNumber();
+    return (await parent.contract.level(parent.userAddress, parent.seasonId)).toNumber();
   }
 
   @ResolveField()
@@ -223,10 +199,7 @@ export class UserResolver {
   async premium(
     @Parent() parent: GetBattlePassUserInfoChildDto,
   ): Promise<GetBattlePassUserInfoChildDto> {
-    const isPremium = await parent.contract.isUserPremium(
-      parent.userAddress,
-      parent.seasonId,
-    );
+    const isPremium = await parent.contract.isUserPremium(parent.userAddress, parent.seasonId);
     if (!isPremium) return null;
     return parent;
   }
@@ -238,15 +211,11 @@ export class PremiumUserResolver {
 
   @ResolveField()
   async owned(@Parent() parent: GetBattlePassUserInfoChildDto) {
-    return (
-      await parent.contract.balanceOf(parent.userAddress, parent.seasonId)
-    ).toNumber();
+    return (await parent.contract.balanceOf(parent.userAddress, parent.seasonId)).toNumber();
   }
 
   @ResolveField()
-  async unclaimedPremiumRewards(
-    @Parent() parent: GetBattlePassUserInfoChildDto,
-  ) {
+  async unclaimedPremiumRewards(@Parent() parent: GetBattlePassUserInfoChildDto) {
     return await this.battlePassService.getUserRewards(parent, true);
   }
 }
@@ -264,11 +233,7 @@ export class SeasonRankingResolver {
     @Args('seasonId') seasonId: number,
   ) {
     const followers = await this.microserviceService.getFollowers(creatorId);
-    return await this.battlePassService.getSeasonRankings(
-      creatorId,
-      seasonId,
-      followers,
-    );
+    return await this.battlePassService.getSeasonRankings(creatorId, seasonId, followers);
   }
 
   @ResolveField()
@@ -292,24 +257,14 @@ export class ReputationRankingResolver {
   @Query()
   async getReputationRankings(@Args('creatorId') creatorId: number) {
     const followers = await this.microserviceService.getFollowers(creatorId);
-    return await this.battlePassService.getReputationRankings(
-      creatorId,
-      followers,
-    );
+    return await this.battlePassService.getReputationRankings(creatorId, followers);
   }
 
   @Query()
-  async getReputationRanking(
-    @Args('creatorId') creatorId: number,
-    @Context() context,
-  ) {
+  async getReputationRanking(@Args('creatorId') creatorId: number, @Context() context) {
     const userAddress: string = context.req.headers['user-address'];
     const followers = await this.microserviceService.getFollowers(creatorId);
-    return this.battlePassService.getReputationRanking(
-      creatorId,
-      followers,
-      userAddress,
-    );
+    return this.battlePassService.getReputationRanking(creatorId, followers, userAddress);
   }
 
   @ResolveField()
@@ -345,10 +300,7 @@ export class AllSeasonRankingResolver {
 
 @Resolver('LootboxOption')
 export class LootboxResolver {
-  constructor(
-    private chainService: ChainService,
-    private inventoryService: InventoryService,
-  ) {}
+  constructor(private chainService: ChainService, private inventoryService: InventoryService) {}
 
   @Query()
   async getLootboxOptions(
@@ -390,9 +342,7 @@ export class LootboxResolver {
       }
       allOptions.push({
         reward: rewardsInOption,
-        probability:
-          option[0].rarityRange[1].toNumber() -
-          option[0].rarityRange[0].toNumber(),
+        probability: option[0].rarityRange[1].toNumber() - option[0].rarityRange[0].toNumber(),
       });
     }
     return allOptions;

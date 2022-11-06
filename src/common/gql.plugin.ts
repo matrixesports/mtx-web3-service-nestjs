@@ -1,9 +1,6 @@
 import { Plugin } from '@nestjs/apollo';
 import { GraphQLRequestContext } from 'apollo-server-core';
-import {
-  ApolloServerPlugin,
-  GraphQLRequestListener,
-} from 'apollo-server-plugin-base';
+import { ApolloServerPlugin, GraphQLRequestListener } from 'apollo-server-plugin-base';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Plugin()
@@ -12,9 +9,7 @@ export class GraphQLPlugin implements ApolloServerPlugin {
     @InjectPinoLogger()
     private readonly logger: PinoLogger,
   ) {}
-  async requestDidStart(
-    ctx: GraphQLRequestContext,
-  ): Promise<GraphQLRequestListener> {
+  async requestDidStart(ctx: GraphQLRequestContext): Promise<GraphQLRequestListener> {
     if (ctx.request.operationName === 'IntrospectionQuery') {
       return;
     }
@@ -24,8 +19,7 @@ export class GraphQLPlugin implements ApolloServerPlugin {
 }
 
 class Listener<T = unknown>
-  implements
-    Pick<GraphQLRequestListener<T>, 'didEncounterErrors' | 'willSendResponse'>
+  implements Pick<GraphQLRequestListener<T>, 'didEncounterErrors' | 'willSendResponse'>
 {
   private readonly start: number;
   constructor(private readonly logData: Record<string, unknown>) {

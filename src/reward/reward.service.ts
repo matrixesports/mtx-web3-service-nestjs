@@ -9,6 +9,7 @@ import { MicroserviceService } from 'src/microservice/microservice.service';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { Requirements } from 'src/graphql.schema';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
+import { ClaimLootdropAlert } from 'src/microservice/microservice.dto';
 
 @Injectable()
 export class RewardService {
@@ -20,22 +21,17 @@ export class RewardService {
     private battlePassService: BattlePassService,
   ) {}
 
-  async claimLootdrop(creatorId: number, userAddress: string) {
+  async claimLootdrop(creatorId: number, userAddress: string, contact: string) {
     const lootdrop = await this.getlootdrop(creatorId);
     // TODO UPDATE WITH CONTACTT UNFO
     let userThreshold: number;
     switch (lootdrop.requirements) {
       case Requirements.ALLXP:
-        userThreshold = await this.battlePassService.getOneAllSeasonInfo(
-          creatorId,
-          userAddress,
-        );
+        userThreshold = await this.battlePassService.getOneAllSeasonInfo(creatorId, userAddress);
         if (userThreshold == null) throw new Error('On-Chain Error!');
         if (userThreshold < lootdrop.threshold)
           throw new Warn(
-            `You need ${
-              lootdrop.threshold - userThreshold
-            } more XP to claim this Lootdrop!`,
+            `You need ${lootdrop.threshold - userThreshold} more XP to claim this Lootdrop!`,
           );
         break;
       case Requirements.REPUTATION:
@@ -52,36 +48,35 @@ export class RewardService {
           );
         break;
       case Requirements.SEASONXP:
-        userThreshold = await this.battlePassService.getXp(
-          creatorId,
-          userAddress,
-        );
+        userThreshold = await this.battlePassService.getXp(creatorId, userAddress);
         if (userThreshold < lootdrop.threshold)
           throw new Warn(
-            `You need ${
-              lootdrop.threshold - userThreshold
-            } more XP to claim this Lootdrop!`,
+            `You need ${lootdrop.threshold - userThreshold} more XP to claim this Lootdrop!`,
           );
         break;
       default:
         throw new Error('Invalid Lootdrop!');
     }
-    if (userThreshold < lootdrop.threshold)
-      throw new Warn('User Cannot Meet Requirements!');
+    if (userThreshold < lootdrop.threshold) throw new Warn('User Cannot Meet Requirements!');
     await this.setLootdropQty(creatorId, userAddress);
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
-    const metadata = await this.inventoryService.getMetadata(
-      creatorId,
-      lootdrop.rewardId,
-    );
-    await this.microserviceService.redeemItemHelper(
+    const metadata = await this.inventoryService.getMetadata(creatorId, lootdrop.rewardId);
+    await this.microserviceService.sendRedeemAlert(
       lootdrop.rewardId,
       userAddress,
       creatorId,
       bpAddress,
       metadata,
+      contact,
     );
-    this.microserviceService.sendClaimLootdropAlert(creatorId, userAddress);
+    const userInfo = await this.microserviceService.getUserInfo(userAddress);
+    const alert: ClaimLootdropAlert = {
+      creatorId,
+      userAddress,
+      name: userInfo.name,
+      pfp: userInfo.pfp,
+    };
+    this.microserviceService.sendClaimLootdropAlert(alert);
     return { success: true };
   }
   async getlootdrop(creatorId: number): Promise<LootdropRS> {

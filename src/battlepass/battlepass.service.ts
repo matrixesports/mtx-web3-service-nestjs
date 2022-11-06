@@ -13,7 +13,7 @@ import { BattlePass, BattlePass__factory } from 'abi/typechain';
 import { Warn } from 'src/common/error.interceptor';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MicroserviceService } from 'src/microservice/microservice.service';
-import { Follower, LeaderboardAlert } from 'src/microservice/microservice.dto';
+import { Follower, LeaderboardAlert, LevelUpAlert } from 'src/microservice/microservice.dto';
 
 @Injectable()
 export class BattlePassService {
@@ -32,12 +32,7 @@ export class BattlePassService {
   /*
 |========================| WEB3 CALLS |========================|
 */
-  async getLevelInfo(
-    creatorId: number,
-    contract: BattlePass,
-    seasonId: number,
-    maxLevel: number,
-  ) {
+  async getLevelInfo(creatorId: number, contract: BattlePass, seasonId: number, maxLevel: number) {
     let levelInfo: LevelInfo[];
     const target = `level-info-${creatorId}`;
     const cache = await this.redis.get(target).catch((error) => {
@@ -84,10 +79,7 @@ export class BattlePassService {
         this.logger.error('Cache Write', error);
       });
     } else {
-      levelInfo = plainToInstance(
-        LevelInfo,
-        JSON.parse(cache as string),
-      ) as unknown as LevelInfo[];
+      levelInfo = plainToInstance(LevelInfo, JSON.parse(cache as string)) as unknown as LevelInfo[];
     }
     return levelInfo;
   }
@@ -143,12 +135,7 @@ export class BattlePassService {
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
     await (await bp.mint(userAddress, id, qty, fee)).wait(1);
-    await this.inventoryService.increaseBalance(
-      userAddress,
-      creatorId,
-      id,
-      qty,
-    );
+    await this.inventoryService.increaseBalance(userAddress, creatorId, id, qty);
   }
 
   async burn(creatorId: number, userAddress: string, id: number, qty: number) {
@@ -161,12 +148,7 @@ export class BattlePassService {
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
     await (await bp.burn(userAddress, id, qty, fee)).wait(1);
-    await this.inventoryService.decreaseBalance(
-      userAddress,
-      creatorId,
-      id,
-      qty,
-    );
+    await this.inventoryService.decreaseBalance(userAddress, creatorId, id, qty);
   }
 
   async giveXp(creatorId: number, userAddress: string, xp: number) {
@@ -212,12 +194,16 @@ export class BattlePassService {
     );
     const newRepRank = this.getRank(newRepRankings);
     if (oldlvl != newlvl) {
-      this.microserviceService.sendLevelUpAlert(
+      const userInfo = await this.microserviceService.getUserInfo(userAddress);
+      const alert: LevelUpAlert = {
         creatorId,
         userAddress,
         oldlvl,
         newlvl,
-      );
+        name: userInfo.name,
+        pfp: userInfo.pfp,
+      };
+      this.microserviceService.sendLevelUpAlert(alert);
     }
     if (oldXpRank != newXpRank || oldRepRank != newRepRank) {
       const alert: LeaderboardAlert = {
@@ -250,32 +236,16 @@ export class BattlePassService {
     }
     return counter;
   }
-  async claimReward(
-    creatorId: number,
-    userAddress: string,
-    level: number,
-    premium: boolean,
-  ) {
+  async claimReward(creatorId: number, userAddress: string, level: number, premium: boolean) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const seasonId = await bp.seasonId();
     const abi = bp.interface.getFunction('claimReward');
-    await this.chainService.simMetatx(
-      abi,
-      [seasonId, level, premium],
-      userAddress,
-      bp.address,
-    );
+    await this.chainService.simMetatx(abi, [seasonId, level, premium], userAddress, bp.address);
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
     fee['nonce'] = nonce;
-    await this.chainService.metatx(
-      abi,
-      [seasonId, level, premium],
-      userAddress,
-      bp.address,
-      fee,
-    );
+    await this.chainService.metatx(abi, [seasonId, level, premium], userAddress, bp.address, fee);
     const rewardGiven = await bp.seasonInfo(seasonId, level);
     let id: number;
     let qty: number;
@@ -286,36 +256,17 @@ export class BattlePassService {
       id = rewardGiven.freeRewardId.toNumber();
       qty = rewardGiven.freeRewardQty.toNumber();
     }
-    const reward = await this.inventoryService.createRewardObj(
-      creatorId,
-      id,
-      qty,
-    );
-    await this.inventoryService.increaseBalance(
-      userAddress,
-      creatorId,
-      id,
-      qty,
-    );
+    const reward = await this.inventoryService.createRewardObj(creatorId, id, qty);
+    await this.inventoryService.increaseBalance(userAddress, creatorId, id, qty);
     return { bpAddress: bp.address, reward: [reward] };
   }
 
-  async claimRewardAtomic(
-    creatorId: number,
-    userAddress: string,
-    level: number,
-    premium: boolean,
-  ) {
+  async claimRewardAtomic(creatorId: number, userAddress: string, level: number, premium: boolean) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     const seasonId = await bp.seasonId();
     const abi = bp.interface.getFunction('claimRewardAtomic');
-    await this.chainService.simMetatx(
-      abi,
-      [seasonId, level, premium],
-      userAddress,
-      bp.address,
-    );
+    await this.chainService.simMetatx(abi, [seasonId, level, premium], userAddress, bp.address);
 
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
@@ -361,17 +312,8 @@ export class BattlePassService {
       }
       return { bpAddress: bp.address, reward: rewards, metadata };
     } else {
-      const reward = await this.inventoryService.createRewardObj(
-        creatorId,
-        id,
-        qty,
-      );
-      await this.inventoryService.increaseBalance(
-        userAddress,
-        creatorId,
-        id,
-        qty,
-      );
+      const reward = await this.inventoryService.createRewardObj(creatorId, id, qty);
+      await this.inventoryService.increaseBalance(userAddress, creatorId, id, qty);
       return { bpAddress: bp.address, reward: [reward], metadata };
     }
   }
@@ -407,11 +349,7 @@ export class BattlePassService {
     return dtos;
   }
 
-  async getReputationRanking(
-    creatorId: number,
-    followers: Follower[],
-    userAddress: string,
-  ) {
+  async getReputationRanking(creatorId: number, followers: Follower[], userAddress: string) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const addresses = [];
     const ids = [];
@@ -421,9 +359,7 @@ export class BattlePassService {
       ids.push(this.REPUTATION_ID);
     }
     const results = await contract.balanceOfBatch(addresses, ids);
-    const index = followers.findIndex(
-      (follower) => follower.userAddress === userAddress,
-    );
+    const index = followers.findIndex((follower) => follower.userAddress === userAddress);
     const dto: GetRankingDto = {
       id: followers[index].id,
       userAddress: followers[index].userAddress,
@@ -444,11 +380,7 @@ export class BattlePassService {
     return dto;
   }
 
-  async getSeasonRankings(
-    creatorId: number,
-    seasonId: number,
-    followers: Follower[],
-  ) {
+  async getSeasonRankings(creatorId: number, seasonId: number, followers: Follower[]) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const iface = BattlePass__factory.createInterface();
     const fragment = iface.getFunction('userInfo');
@@ -470,10 +402,7 @@ export class BattlePassService {
     const others: { total: number; userAddress: string }[] = [];
     for (let i = 0; i < results.length; i++) {
       const follower = followers[i];
-      const userInfo = iface.decodeFunctionResult(
-        'userInfo',
-        results[i].returnData[1],
-      );
+      const userInfo = iface.decodeFunctionResult('userInfo', results[i].returnData[1]);
       others.push({
         total: userInfo.xp.toNumber(),
         userAddress: follower.userAddress,
@@ -491,12 +420,7 @@ export class BattlePassService {
     return dtos;
   }
 
-  async getSeasonRanking(
-    creatorId: number,
-    seasonId: number,
-    followers: Follower[],
-    userAddress,
-  ) {
+  async getSeasonRanking(creatorId: number, seasonId: number, followers: Follower[], userAddress) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const iface = BattlePass__factory.createInterface();
     const fragment = iface.getFunction('userInfo');
@@ -514,9 +438,7 @@ export class BattlePassService {
     }
     const results = await this.chainService.multicall(calls);
     if (results == null) return null;
-    const index = followers.findIndex(
-      (follower) => follower.userAddress === userAddress,
-    );
+    const index = followers.findIndex((follower) => follower.userAddress === userAddress);
     const dto: GetRankingDto = {
       id: followers[index].id,
       userAddress: followers[index].userAddress,
@@ -527,10 +449,7 @@ export class BattlePassService {
     };
     for (let i = 0; i < results.length; i++) {
       const follower = followers[i];
-      const userInfo = iface.decodeFunctionResult(
-        'userInfo',
-        results[i].returnData[1],
-      );
+      const userInfo = iface.decodeFunctionResult('userInfo', results[i].returnData[1]);
       dto.others.push({
         total: userInfo.xp.toNumber(),
         userAddress: follower.userAddress,
@@ -609,27 +528,19 @@ export class BattlePassService {
     let xp = 0;
     if (results == null) return null;
     for (let i = 0; i < seasonId; i++) {
-      const userInfo = iface.decodeFunctionResult(
-        'userInfo',
-        results[i].returnData[1],
-      );
+      const userInfo = iface.decodeFunctionResult('userInfo', results[i].returnData[1]);
       xp += userInfo.xp.toNumber();
     }
     return xp;
   }
 
   getRank(dto: GetRankingDto) {
-    return (
-      dto.others.findIndex((other) => other.userAddress === dto.userAddress) + 1
-    );
+    return dto.others.findIndex((other) => other.userAddress === dto.userAddress) + 1;
   }
 
   getTopPercent(dto: GetRankingDto) {
-    const index = dto.others.findIndex(
-      (other) => other.userAddress === dto.userAddress,
-    );
-    const topPercent =
-      100 - ((dto.others.length - index) / dto.others.length) * 100;
+    const index = dto.others.findIndex((other) => other.userAddress === dto.userAddress);
+    const topPercent = 100 - ((dto.others.length - index) / dto.others.length) * 100;
     return topPercent > 0.01 ? topPercent : 0.01;
   }
 
@@ -644,10 +555,7 @@ export class BattlePassService {
   }
 
   async getBattlePasses() {
-    const bp = await this.battlePassRepository
-      .createQueryBuilder()
-      .select()
-      .getMany();
+    const bp = await this.battlePassRepository.createQueryBuilder().select().getMany();
     if (bp) return bp;
     throw new Error('BattlePasses Not Found!');
   }

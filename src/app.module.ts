@@ -120,7 +120,7 @@ import { MicroserviceModule } from './microservice/microservice.module';
       driver: ApolloFederationDriver,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      useFactory: () => ({
         definitions: {
           path: join(process.cwd(), 'src/graphql.schema.ts'),
           outputAs: 'class',
@@ -129,11 +129,8 @@ import { MicroserviceModule } from './microservice/microservice.module';
         typePaths: ['./**/*.graphql'],
         playground: false,
         debug: true, // stacktrace for error context
-        formatError: (err) => {
-          const message =
-            err.message.search(config.get<string>('rpc.url')) > 0
-              ? 'on-chain error'
-              : err.message;
+        formatError: () => {
+          const message = 'on-chain error';
           return new GraphQLError(message);
         },
         plugins: [ApolloServerPluginLandingPageLocalDefault()],
@@ -146,9 +143,7 @@ import { MicroserviceModule } from './microservice/microservice.module';
     RedisModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (
-        config: ConfigService,
-      ): Promise<RedisModuleOptions> => {
+      useFactory: async (config: ConfigService): Promise<RedisModuleOptions> => {
         return {
           config: {
             url: config.get<string>('storage.redis'),

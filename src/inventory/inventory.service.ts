@@ -2,13 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RewardType } from 'src/graphql.schema';
 import { Reward } from 'src/reward/reward.dto';
-import {
-  DataSource,
-  DeleteResult,
-  InsertResult,
-  Repository,
-  UpdateResult,
-} from 'typeorm';
+import { DataSource, DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { InventoryDB, MetadataDB } from './inventory.entity';
 
 @Injectable()
@@ -43,11 +37,7 @@ export class InventoryService {
     throw new Error('Asset Not Found!');
   }
 
-  async getAssetNullable(
-    userAddress: string,
-    creatorId: number,
-    rewardId: number,
-  ) {
+  async getAssetNullable(userAddress: string, creatorId: number, rewardId: number) {
     const asset = await this.inventoryRepository
       .createQueryBuilder('inv')
       .select()
@@ -59,12 +49,7 @@ export class InventoryService {
     return null;
   }
 
-  async increaseBalance(
-    userAddress: string,
-    creatorId: number,
-    rewardId: number,
-    qty: number,
-  ) {
+  async increaseBalance(userAddress: string, creatorId: number, rewardId: number, qty: number) {
     const asset = await this.getAssetNullable(userAddress, creatorId, rewardId);
     if (!asset) await this.newAsset(userAddress, creatorId, rewardId, qty);
     else {
@@ -94,15 +79,9 @@ export class InventoryService {
     }
   }
 
-  async decreaseBalance(
-    userAddress: string,
-    creatorId: number,
-    rewardId: number,
-    qty: number,
-  ) {
+  async decreaseBalance(userAddress: string, creatorId: number, rewardId: number, qty: number) {
     const asset = await this.getAsset(userAddress, creatorId, rewardId);
-    if (asset.qty - qty == 0)
-      await this.delAsset(userAddress, creatorId, rewardId);
+    if (asset.qty - qty == 0) await this.delAsset(userAddress, creatorId, rewardId);
     else if (asset.qty - qty <= 0) throw new Error('Inventory Failure!');
     else {
       const queryRunner = this.dataSource.createQueryRunner();
@@ -156,12 +135,7 @@ export class InventoryService {
     throw new Error('Remove Asset Failed!');
   }
 
-  async newAsset(
-    userAddress: string,
-    creatorId: number,
-    rewardId: number,
-    qty: number,
-  ) {
+  async newAsset(userAddress: string, creatorId: number, rewardId: number, qty: number) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

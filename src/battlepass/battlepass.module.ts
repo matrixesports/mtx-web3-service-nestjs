@@ -11,8 +11,6 @@ import {
 import { BattlePassService } from './battlepass.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BattlePassDB } from './battlepass.entity';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { InventoryModule } from 'src/inventory/inventory.module';
 import { ChainModule } from 'src/chain/chain.module';
 import { MicroserviceModule } from 'src/microservice/microservice.module';

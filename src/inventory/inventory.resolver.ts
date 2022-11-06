@@ -1,11 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import {
-  Context,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Context, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import axios from 'axios';
 import { Redeemed, RedeemStatus, Reward } from 'src/graphql.schema';
 import { GetInventoryChildDto } from './inventory.dto';
@@ -13,17 +7,12 @@ import { InventoryService } from './inventory.service';
 
 @Resolver('Inventory')
 export class InventoryResolver {
-  constructor(
-    private inventoryService: InventoryService,
-    private configService: ConfigService,
-  ) {}
+  constructor(private inventoryService: InventoryService, private configService: ConfigService) {}
 
   @ResolveField()
   async default(@Parent() parent: GetInventoryChildDto) {
     const defaultRewards: Reward[] = [];
-    const inventory = await this.inventoryService.getInventory(
-      parent.userAddress,
-    );
+    const inventory = await this.inventoryService.getInventory(parent.userAddress);
 
     for (let i = 0; i < inventory.length; i++) {
       let reward: Reward;
@@ -42,10 +31,9 @@ export class InventoryResolver {
   @ResolveField()
   //get all tickets for a user
   async redeemed(@Parent() parent: GetInventoryChildDto) {
-    const res = await axios.get(
-      `${this.configService.get('microservice.ticket.url')}/api/ticket`,
-      { params: { userAddress: parent.userAddress } },
-    );
+    const res = await axios.get(`${this.configService.get('microservice.ticket.url')}/api/ticket`, {
+      params: { userAddress: parent.userAddress },
+    });
     const userRedeemedInfo: UserRedeemedRes[] = res.data;
     const redeemed: Redeemed[] = [];
     //creatorid->itemId->statuses
@@ -55,10 +43,7 @@ export class InventoryResolver {
       if (temp[userRedeemedInfo[x].creatorId] === undefined) {
         temp[userRedeemedInfo[x].creatorId] = {};
       }
-      if (
-        temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] ===
-        undefined
-      ) {
+      if (temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] === undefined) {
         temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId] = [];
       }
       temp[userRedeemedInfo[x].creatorId][userRedeemedInfo[x].itemId].push(

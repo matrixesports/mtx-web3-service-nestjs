@@ -1,7 +1,4 @@
-import {
-  RequiredUserPaymentOptions,
-  RequiredUserSocialOptions,
-} from 'src/graphql.schema';
+import { RequiredUserPaymentOptions, RequiredUserSocialOptions } from 'src/graphql.schema';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('battlepass')

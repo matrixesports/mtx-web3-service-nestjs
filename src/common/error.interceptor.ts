@@ -1,10 +1,4 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  NestInterceptor,
-  Logger,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor, Logger } from '@nestjs/common';
 import { catchError, Observable, throwError } from 'rxjs';
 import { ErrorCode as codes } from '@ethersproject/logger';
 import { EthersException } from './filters';
@@ -24,8 +18,7 @@ export class ErrorInterceptor implements NestInterceptor {
           // const response = context.switchToHttp().getResponse();
           if (error.constructor.name == Warn.name) {
             if (error?.error) this.logger.warn(error.error);
-          } else if (error?.code in codes)
-            return this.parseEthersError(error, this.logger);
+          } else if (error?.code in codes) return this.parseEthersError(error, this.logger);
           else this.logger.error(error);
           return error;
         }),
@@ -84,3 +77,15 @@ export class Warn extends GraphQLError {
     this.error = error;
   }
 }
+
+export class Err extends GraphQLError {
+  error: string;
+  context: string;
+  constructor(_message: string, _error?: string, _context?: any) {
+    super(_message);
+    this.error = _error;
+    this.context = JSON.stringify(_context);
+  }
+}
+
+export const REDEEM_TICKET_ERROR = 'REDEEM_TICKET_ERROR';

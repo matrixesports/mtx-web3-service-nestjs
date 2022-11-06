@@ -6,26 +6,34 @@ import { BattlePassDB } from 'src/battlepass/battlepass.entity';
 import {
   ClaimLootdropAlert,
   CLAIM_LOOTDROP_ALERT,
+  Follower,
   LeaderboardAlert,
   LEADERBOARD_ALERT,
   LevelUpAlert,
   LEVELUP_ALERT,
+  LootdropAlert,
   NEW_LOOTDROP_ALERT,
   NEW_SEASON_ALERT,
   PremPassAlert,
   PREM_PASS_ALERT,
-  RequiredFieldsBody,
-  RequiredFieldsResponse,
+  RequiredFields,
   SeasonAlert,
   ShortUrl,
   TicketRedeemBody,
   TwitchRedeemBody,
+  UserInfo,
 } from './microservice.dto';
 import { parse } from 'postgres-array';
 import { MetadataDB } from 'src/inventory/inventory.entity';
 import { ClientProxy } from '@nestjs/microservices';
 import { LootdropReward } from 'src/reward/reward.dto';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Err, REDEEM_TICKET_ERROR } from 'src/common/error.interceptor';
+import {
+  RequiredUserPaymentOptions,
+  RequiredUserSocialOptions,
+  UserMissingFields,
+} from 'src/graphql.schema';
 
 @Injectable()
 export class MicroserviceService {
@@ -35,31 +43,16 @@ export class MicroserviceService {
     @Inject('DISCORD_SERVICE') private discordClient: ClientProxy,
   ) {}
 
-  sendClaimLootdropAlert(creatorId: number, userAddress: string) {
-    const alert: ClaimLootdropAlert = {
-      userAddress,
-      creatorId,
-    };
+  sendClaimLootdropAlert(alert: ClaimLootdropAlert) {
     this.twitchClient.emit<ClaimLootdropAlert>(CLAIM_LOOTDROP_ALERT, alert);
   }
 
-  sendNewLootdropAlert(alert: LootdropReward) {
+  sendLootdropAlert(alert: LootdropAlert) {
     this.twitchClient.emit<LootdropReward>(NEW_LOOTDROP_ALERT, alert);
     this.discordClient.emit<LootdropReward>(NEW_LOOTDROP_ALERT, alert);
   }
 
-  sendLevelUpAlert(
-    creatorId: number,
-    userAddress: string,
-    oldlvl: number,
-    newlvl: number,
-  ) {
-    const alert: LevelUpAlert = {
-      creatorId,
-      userAddress,
-      oldlvl,
-      newlvl,
-    };
+  sendLevelUpAlert(alert: LevelUpAlert) {
     this.discordClient.emit<LevelUpAlert>(LEVELUP_ALERT, alert);
   }
 
@@ -67,18 +60,7 @@ export class MicroserviceService {
     this.discordClient.emit<LeaderboardAlert>(LEADERBOARD_ALERT, alert);
   }
 
-  sendPremPassAlert(
-    creatorId: number,
-    userAddress: string,
-    seasonId: number,
-    streaks: number,
-  ) {
-    const alert: PremPassAlert = {
-      creatorId,
-      userAddress,
-      seasonId,
-      streaks,
-    };
+  sendPremPassAlert(alert: PremPassAlert) {
     this.discordClient.emit<PremPassAlert>(PREM_PASS_ALERT, alert);
   }
 
@@ -92,10 +74,14 @@ export class MicroserviceService {
     };
     const {
       data: { shortUrl },
-    } = await axios.post<ShortUrl>(
-      `${this.configService.get<string>('microservice.url.url')}/createurl`,
-      urlpayload,
-    );
+    } = await axios
+      .post<ShortUrl>(
+        `${this.configService.get<string>('microservice.url.url')}/createurl`,
+        urlpayload,
+      )
+      .catch((err) => {
+        throw new Err('URL Service Failed', err, creatorId);
+      });
     return shortUrl;
   }
 
@@ -115,30 +101,37 @@ export class MicroserviceService {
     // });
     // return res.data;
     const res = await axios
-      .get(
+      .get<Follower[]>(
         `${this.configService.get<string>(
           'microservice.user.url',
         )}/api/creator/${creatorId}/followers`,
       )
-      .catch((error) => {
-        console.log(error);
-        throw new Error('Fetching Leaderboard Failed!');
+      .catch((err) => {
+        throw new Err('User Service Failed', err, creatorId);
       });
     return res.data;
   }
 
-  /**
-   * check what contact info is needed for a season
-   * only called for level 1
-   * @param creatorId
-   * @param userAddress
-   * @param level
-   */
+  //   GET: {USER_SERVICE_URL}/api/user/:userAddress
+  // Header: { api-token: "*KwAx?YeekQzpwfvf8y@2J#p2Tt@J9QtbC=Zb33G+M6GK8Qg+f7J&Q4gD5Fj3A8h" }
+
+  // Response: { name: string, pfp: string }
+
+  async getUserInfo(userAddress: string) {
+    const res = await axios
+      .get<UserInfo>(
+        `${this.configService.get<string>('microservice.user.url')}/api/user/${userAddress}`,
+      )
+      .catch((err) => {
+        throw new Err('User Service Failed', err, userAddress);
+      });
+    return res.data;
+  }
+
   async checkRequiredFields(
-    creatorId: number,
     userAddress: string,
     battlePassDB: BattlePassDB,
-  ): Promise<RequiredFieldsResponse> {
+  ): Promise<UserMissingFields> {
     if (
       battlePassDB.required_user_social_options.length == 0 &&
       battlePassDB.required_user_payment_options.length == 0
@@ -153,45 +146,41 @@ export class MicroserviceService {
       battlePassDB.required_user_payment_options,
       (value) => value,
     );
-    const requiredFieldsBody: RequiredFieldsBody = {
+    const requiredFields: RequiredFields = {
       userAddress,
       required_user_social_options,
       required_user_payment_options,
     };
-    const missingRedeemFields = await axios.post(
-      `${this.configService.get<string>(
-        'microservice.user.url',
-      )}/api/user/missingRedeemFields`,
-      requiredFieldsBody,
-    );
+    const missingRedeemFields = await axios
+      .post<{
+        missing_user_payment_options: RequiredUserPaymentOptions[];
+        missing_user_social_options: RequiredUserSocialOptions[];
+      }>(
+        `${this.configService.get<string>('microservice.user.url')}/api/user/missingRedeemFields`,
+        requiredFields,
+      )
+      .catch((err) => {
+        throw new Err('User Service Failed', err, missingRedeemFields);
+      });
     if (
       missingRedeemFields.data.missing_user_payment_options.length != 0 ||
       missingRedeemFields.data.missing_user_social_options.length != 0
     ) {
       return {
-        missing_user_payment_options:
-          missingRedeemFields.data.missing_user_payment_options,
-        missing_user_social_options:
-          missingRedeemFields.data.missing_user_social_options,
+        payment: missingRedeemFields.data.missing_user_payment_options,
+        social: missingRedeemFields.data.missing_user_social_options,
       };
     }
     return null;
   }
 
-  /**
-   * helper when item is redeemed
-   * @param itemId
-   * @param userAddress
-   * @param creatorId
-   * @param address
-   * @param metadata
-   */
-  async redeemItemHelper(
+  async sendRedeemAlert(
     itemId: number,
     userAddress: string,
     creatorId: number,
     address: string,
     metadata: MetadataDB,
+    contact = '',
   ) {
     const ticketRedeemBody: TicketRedeemBody = {
       name: metadata.name,
@@ -201,13 +190,16 @@ export class MicroserviceService {
       itemId: itemId,
       userAddress: userAddress,
       itemAddress: address,
+      contactInfo: contact.length != 0 ? contact : null,
     };
-    await axios.post(
-      `${this.configService.get<string>(
-        'microservice.ticket.url',
-      )}/api/ticket/redemption`,
-      ticketRedeemBody,
-    );
+    await axios
+      .post(
+        `${this.configService.get<string>('microservice.ticket.url')}/api/ticket/redemption`,
+        ticketRedeemBody,
+      )
+      .catch((err) => {
+        throw new Err(REDEEM_TICKET_ERROR, err, ticketRedeemBody);
+      });
     const twitchRedeemBody: TwitchRedeemBody = {
       ...metadata,
       creatorId: creatorId,
@@ -215,16 +207,14 @@ export class MicroserviceService {
       userAddress: userAddress,
       itemAddress: address,
     };
-    try {
-      await axios.post(
-        `${this.configService.get<string>(
-          'microservice.twitch.url',
-        )}/redemptions/redemption`,
+    await axios
+      .post(
+        `${this.configService.get<string>('microservice.twitch.url')}/redemptions/redemption`,
         twitchRedeemBody,
-      );
-    } catch (e) {
-      console.log('Twitch Service Failed');
-    }
+      )
+      .catch((err) => {
+        throw new Err('Twitch Service Failed', err, twitchRedeemBody);
+      });
   }
 }
 
@@ -236,7 +226,7 @@ export class MicroserviceService {
 
 @Controller('')
 export class MockController {
-  @ApiOkResponse({ type: LootdropReward })
+  @ApiOkResponse({ type: LootdropAlert })
   @Post(NEW_LOOTDROP_ALERT)
   @ApiTags('TCP EVENTS')
   async mock() {}

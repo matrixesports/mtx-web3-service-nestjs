@@ -1,12 +1,4 @@
-import {
-  Args,
-  Context,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { ChainService } from 'src/chain/chain.service';
 import { Reward } from 'src/graphql.schema';
 import { CraftingService } from './crafting.service';
@@ -82,8 +74,7 @@ export class CraftingResolver {
     const recipes = await this.craftingService.getAllActiveRecipes();
     const creators = [...new Set(recipes.map((recipe) => recipe.creator_id))];
     const owners = await this.craftingService.getOwner(creators);
-    if (creators.length != owners.length)
-      throw new Error('Invalid Recipes or Creator!');
+    if (creators.length != owners.length) throw new Error('Invalid Recipes or Creator!');
     const ingridients = await this.craftingService.getIngridients(recipes);
     for (let i = 0; i < ingridients.length; i++) {
       dtos.push({

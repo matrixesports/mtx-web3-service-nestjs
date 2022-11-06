@@ -76,16 +76,10 @@ export class CraftingService {
       for (let i = 0; i < results.length - 1; i += 2) {
         const recipe: Recipe = {
           input: this.mapIngridients(
-            iface.decodeFunctionResult(
-              'getInputIngredients',
-              results[i].returnData[1],
-            ),
+            iface.decodeFunctionResult('getInputIngredients', results[i].returnData[1]),
           ),
           output: this.mapIngridients(
-            iface.decodeFunctionResult(
-              'getOutputIngredients',
-              results[i + 1].returnData[1],
-            ),
+            iface.decodeFunctionResult('getOutputIngredients', results[i + 1].returnData[1]),
           ),
         };
         const target = `recipe-${notCached[i].id}`;
@@ -109,16 +103,13 @@ export class CraftingService {
     let owners: AxiosResponse<any, any>;
     try {
       owners = await axios.post(
-        `${
-          this.configService.get('SERVICE').userService
-        }/api/creator/getRecipes`,
+        `${this.configService.get('SERVICE').userService}/api/creator/getRecipes`,
         { ids: creatorIds },
       );
     } catch (e) {
       throw new Error('Fetch Owners from User-Service Failed!');
     }
-    if (owners.data.length == 0)
-      throw new Error('Owners Not Found In User-Service!');
+    if (owners.data.length == 0) throw new Error('Owners Not Found In User-Service!');
     return owners.data as Owner[];
   }
 
@@ -215,9 +206,7 @@ export class CraftingService {
   }
 
   async getAllRecipes() {
-    const recipes = await this.recipeRepository
-      .createQueryBuilder('recipe')
-      .getMany();
+    const recipes = await this.recipeRepository.createQueryBuilder('recipe').getMany();
     if (recipes.length != 0) return recipes;
     throw new Error('Recipes Not Found!');
   }

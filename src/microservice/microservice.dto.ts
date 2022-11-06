@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Requirements } from 'src/graphql.schema';
+import { LootdropReward, Reward } from 'src/reward/reward.dto';
 
 export const LEVELUP_ALERT = 'levelup';
 export const NEW_LOOTDROP_ALERT = 'new-lootdrop';
@@ -7,7 +9,13 @@ export const LEADERBOARD_ALERT = 'leaderboard';
 export const NEW_SEASON_ALERT = 'new-season';
 export const CLAIM_LOOTDROP_ALERT = 'claim-lootdrop';
 
-export class LevelUpAlert {
+abstract class BaseAlert {
+  creatorId: number;
+  userAddress: string;
+  pfp: string;
+  name: string;
+}
+export class LevelUpAlert implements BaseAlert {
   @ApiProperty({ type: Number })
   creatorId: number;
   @ApiProperty({ type: String })
@@ -16,16 +24,24 @@ export class LevelUpAlert {
   oldlvl: number;
   @ApiProperty({ type: Number })
   newlvl: number;
+  @ApiProperty({ type: String })
+  pfp: string;
+  @ApiProperty({ type: String })
+  name: string;
 }
 
-export class ClaimLootdropAlert {
+export class ClaimLootdropAlert implements BaseAlert {
   @ApiProperty({ type: Number })
   creatorId: number;
   @ApiProperty({ type: String })
   userAddress: string;
+  @ApiProperty({ type: String })
+  pfp: string;
+  @ApiProperty({ type: String })
+  name: string;
 }
 
-export class LeaderboardAlert {
+export class LeaderboardAlert implements BaseAlert {
   @ApiProperty({ type: Number })
   creatorId: number;
   @ApiProperty({ type: String })
@@ -38,13 +54,13 @@ export class LeaderboardAlert {
   oldRepRank: number;
   @ApiProperty({ type: Number })
   newRepRank: number;
-  @ApiProperty({ type: String, required: false })
-  pfp?: string;
-  @ApiProperty({ type: String, required: false })
-  name?: string;
+  @ApiProperty({ type: String })
+  pfp: string;
+  @ApiProperty({ type: String })
+  name: string;
 }
 
-export class PremPassAlert {
+export class PremPassAlert implements BaseAlert {
   @ApiProperty({ type: Number })
   creatorId: number;
   @ApiProperty({ type: String })
@@ -56,6 +72,10 @@ export class PremPassAlert {
     description: 'Number of consecutive premium passes',
   })
   streaks: number;
+  @ApiProperty({ type: String })
+  pfp: string;
+  @ApiProperty({ type: String })
+  name: string;
 }
 
 export class SeasonAlert {
@@ -75,6 +95,23 @@ export class SeasonAlert {
   end: string;
 }
 
+export class LootdropAlert implements LootdropReward {
+  @ApiProperty({ type: Number })
+  creatorId: number;
+  @ApiProperty({ type: Reward })
+  reward: Reward;
+  @ApiProperty({ enum: Requirements })
+  requirements: Requirements;
+  @ApiProperty({ type: Number })
+  threshold: number;
+  @ApiProperty({ type: String })
+  start: string;
+  @ApiProperty({ type: String })
+  end: string;
+  @ApiProperty({ type: String })
+  url: string;
+}
+
 export class ShortUrl {
   shortUrl: string;
 }
@@ -87,6 +124,7 @@ export class TicketRedeemBody {
   itemId: number;
   userAddress: string;
   itemAddress: string;
+  contactInfo?: string;
 }
 
 export class TwitchRedeemBody {
@@ -99,20 +137,19 @@ export class TwitchRedeemBody {
   itemAddress: string;
 }
 
-export class RequiredFieldsBody {
+export class RequiredFields {
   userAddress: string;
   required_user_social_options: string[];
   required_user_payment_options: string[];
 }
 
-export class RequiredFieldsResponse {
-  missing_user_social_options: string[];
-  missing_user_payment_options: string[];
+export class UserInfo {
+  pfp: string;
+  name: string;
 }
-
-export class Follower {
+export class Follower implements UserInfo {
   id: string;
-  pfp?: string;
-  name?: string;
+  pfp: string;
+  name: string;
   userAddress: string;
 }

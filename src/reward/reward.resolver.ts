@@ -1,22 +1,11 @@
-import {
-  Args,
-  Context,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { RewardService } from './reward.service';
 import { GetLootdropDto, LootdropRS } from './reward.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
 
 @Resolver('Lootdrop')
 export class LootdropResolver {
-  constructor(
-    private rewardService: RewardService,
-    private inventoryService: InventoryService,
-  ) {}
+  constructor(private rewardService: RewardService, private inventoryService: InventoryService) {}
 
   @Query('getLootdrop')
   async getlootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
@@ -26,19 +15,16 @@ export class LootdropResolver {
   @Mutation('claimLootdrop')
   async claimLootdrop(
     @Args('creatorId') creatorId: number,
+    @Args('contract') contract: string,
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    return this.rewardService.claimLootdrop(creatorId, userAddress);
+    return this.rewardService.claimLootdrop(creatorId, userAddress, contract);
   }
 
   @ResolveField()
   async reward(@Parent() parent: GetLootdropDto) {
-    return await this.inventoryService.createRewardObj(
-      parent.creatorId,
-      parent.rewardId,
-      1,
-    );
+    return await this.inventoryService.createRewardObj(parent.creatorId, parent.rewardId, 1);
   }
 
   @ResolveField()

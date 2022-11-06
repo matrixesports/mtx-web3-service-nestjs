@@ -26,28 +26,16 @@ export class ChainService {
   craftingProxy: ERC1967Proxy;
   pubAddr: string;
 
-  constructor(
-    private configService: ConfigService,
-    @InjectRedis() private readonly redis: Redis,
-  ) {
+  constructor(private configService: ConfigService, @InjectRedis() private readonly redis: Redis) {
     this.pubAddr = configService.get('PUB_ADDR');
     const rpc = configService.get('rpc');
     this.provider = new ethers.providers.AlchemyProvider(rpc.name, rpc.apiKey);
     this.chainId = rpc.chainId;
     this.multicallObj = new Multicall({ provider: this.provider });
-    this.signer = new ethers.Wallet(
-      this.configService.get('PVT_KEY'),
-      this.provider,
-    );
+    this.signer = new ethers.Wallet(this.configService.get('PVT_KEY'), this.provider);
     const contracts = configService.get('contracts');
-    this.battlePassFactory = BattlePassFactory__factory.connect(
-      contracts.bpFactory,
-      this.provider,
-    );
-    this.craftingProxy = ERC1967Proxy__factory.connect(
-      contracts.craftingProxy,
-      this.provider,
-    );
+    this.battlePassFactory = BattlePassFactory__factory.connect(contracts.bpFactory, this.provider);
+    this.craftingProxy = ERC1967Proxy__factory.connect(contracts.craftingProxy, this.provider);
   }
 
   getSignerContract(contract: Contract) {
@@ -99,9 +87,7 @@ export class ChainService {
    * @returns
    */
   async getBattlePassContract(creatorId: number): Promise<BattlePass> {
-    const address = await this.battlePassFactory.getBattlePassFromUnderlying(
-      creatorId,
-    );
+    const address = await this.battlePassFactory.getBattlePassFromUnderlying(creatorId);
     const exists = await this.battlePassFactory.isBattlePassDeployed(address);
     if (!exists) throw new Error('BattlePass not deployed');
     return BattlePass__factory.connect(address, this.provider);
@@ -113,18 +99,14 @@ export class ChainService {
    * @returns
    */
   async getBattlePassAddress(creatorId: number) {
-    const address = await this.battlePassFactory.getBattlePassFromUnderlying(
-      creatorId,
-    );
+    const address = await this.battlePassFactory.getBattlePassFromUnderlying(creatorId);
     const exists = await this.battlePassFactory.isBattlePassDeployed(address);
     if (!exists) throw new Error('BattlePass not deployed');
     return address;
   }
 
   async isBattlePassDeployed(creatorId: number) {
-    const address = await this.battlePassFactory.getBattlePassFromUnderlying(
-      creatorId,
-    );
+    const address = await this.battlePassFactory.getBattlePassFromUnderlying(creatorId);
     return await this.battlePassFactory.isBattlePassDeployed(address);
   }
 
@@ -206,10 +188,7 @@ export class ChainService {
         method: 'get',
         url: 'https://gasstation-mainnet.matic.network/v2',
       });
-      const maxFeePerGas = ethers.utils.parseUnits(
-        Math.ceil(data.fast.maxFee) + '',
-        'gwei',
-      );
+      const maxFeePerGas = ethers.utils.parseUnits(Math.ceil(data.fast.maxFee) + '', 'gwei');
       const maxPriorityFeePerGas = ethers.utils.parseUnits(
         Math.ceil(data.fast.maxPriorityFee) + '',
         'gwei',
@@ -221,10 +200,7 @@ export class ChainService {
       };
     } catch (e) {
       return {
-        maxPriorityFeePerGas: ethers.utils.parseUnits(
-          Math.ceil(40) + '',
-          'gwei',
-        ),
+        maxPriorityFeePerGas: ethers.utils.parseUnits(Math.ceil(40) + '', 'gwei'),
       };
     }
   }
