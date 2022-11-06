@@ -359,7 +359,7 @@ export class BattlePassService {
       ids.push(this.REPUTATION_ID);
     }
     const results = await contract.balanceOfBatch(addresses, ids);
-    const index = followers.findIndex((follower) => follower.userAddress === userAddress);
+    const index = followers.findIndex((follower) => follower.userAddress === '0x' + userAddress);
     const dto: GetRankingDto = {
       id: followers[index].id,
       userAddress: followers[index].userAddress,
@@ -420,7 +420,12 @@ export class BattlePassService {
     return dtos;
   }
 
-  async getSeasonRanking(creatorId: number, seasonId: number, followers: Follower[], userAddress) {
+  async getSeasonRanking(
+    creatorId: number,
+    seasonId: number,
+    followers: Follower[],
+    userAddress: string,
+  ) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const iface = BattlePass__factory.createInterface();
     const fragment = iface.getFunction('userInfo');
@@ -438,7 +443,7 @@ export class BattlePassService {
     }
     const results = await this.chainService.multicall(calls);
     if (results == null) return null;
-    const index = followers.findIndex((follower) => follower.userAddress === userAddress);
+    const index = followers.findIndex((follower) => follower.userAddress === '0x' + userAddress);
     const dto: GetRankingDto = {
       id: followers[index].id,
       userAddress: followers[index].userAddress,
