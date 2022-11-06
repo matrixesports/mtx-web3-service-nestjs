@@ -359,7 +359,7 @@ export class BattlePassService {
       ids.push(this.REPUTATION_ID);
     }
     const results = await contract.balanceOfBatch(addresses, ids);
-    const index = followers.findIndex((follower) => follower.userAddress === '0x' + userAddress);
+    const index = followers.findIndex((follower) => follower.userAddress === userAddress);
     const dto: GetRankingDto = {
       id: followers[index].id,
       userAddress: followers[index].userAddress,
@@ -443,7 +443,7 @@ export class BattlePassService {
     }
     const results = await this.chainService.multicall(calls);
     if (results == null) return null;
-    const index = followers.findIndex((follower) => follower.userAddress === '0x' + userAddress);
+    const index = followers.findIndex((follower) => follower.userAddress === userAddress);
     const dto: GetRankingDto = {
       id: followers[index].id,
       userAddress: followers[index].userAddress,

@@ -141,7 +141,7 @@ export class ApiController {
   @Post('mint/xp') async mintXp(@Body() mintXpDto: MintXpDto) {
     await this.battlePassService.giveXp(
       mintXpDto.creatorId,
-      mintXpDto.userAddress,
+      '0x' + mintXpDto.userAddress,
       mintXpDto.amount,
     );
     return { success: true };
