@@ -132,8 +132,8 @@ import { MicroserviceModule } from './microservice/microservice.module';
         playground: false,
         debug: true, // stacktrace for error context
         formatError: (error) => {
-          const message = 'on-chain error';
-          return new GraphQLError(message);
+          //const message = 'on-chain error';
+          return new GraphQLError(error.message);
         },
         plugins: [ApolloServerPluginLandingPageLocalDefault()],
       }),

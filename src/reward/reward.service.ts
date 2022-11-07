@@ -25,6 +25,7 @@ export class RewardService {
     let userThreshold: number;
     switch (lootdrop.requirements) {
       case Requirements.ALLXP:
+        // better leaderboard fn
         userThreshold = await this.battlePassService.getOneAllSeasonInfo(creatorId, userAddress);
         if (userThreshold == null) throw new Error('On-Chain Error!');
         if (userThreshold < lootdrop.threshold)

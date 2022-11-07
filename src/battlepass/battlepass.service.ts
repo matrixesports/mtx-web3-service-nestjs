@@ -348,7 +348,7 @@ export class BattlePassService {
     return dtos;
   }
 
-  async getReputationRanking(creatorId: number, followers: Follower[], userAddress: string) {
+  async getReputationRanking(creatorId: number, followers: Follower[], _userAddress: string) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const addresses = [];
     const ids = [];
@@ -357,6 +357,7 @@ export class BattlePassService {
       addresses.push(follower.userAddress);
       ids.push(this.REPUTATION_ID);
     }
+    const userAddress = this.chainService.getAddress(_userAddress);
     const results = await contract.balanceOfBatch(addresses, ids);
     const index = followers.findIndex((follower) => follower.userAddress === userAddress);
     const dto: GetRankingDto = {
