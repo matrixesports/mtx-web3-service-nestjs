@@ -8,7 +8,7 @@ export class LootdropResolver {
   constructor(private rewardService: RewardService, private inventoryService: InventoryService) {}
 
   @Query()
-  async getlootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
+  async getLootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
     return this.rewardService.getlootdrop(creatorId);
   }
 

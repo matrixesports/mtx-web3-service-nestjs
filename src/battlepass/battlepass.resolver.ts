@@ -264,7 +264,7 @@ export class ReputationRankingResolver {
   async getReputationRanking(@Args('creatorId') creatorId: number, @Context() context) {
     const userAddress: string = context.req.headers['user-address'];
     const followers = await this.microserviceService.getFollowers(creatorId);
-    return this.battlePassService.getReputationRanking(creatorId, followers, userAddress);
+    return await this.battlePassService.getReputationRanking(creatorId, followers, userAddress);
   }
 
   @ResolveField()
