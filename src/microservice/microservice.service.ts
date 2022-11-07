@@ -190,7 +190,7 @@ export class MicroserviceService {
       itemId: itemId,
       userAddress: userAddress,
       itemAddress: address,
-      contactInfo: contact.length != 0 ? contact : null,
+      contactInfo: contact,
     };
     await axios
       .post(
