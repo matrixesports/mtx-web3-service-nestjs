@@ -23,7 +23,6 @@ export class RewardService {
 
   async claimLootdrop(creatorId: number, userAddress: string, contact: string) {
     const lootdrop = await this.getlootdrop(creatorId);
-    // TODO UPDATE WITH CONTACTT UNFO
     let userThreshold: number;
     switch (lootdrop.requirements) {
       case Requirements.ALLXP:

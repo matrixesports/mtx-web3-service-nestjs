@@ -31,7 +31,7 @@ type Mutation {
   ): ClaimRewardResponse!
   redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
   craft(recipeId: Int!): MutationResponse!
-  claimLootdrop(creatorId: Int!, contract: String!): MutationResponse!
+  claimLootdrop(creatorId: Int!, contact: String!): MutationResponse!
 }
 
 type ClaimRewardResponse {

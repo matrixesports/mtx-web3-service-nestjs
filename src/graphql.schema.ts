@@ -81,7 +81,7 @@ export abstract class IMutation {
 
     abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
 
-    abstract claimLootdrop(creatorId: number, contract: string): MutationResponse | Promise<MutationResponse>;
+    abstract claimLootdrop(creatorId: number, contact: string): MutationResponse | Promise<MutationResponse>;
 }
 
 export class ClaimRewardResponse {

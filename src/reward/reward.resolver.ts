@@ -15,11 +15,11 @@ export class LootdropResolver {
   @Mutation('claimLootdrop')
   async claimLootdrop(
     @Args('creatorId') creatorId: number,
-    @Args('contract') contract: string,
+    @Args('contact') contact: string,
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    return this.rewardService.claimLootdrop(creatorId, userAddress, contract);
+    return this.rewardService.claimLootdrop(creatorId, userAddress, contact);
   }
 
   @ResolveField()
