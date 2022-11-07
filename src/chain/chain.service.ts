@@ -47,6 +47,10 @@ export class ChainService {
     return this.signer;
   }
 
+  getAddress(userAddress: string) {
+    return ethers.utils.getAddress(userAddress);
+  }
+
   async getNonce() {
     const target = `nonce`;
     const cache = await this.redis.get(target);
