@@ -67,14 +67,4 @@ export class ErrorInterceptor implements NestInterceptor {
   }
 }
 
-export class Err extends GraphQLError {
-  error: string;
-  context: string;
-  constructor(_message: string, _error?: string, _context?: any) {
-    super(_message);
-    this.error = _error;
-    this.context = JSON.stringify(_context);
-  }
-}
-
 export const REDEEM_TICKET_ERROR = 'REDEEM_TICKET_ERROR';

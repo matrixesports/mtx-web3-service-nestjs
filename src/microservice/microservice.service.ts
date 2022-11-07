@@ -28,7 +28,6 @@ import { MetadataDB } from 'src/inventory/inventory.entity';
 import { ClientProxy } from '@nestjs/microservices';
 import { LootdropReward } from 'src/reward/reward.dto';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { Err, REDEEM_TICKET_ERROR } from 'src/common/error.interceptor';
 import {
   RequiredUserPaymentOptions,
   RequiredUserSocialOptions,
@@ -74,14 +73,10 @@ export class MicroserviceService {
     };
     const {
       data: { shortUrl },
-    } = await axios
-      .post<ShortUrl>(
-        `${this.configService.get<string>('microservice.url.url')}/createurl`,
-        urlpayload,
-      )
-      .catch((err) => {
-        throw new Err('URL Service Failed', err, creatorId);
-      });
+    } = await axios.post<ShortUrl>(
+      `${this.configService.get<string>('microservice.url.url')}/createurl`,
+      urlpayload,
+    );
     return shortUrl;
   }
 
@@ -100,31 +95,23 @@ export class MicroserviceService {
     //   name: 'name1',
     // });
     // return res.data;
-    const res = await axios
-      .get<Follower[]>(
-        `${this.configService.get<string>(
-          'microservice.user.url',
-        )}/api/creator/${creatorId}/followers`,
-      )
-      .catch((err) => {
-        throw new Err('User Service Failed', err, creatorId);
-      });
+    const res = await axios.get<Follower[]>(
+      `${this.configService.get<string>(
+        'microservice.user.url',
+      )}/api/creator/${creatorId}/followers`,
+    );
     return res.data;
   }
 
   async getUserInfo(userAddress: string) {
-    const res = await axios
-      .get<UserInfo>(
-        `${this.configService.get<string>('microservice.user.url')}/api/user/${userAddress}`,
-        {
-          headers: {
-            'api-token': this.configService.get<string>('microservice.user.token'),
-          },
+    const res = await axios.get<UserInfo>(
+      `${this.configService.get<string>('microservice.user.url')}/api/user/${userAddress}`,
+      {
+        headers: {
+          'api-token': this.configService.get<string>('microservice.user.token'),
         },
-      )
-      .catch((err) => {
-        throw new Err('User Service Failed', err, userAddress);
-      });
+      },
+    );
     return res.data;
   }
 
@@ -151,17 +138,13 @@ export class MicroserviceService {
       required_user_social_options,
       required_user_payment_options,
     };
-    const missingRedeemFields = await axios
-      .post<{
-        missing_user_payment_options: RequiredUserPaymentOptions[];
-        missing_user_social_options: RequiredUserSocialOptions[];
-      }>(
-        `${this.configService.get<string>('microservice.user.url')}/api/user/missingRedeemFields`,
-        requiredFields,
-      )
-      .catch((err) => {
-        throw new Err('User Service Failed', err, missingRedeemFields);
-      });
+    const missingRedeemFields = await axios.post<{
+      missing_user_payment_options: RequiredUserPaymentOptions[];
+      missing_user_social_options: RequiredUserSocialOptions[];
+    }>(
+      `${this.configService.get<string>('microservice.user.url')}/api/user/missingRedeemFields`,
+      requiredFields,
+    );
     if (
       missingRedeemFields.data.missing_user_payment_options.length != 0 ||
       missingRedeemFields.data.missing_user_social_options.length != 0
@@ -192,14 +175,10 @@ export class MicroserviceService {
       itemAddress: address,
       contactInfo: contact,
     };
-    await axios
-      .post(
-        `${this.configService.get<string>('microservice.ticket.url')}/api/ticket/redemption`,
-        ticketRedeemBody,
-      )
-      .catch((err) => {
-        throw new Err(REDEEM_TICKET_ERROR, err, ticketRedeemBody);
-      });
+    await axios.post(
+      `${this.configService.get<string>('microservice.ticket.url')}/api/ticket/redemption`,
+      ticketRedeemBody,
+    );
     const twitchRedeemBody: TwitchRedeemBody = {
       ...metadata,
       creatorId: creatorId,
@@ -213,7 +192,7 @@ export class MicroserviceService {
         twitchRedeemBody,
       )
       .catch((err) => {
-        throw new Err('Twitch Service Failed', err, twitchRedeemBody);
+        throw new Error('Twitch Service Failed');
       });
   }
 }
