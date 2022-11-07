@@ -19,7 +19,7 @@ export class LootdropResolver {
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    return this.rewardService.claimLootdrop(creatorId, userAddress, contact);
+    return await this.rewardService.claimLootdrop(creatorId, userAddress, contact);
   }
 
   @ResolveField()
