@@ -10,7 +10,6 @@ import { ChainService } from 'src/chain/chain.service';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { BattlePass, BattlePass__factory } from 'abi/typechain';
-import { Warn } from 'src/common/error.interceptor';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MicroserviceService } from 'src/microservice/microservice.service';
 import { Follower, LeaderboardAlert, LevelUpAlert } from 'src/microservice/microservice.dto';
@@ -129,7 +128,7 @@ export class BattlePassService {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     await bp.callStatic.mint(userAddress, id, qty).catch((err) => {
-      throw new Warn('Transaction Reverted!', err);
+      throw new Error('Transaction Reverted!');
     });
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
@@ -142,7 +141,7 @@ export class BattlePassService {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     await bp.callStatic.burn(userAddress, id, qty).catch((err) => {
-      throw new Warn('Transaction Reverted!', err);
+      throw new Error('Transaction Reverted!');
     });
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();
@@ -157,7 +156,7 @@ export class BattlePassService {
     const bp = this.chainService.getSignerContract(contract) as BattlePass;
     await bp.callStatic.giveXp(seasonId, xp, userAddress).catch((err) => {
       console.log(err);
-      throw new Warn('Transaction Reverted!');
+      throw new Error('Transaction Reverted!');
     });
     const nonce = await this.chainService.getNonce();
     const fee = await this.chainService.getMaticFeeData();

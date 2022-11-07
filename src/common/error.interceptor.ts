@@ -16,9 +16,7 @@ export class ErrorInterceptor implements NestInterceptor {
       catchError((error) =>
         throwError(() => {
           // const response = context.switchToHttp().getResponse();
-          if (error.constructor.name == Warn.name) {
-            if (error?.error) this.logger.warn(error.error);
-          } else if (error?.code in codes) return this.parseEthersError(error, this.logger);
+          if (error?.code in codes) return this.parseEthersError(error, this.logger);
           else this.logger.error(error);
           return error;
         }),
@@ -66,15 +64,6 @@ export class ErrorInterceptor implements NestInterceptor {
     );
     logger.error(newerr);
     return newerr;
-  }
-}
-
-// user facing errors
-export class Warn extends GraphQLError {
-  error: string;
-  constructor(message: string, error?: string) {
-    super(message);
-    this.error = error;
   }
 }
 

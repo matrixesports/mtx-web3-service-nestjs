@@ -1,6 +1,5 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
-import { Warn } from 'src/common/error.interceptor';
 import { plainToInstance } from 'class-transformer';
 import { LootdropRS } from './reward.dto';
 import { Injectable } from '@nestjs/common';
@@ -29,7 +28,7 @@ export class RewardService {
         userThreshold = await this.battlePassService.getOneAllSeasonInfo(creatorId, userAddress);
         if (userThreshold == null) throw new Error('On-Chain Error!');
         if (userThreshold < lootdrop.threshold)
-          throw new Warn(
+          throw new Error(
             `You need ${lootdrop.threshold - userThreshold} more XP to claim this Lootdrop!`,
           );
         break;
@@ -40,7 +39,7 @@ export class RewardService {
           lootdrop.rewardId,
         );
         if (userThreshold < lootdrop.threshold)
-          throw new Warn(
+          throw new Error(
             `You need ${
               lootdrop.threshold - userThreshold
             } more Reputation to claim this Lootdrop!`,
@@ -49,14 +48,14 @@ export class RewardService {
       case Requirements.SEASONXP:
         userThreshold = await this.battlePassService.getXp(creatorId, userAddress);
         if (userThreshold < lootdrop.threshold)
-          throw new Warn(
+          throw new Error(
             `You need ${lootdrop.threshold - userThreshold} more XP to claim this Lootdrop!`,
           );
         break;
       default:
         throw new Error('Invalid Lootdrop!');
     }
-    if (userThreshold < lootdrop.threshold) throw new Warn('User Cannot Meet Requirements!');
+    if (userThreshold < lootdrop.threshold) throw new Error('User Cannot Meet Requirements!');
     await this.setLootdropQty(creatorId, userAddress);
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(creatorId, lootdrop.rewardId);
@@ -81,14 +80,14 @@ export class RewardService {
   async getlootdrop(creatorId: number): Promise<LootdropRS> {
     const target = `lootdrop-${creatorId}`;
     const cache = await this.redis.get(target);
-    if (cache == null) throw new Warn('Lootdrop Not Active!');
+    if (cache == null) throw new Error('Lootdrop Not Active!');
     return plainToInstance(LootdropRS, JSON.parse(cache as string));
   }
 
   async setLootdropQty(creatorId: number, userAddress: string) {
     const target = `lootdrop-${creatorId}`;
     const claimed = await this.redis.sismember(target + '-list', userAddress);
-    if (claimed != null && claimed == 1) throw new Warn('Already Claimed!');
+    if (claimed != null && claimed == 1) throw new Error('Already Claimed!');
     const lootdrop = await this.getlootdrop(creatorId);
     if (lootdrop.qty == -1) {
       await this.redis.sadd(target + '-list', userAddress);
@@ -99,9 +98,9 @@ export class RewardService {
         retry = false;
         await this.redis.watch(target);
         const cache = await this.redis.get(target + '-qty');
-        if (cache == null) throw new Warn('Lootdrop Not Active!');
+        if (cache == null) throw new Error('Lootdrop Not Active!');
         const qty = parseInt(cache);
-        if (qty == 0) throw new Warn('Out of Rewards!');
+        if (qty == 0) throw new Error('Out of Rewards!');
         await this.redis
           .multi()
           .set(target + '-qty', qty - 1, 'KEEPTTL')

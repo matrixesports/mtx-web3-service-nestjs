@@ -7,12 +7,12 @@ import { InventoryService } from 'src/inventory/inventory.service';
 export class LootdropResolver {
   constructor(private rewardService: RewardService, private inventoryService: InventoryService) {}
 
-  @Query('getLootdrop')
+  @Query()
   async getlootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
     return this.rewardService.getlootdrop(creatorId);
   }
 
-  @Mutation('claimLootdrop')
+  @Mutation()
   async claimLootdrop(
     @Args('creatorId') creatorId: number,
     @Args('contact') contact: string,

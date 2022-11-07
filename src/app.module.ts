@@ -131,7 +131,7 @@ import { MicroserviceModule } from './microservice/microservice.module';
         typePaths: ['./**/*.graphql'],
         playground: false,
         debug: true, // stacktrace for error context
-        formatError: () => {
+        formatError: (error) => {
           const message = 'on-chain error';
           return new GraphQLError(message);
         },
