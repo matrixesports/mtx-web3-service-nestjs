@@ -179,21 +179,21 @@ export class MicroserviceService {
       `${this.configService.get<string>('microservice.ticket.url')}/api/ticket/redemption`,
       ticketRedeemBody,
     );
-    const twitchRedeemBody: TwitchRedeemBody = {
-      ...metadata,
-      creatorId: creatorId,
-      itemId: itemId,
-      userAddress: userAddress,
-      itemAddress: address,
-    };
-    await axios
-      .post(
-        `${this.configService.get<string>('microservice.twitch.url')}/redemptions/redemption`,
-        twitchRedeemBody,
-      )
-      .catch((err) => {
-        throw new Error('Twitch Service Failed');
-      });
+    // const twitchRedeemBody: TwitchRedeemBody = {
+    //   ...metadata,
+    //   creatorId: creatorId,
+    //   itemId: itemId,
+    //   userAddress: userAddress,
+    //   itemAddress: address,
+    // };
+    // await axios
+    //   .post(
+    //     `${this.configService.get<string>('microservice.twitch.url')}/redemptions/redemption`,
+    //     twitchRedeemBody,
+    //   )
+    //   .catch((err) => {
+    //     throw new Error('Twitch Service Failed');
+    //   });
   }
 }
 
