@@ -68,14 +68,14 @@ export class RewardService {
       metadata,
       contact,
     );
-    const userInfo = await this.microserviceService.getUserInfo(userAddress);
-    const alert: ClaimLootdropAlert = {
-      creatorId,
-      userAddress,
-      name: userInfo.name,
-      pfp: userInfo.pfp,
-    };
-    this.microserviceService.sendClaimLootdropAlert(alert);
+    // const userInfo = await this.microserviceService.getUserInfo(userAddress);
+    // const alert: ClaimLootdropAlert = {
+    //   creatorId,
+    //   userAddress,
+    //   name: userInfo.name,
+    //   pfp: userInfo.pfp,
+    // };
+    // this.microserviceService.sendClaimLootdropAlert(alert);
     return { success: true };
   }
   async getlootdrop(creatorId: number): Promise<LootdropRS> {
