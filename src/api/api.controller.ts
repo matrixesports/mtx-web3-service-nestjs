@@ -147,6 +147,14 @@ export class ApiController {
     return { success: true };
   }
 
+  @Get('test/test')
+  async test(@Body() mintXpDto: MintXpDto) {
+    console.log(
+      await this.microserviceService.getUserInfo('0xE0c788889AaBeAd8D4181d14b2868E7720AE1c26'),
+    );
+    return { success: true };
+  }
+
   @Post('deploy/battlepass')
   async deploy(@Body('creatorId') creatorId: number) {
     if (await this.chainService.isBattlePassDeployed(creatorId)) {

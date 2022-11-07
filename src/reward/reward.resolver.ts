@@ -9,7 +9,7 @@ export class LootdropResolver {
 
   @Query()
   async getLootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
-    return this.rewardService.getlootdrop(creatorId);
+    return await this.rewardService.getlootdrop(creatorId);
   }
 
   @Mutation()
