@@ -39,6 +39,14 @@ export class ClaimLootdropAlert implements BaseAlert {
   pfp: string;
   @ApiProperty({ type: String })
   name: string;
+  @ApiProperty({ type: String })
+  start: string;
+  @ApiProperty({ type: String })
+  end: string;
+  @ApiProperty({ type: String })
+  url: string;
+  @ApiProperty({ type: Number })
+  lootdropId: number;
 }
 
 export class LeaderboardAlert implements BaseAlert {
