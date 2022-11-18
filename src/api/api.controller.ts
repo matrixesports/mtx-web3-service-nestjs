@@ -339,6 +339,7 @@ export class ApiController {
       start: start.toString(),
       end: end.toString(),
       url: shortUrl,
+      lootdropId: reward.id,
     };
     this.microserviceService.sendLootdropAlert(alert);
     return { success: true };
