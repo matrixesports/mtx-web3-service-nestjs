@@ -163,59 +163,57 @@ export class BattlePassService {
     fee['nonce'] = nonce;
 
     const followers = await this.microserviceService.getFollowers(creatorId);
-    const oldXpRankings: GetRankingDto = await this.getSeasonRanking(
-      creatorId,
-      seasonId,
-      followers,
-      userAddress,
-    );
-    const oldXpRank = this.getRank(oldXpRankings);
-    const oldRepRankings: GetRankingDto = await this.getReputationRanking(
-      creatorId,
-      followers,
-      userAddress,
-    );
-    const oldRepRank = this.getRank(oldRepRankings);
-    const oldlvl = (await bp.level(userAddress, seasonId)).toNumber();
-    await (await bp.giveXp(seasonId, xp, userAddress, fee)).wait(1);
-    const newlvl = (await bp.level(userAddress, seasonId)).toNumber();
-    const newXpRankings: GetRankingDto = await this.getSeasonRanking(
-      creatorId,
-      seasonId,
-      followers,
-      userAddress,
-    );
-    const newXpRank = this.getRank(newXpRankings);
-    const newRepRankings: GetRankingDto = await this.getReputationRanking(
-      creatorId,
-      followers,
-      userAddress,
-    );
-    const newRepRank = this.getRank(newRepRankings);
-    if (oldlvl != newlvl) {
-      const userInfo = await this.microserviceService.getUserInfo(userAddress);
-      const alert: LevelUpAlert = {
-        creatorId,
-        userAddress,
-        oldlvl,
-        newlvl,
-        name: userInfo.name,
-        pfp: userInfo.pfp,
-      };
-      this.microserviceService.sendLevelUpAlert(alert);
+    const isFollowing = followers.findIndex((follower) => follower.userAddress === userAddress);
+    let oldXpRank, oldRepRank, oldlvl;
+    let oldXpRankings: GetRankingDto, oldRepRankings: GetRankingDto;
+    if (isFollowing) {
+      oldXpRankings = await this.getSeasonRanking(creatorId, seasonId, followers, userAddress);
+      oldXpRank = this.getRank(oldXpRankings);
+      oldRepRankings = await this.getReputationRanking(creatorId, followers, userAddress);
+      oldRepRank = this.getRank(oldRepRankings);
+      oldlvl = (await bp.level(userAddress, seasonId)).toNumber();
     }
-    if (oldXpRank != newXpRank || oldRepRank != newRepRank) {
-      const alert: LeaderboardAlert = {
+    await (await bp.giveXp(seasonId, xp, userAddress, fee)).wait(1);
+    if (isFollowing) {
+      const newlvl = (await bp.level(userAddress, seasonId)).toNumber();
+      const newXpRankings: GetRankingDto = await this.getSeasonRanking(
         creatorId,
+        seasonId,
+        followers,
         userAddress,
-        oldXpRank,
-        newXpRank,
-        oldRepRank,
-        newRepRank,
-        pfp: oldXpRankings?.pfp,
-        name: oldXpRankings?.name,
-      };
-      this.microserviceService.sendLeaderboardAlert(alert);
+      );
+      const newXpRank = this.getRank(newXpRankings);
+      const newRepRankings: GetRankingDto = await this.getReputationRanking(
+        creatorId,
+        followers,
+        userAddress,
+      );
+      const newRepRank = this.getRank(newRepRankings);
+      if (oldlvl != newlvl) {
+        const userInfo = await this.microserviceService.getUserInfo(userAddress);
+        const alert: LevelUpAlert = {
+          creatorId,
+          userAddress,
+          oldlvl,
+          newlvl,
+          name: userInfo.name,
+          pfp: userInfo.pfp,
+        };
+        this.microserviceService.sendLevelUpAlert(alert);
+      }
+      if (oldXpRank != newXpRank || oldRepRank != newRepRank) {
+        const alert: LeaderboardAlert = {
+          creatorId,
+          userAddress,
+          oldXpRank,
+          newXpRank,
+          oldRepRank,
+          newRepRank,
+          pfp: oldXpRankings?.pfp,
+          name: oldXpRankings?.name,
+        };
+        this.microserviceService.sendLeaderboardAlert(alert);
+      }
     }
   }
 
