@@ -23,6 +23,11 @@ export class LootdropResolver {
   }
 
   @ResolveField()
+  async lootdropId(@Parent() parent: GetLootdropDto) {
+    return parent.lootdropId;
+  }
+
+  @ResolveField()
   async reward(@Parent() parent: GetLootdropDto) {
     return await this.inventoryService.createRewardObj(parent.creatorId, parent.rewardId, 1);
   }
