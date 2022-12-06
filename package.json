@@ -21,7 +21,10 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typechain": "typechain --target ethers-v5 --out-dir ./abi/typechain/ './abi/*.json'",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "migration:generate": "rimraf dist && nest build && npx typeorm migration:generate -d ./dist/src/database.configuration",
+    "migration:run": "rimraf dist && nest build && npx typeorm migration:run -d ./dist/src/database.configuration",
+    "migration:revert": "rimraf dist && nest build && npx typeorm migration:revert -d ./dist/src/database.configuration"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": "yarn run lint"

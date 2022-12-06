@@ -100,6 +100,12 @@ import { MicroserviceModule } from './microservice/microservice.module';
           type: 'postgres',
           url: config.get<string>('storage.postgres'),
           autoLoadEntities: true,
+          ...{
+            migrations: ['dist/migrations/**/*.js'],
+            cli: {
+              migrationsDir: 'dist/database/migrations',
+            },
+          },
         };
       },
     }),
