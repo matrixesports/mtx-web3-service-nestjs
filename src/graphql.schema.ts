@@ -12,7 +12,8 @@ export enum RewardType {
     CREATOR_TOKEN = "CREATOR_TOKEN",
     LOOTBOX = "LOOTBOX",
     REDEEMABLE = "REDEEMABLE",
-    SPECIAL = "SPECIAL"
+    SPECIAL = "SPECIAL",
+    GiVEAWAY = "GIVEAWAY"
 }
 
 export enum RedeemStatus {
