@@ -13,7 +13,7 @@ export enum RewardType {
     LOOTBOX = "LOOTBOX",
     REDEEMABLE = "REDEEMABLE",
     SPECIAL = "SPECIAL",
-    GiVEAWAY = "GIVEAWAY"
+    GIVEAWAY = "GIVEAWAY"
 }
 
 export enum RedeemStatus {
