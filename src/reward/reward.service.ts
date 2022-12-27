@@ -106,11 +106,14 @@ export class RewardService {
 
   async setLootdropQty(creatorId: number, userAddress: string, lootdropId: number) {
     const target = `lootdrop-${creatorId}`;
-    const claimed = await this.redis.sismember(target + '-list', userAddress);
+    const claimed = await this.redis.sismember(
+      target + '-' + lootdropId.toString() + '-list',
+      userAddress,
+    );
     if (claimed != null && claimed == 1) throw new Error('Already Claimed!');
     const lootdrops = await this.getlootdrops(creatorId);
     if (lootdrops.response[lootdropId].qty == -1) {
-      await this.redis.sadd(target + '-list', userAddress);
+      await this.redis.sadd(target + '-' + lootdropId.toString() + '-list', userAddress);
       return;
     } else {
       let retry = true;
@@ -124,7 +127,7 @@ export class RewardService {
         await this.redis
           .multi()
           .set(target + '-' + lootdropId.toString() + '-qty', qty - 1, 'KEEPTTL')
-          .sadd(target + '-list', userAddress)
+          .sadd(target + '-' + lootdropId.toString() + '-list', userAddress)
           .exec()
           .catch(() => {
             retry = true;
