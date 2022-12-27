@@ -1,3 +1,4 @@
+
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -214,8 +215,8 @@ export class Lootdrop {
 }
 
 export class Lootdrops {
-    response: Lootdrop[]
-} 
+    response?: Nullable<Nullable<Lootdrop>[]>;
+}
 
 export type BigInt = unknown;
 type Nullable<T> = T | null;

@@ -223,4 +223,6 @@ type Lootdrop {
   url: String!
 }
 
-
+type Lootdrops {
+  response: [Lootdrop]
+}
