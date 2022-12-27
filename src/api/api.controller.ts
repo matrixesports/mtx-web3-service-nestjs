@@ -327,7 +327,12 @@ export class ApiController {
     console.log('Lootdrops: ', cache);
     cache.response.push(lootdrop);
     await this.redis.set(target, JSON.stringify(cache));
-    await this.redis.set(target + '-qty', createLootdropDto.qty, 'EX', ttl);
+    await this.redis.set(
+      target + '-' + cache.response.length.toString() + '-qty',
+      createLootdropDto.qty,
+      'EX',
+      ttl,
+    );
     await this.redis.del(target + '-list');
     const reward = await this.inventoryService.createRewardObj(
       createLootdropDto.creatorId,
