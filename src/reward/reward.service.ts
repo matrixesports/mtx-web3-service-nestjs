@@ -21,17 +21,17 @@ export class RewardService {
   ) {}
 
   async claimLootdrop(creatorId: number, userAddress: string, contact: string, lootdropId: number) {
-    const lootdrop = await this.getlootdrops(creatorId);
+    const lootdrops = await this.getlootdrops(creatorId);
     let userThreshold: number;
-    switch (lootdrop.response[lootdropId].requirements) {
+    switch (lootdrops.response[lootdropId].requirements) {
       case Requirements.ALLXP:
         // better leaderboard fn
         userThreshold = await this.battlePassService.getOneAllSeasonInfo(creatorId, userAddress);
         if (userThreshold == null) throw new Error('On-Chain Error!');
-        if (userThreshold < lootdrop.response[lootdropId].threshold)
+        if (userThreshold < lootdrops.response[lootdropId].threshold)
           throw new Error(
             `You need ${
-              lootdrop.response[lootdropId].threshold - userThreshold
+              lootdrops.response[lootdropId].threshold - userThreshold
             } more XP to claim this Lootdrop!`,
           );
         break;
@@ -39,37 +39,37 @@ export class RewardService {
         userThreshold = await this.battlePassService.getBalance(
           creatorId,
           userAddress,
-          lootdrop.response[lootdropId].rewardId,
+          lootdrops.response[lootdropId].rewardId,
         );
-        if (userThreshold < lootdrop.response[lootdropId].threshold)
+        if (userThreshold < lootdrops.response[lootdropId].threshold)
           throw new Error(
             `You need ${
-              lootdrop.response[lootdropId].threshold - userThreshold
+              lootdrops.response[lootdropId].threshold - userThreshold
             } more Reputation to claim this Lootdrop!`,
           );
         break;
       case Requirements.SEASONXP:
         userThreshold = await this.battlePassService.getXp(creatorId, userAddress);
-        if (userThreshold < lootdrop.response[lootdropId].threshold)
+        if (userThreshold < lootdrops.response[lootdropId].threshold)
           throw new Error(
             `You need ${
-              lootdrop.response[lootdropId].threshold - userThreshold
+              lootdrops.response[lootdropId].threshold - userThreshold
             } more XP to claim this Lootdrop!`,
           );
         break;
       default:
         throw new Error('Invalid Lootdrop!');
     }
-    if (userThreshold < lootdrop.response[lootdropId].threshold)
+    if (userThreshold < lootdrops.response[lootdropId].threshold)
       throw new Error('User Cannot Meet Requirements!');
     await this.setLootdropQty(creatorId, userAddress, lootdropId);
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(
       creatorId,
-      lootdrop.response[lootdropId].rewardId,
+      lootdrops.response[lootdropId].rewardId,
     );
     await this.microserviceService.sendRedeemAlert(
-      lootdrop.response[lootdropId].rewardId,
+      lootdrops.response[lootdropId].rewardId,
       userAddress,
       creatorId,
       bpAddress,
@@ -82,10 +82,10 @@ export class RewardService {
       userAddress,
       name: userInfo.name,
       pfp: userInfo.pfp,
-      lootdropId: lootdrop.response[lootdropId].rewardId,
-      start: lootdrop.response[lootdropId].start,
-      end: lootdrop.response[lootdropId].end,
-      url: lootdrop.response[lootdropId].url,
+      lootdropId: lootdrops.response[lootdropId].rewardId,
+      start: lootdrops.response[lootdropId].start,
+      end: lootdrops.response[lootdropId].end,
+      url: lootdrops.response[lootdropId].url,
     };
     this.microserviceService.sendClaimLootdropAlert(alert);
     return { success: true };
@@ -108,8 +108,8 @@ export class RewardService {
     const target = `lootdrop-${creatorId}`;
     const claimed = await this.redis.sismember(target + '-list', userAddress);
     if (claimed != null && claimed == 1) throw new Error('Already Claimed!');
-    const lootdrop = await this.getlootdrop(creatorId);
-    if (lootdrop.qty == -1) {
+    const lootdrops = await this.getlootdrops(creatorId);
+    if (lootdrops.response[lootdropId].qty == -1) {
       await this.redis.sadd(target + '-list', userAddress);
       return;
     } else {
