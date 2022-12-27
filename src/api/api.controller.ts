@@ -322,8 +322,10 @@ export class ApiController {
         ? Math.floor((end.getTime() - start.getTime()) / 1000)
         : Math.floor((end.getTime() - nw.getTime()) / 1000);
     const target = `lootdrop-${createLootdropDto.creatorId}`;
+    const cache = await this.rewardService.getlootdrops(createLootdropDto.creatorId);
     const lootdrop: LootdropRS = { ...createLootdropDto, url: shortUrl };
-    await this.redis.set(target, JSON.stringify(lootdrop), 'EX', ttl);
+    cache.push(lootdrop);
+    await this.redis.set(target, JSON.stringify(cache));
     await this.redis.set(target + '-qty', createLootdropDto.qty, 'EX', ttl);
     await this.redis.del(target + '-list');
     const reward = await this.inventoryService.createRewardObj(

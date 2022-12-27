@@ -89,6 +89,13 @@ export class RewardService {
     return plainToInstance(LootdropRS, JSON.parse(cache as string));
   }
 
+  async getlootdrops(creatorId: number): Promise<LootdropRS[]> {
+    const target = `lootdrop-${creatorId}`;
+    const cache = await this.redis.get(target);
+    if (cache == null) throw new Error('No Active Lootdrop!');
+    return plainToInstance(Array<LootdropRS>, JSON.parse(cache as string));
+  }
+
   async setLootdropQty(creatorId: number, userAddress: string) {
     const target = `lootdrop-${creatorId}`;
     const claimed = await this.redis.sismember(target + '-list', userAddress);
