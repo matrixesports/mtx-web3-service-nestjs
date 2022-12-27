@@ -72,6 +72,8 @@ export abstract class IQuery {
     abstract getReputationRankings(creatorId: number): Nullable<Nullable<ReputationRanking>[]> | Promise<Nullable<Nullable<ReputationRanking>[]>>;
 
     abstract getLootdrop(creatorId: number): Nullable<Lootdrop> | Promise<Nullable<Lootdrop>>;
+
+    abstract getLootdrops(creatorId: number): Nullable<Lootdrops> | Promise<Nullable<Lootdrops>>;
 }
 
 export abstract class IMutation {
@@ -210,6 +212,10 @@ export class Lootdrop {
     end: Date;
     url: string;
 }
+
+export class Lootdrops {
+    response: Lootdrop[]
+} 
 
 export type BigInt = unknown;
 type Nullable<T> = T | null;
