@@ -40,6 +40,7 @@ export abstract class LootdropBase {
 }
 
 export class LootdropRS implements LootdropBase {
+  lootdropId: number;
   creatorId: number;
   rewardId: number;
   requirements: Requirements;
@@ -72,6 +73,7 @@ export class LootdropReward implements LootdropBase {
 }
 
 export class GetLootdropDto implements LootdropRS {
+  lootdropId: number;
   creatorId: number;
   rewardId: number;
   requirements: Requirements;

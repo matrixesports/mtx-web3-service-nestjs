@@ -94,6 +94,7 @@ enum RewardType {
   LOOTBOX
   REDEEMABLE
   SPECIAL
+  GIVEAWAY
 }
 
 type RewardMetadata {

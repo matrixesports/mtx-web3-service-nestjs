@@ -339,6 +339,8 @@ export class ApiController {
       createLootdropDto.rewardId,
       1,
     );
+    const lootdrop: LootdropRS = { ...createLootdropDto, url: shortUrl, lootdropId: reward.id };
+    await this.redis.set(target, JSON.stringify(lootdrop), 'EX', ttl);
     const alert: LootdropAlert = {
       creatorId: createLootdropDto.creatorId,
       requirements: createLootdropDto.requirements,
