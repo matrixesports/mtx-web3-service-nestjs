@@ -18,6 +18,7 @@ type Query {
   getReputationRankings(creatorId: Int!): [ReputationRanking]
 
   getLootdrop(creatorId: Int!): Lootdrop
+  getLootdrops(creatorId: Int!): Lootdrops
 }
 
 # |========================| MUTATION |========================|
@@ -223,4 +224,6 @@ type Lootdrop {
   url: String!
 }
 
-
+type Lootdrops {
+  response: [Lootdrop]
+}
