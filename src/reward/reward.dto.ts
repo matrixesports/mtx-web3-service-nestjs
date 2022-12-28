@@ -51,10 +51,6 @@ export class LootdropRS implements LootdropBase {
   url: string;
 }
 
-export class Lootdrops {
-  response: LootdropRS[];
-}
-
 export class LootdropReward implements LootdropBase {
   @ApiProperty({ type: Number })
   creatorId: number;
