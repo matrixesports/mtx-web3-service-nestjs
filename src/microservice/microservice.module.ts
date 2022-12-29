@@ -32,7 +32,7 @@ import { MicroserviceService, MockController } from './microservice.service';
         }),
       },
       {
-        name: 'USSER_SERVICE',
+        name: 'USER_SERVICE',
         imports: [ConfigModule],
         inject: [ConfigService],
         useFactory: (config: ConfigService) => ({
