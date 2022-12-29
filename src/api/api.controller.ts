@@ -328,7 +328,7 @@ export class ApiController {
     cache.response.push(lootdrop);
     await this.redis.set(target, JSON.stringify(cache));
     await this.redis.set(
-      target + '-' + cache.response.length.toString() + '-qty',
+      target + '-' + (cache.response.length - 1).toString() + '-qty',
       createLootdropDto.qty,
       'EX',
       ttl,

@@ -1,3 +1,4 @@
+
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -39,7 +40,8 @@ export enum RequiredUserPaymentOptions {
 export enum Requirements {
     REPUTATION = "REPUTATION",
     SEASONXP = "SEASONXP",
-    ALLXP = "ALLXP"
+    ALLXP = "ALLXP",
+    STREAK = "STREAK"
 }
 
 export interface Ranking {
@@ -84,7 +86,7 @@ export abstract class IMutation {
 
     abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
 
-    abstract claimLootdrop(creatorId: number, contact: string): MutationResponse | Promise<MutationResponse>;
+    abstract claimLootdrop(creatorId: number, contact: string, lootdropId: number): MutationResponse | Promise<MutationResponse>;
 }
 
 export class ClaimRewardResponse {

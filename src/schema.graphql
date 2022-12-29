@@ -32,7 +32,7 @@ type Mutation {
   ): ClaimRewardResponse!
   redeemReward(creatorId: Int!, itemId: Int!): MutationResponse!
   craft(recipeId: Int!): MutationResponse!
-  claimLootdrop(creatorId: Int!, contact: String!): MutationResponse!
+  claimLootdrop(creatorId: Int!, contact: String!, lootdropId: Int!): MutationResponse!
 }
 
 type ClaimRewardResponse {
@@ -213,6 +213,7 @@ enum Requirements {
   REPUTATION
   SEASONXP
   ALLXP
+  STREAK
 }
 
 type Lootdrop {
