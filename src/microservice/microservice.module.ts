@@ -31,6 +31,18 @@ import { MicroserviceService, MockController } from './microservice.service';
           },
         }),
       },
+      {
+        name: 'USSER_SERVICE',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (config: ConfigService) => ({
+          options: {
+            host: config.get<string>('microservice.user.host'),
+            port: config.get<number>('microservice.user.port'),
+          },
+          transport: Transport.TCP,
+        }),
+      },
     ]),
   ],
   exports: [MicroserviceService],

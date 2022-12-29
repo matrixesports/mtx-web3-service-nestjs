@@ -40,7 +40,19 @@ export class MicroserviceService {
     private configService: ConfigService,
     @Inject('TWITCH_SERVICE') private twitchClient: ClientProxy,
     @Inject('DISCORD_SERVICE') private discordClient: ClientProxy,
+    @Inject('USER_SERVICE') private userClient: ClientProxy,
   ) {}
+
+  async getUserStreak(
+    creatorId: number,
+    userAddress: string,
+  ): Promise<{ xpBoost: number; streakDays: number }> {
+    const response = await this.userClient
+      .send({ cmd: 'get_xp_boost' }, { creatorId: creatorId, userAddress: userAddress })
+      .toPromise();
+    console.log("=> Interaction Event: 'USER_MICROSERVICE' :: User Service TCP Responded");
+    return response;
+  }
 
   sendClaimLootdropAlert(alert: ClaimLootdropAlert) {
     this.twitchClient.emit<ClaimLootdropAlert>(CLAIM_LOOTDROP_ALERT, alert);

@@ -150,6 +150,11 @@ export class BattlePassService {
     await this.inventoryService.decreaseBalance(userAddress, creatorId, id, qty);
   }
 
+  async getStreak(creatorId: number, userAddress: string) {
+    const userStreak = await this.microserviceService.getUserStreak(creatorId, userAddress);
+    return userStreak.streakDays;
+  }
+
   async giveXp(creatorId: number, userAddress: string, xp: number) {
     const contract = await this.chainService.getBattlePassContract(creatorId);
     const seasonId = (await contract.seasonId()).toNumber();
