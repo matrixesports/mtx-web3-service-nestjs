@@ -1,5 +1,3 @@
-
-
 ## [API SPEC](https://fuzzy-disco-384afb48.pages.github.io/)
 
 ## Installation
@@ -19,7 +17,7 @@ $ yarn run start:dev
 $ yarn run start:prod
 
 ```
+
 ## License
 
 Nest is [MIT licensed](LICENSE).
-

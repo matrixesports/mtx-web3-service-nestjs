@@ -16,10 +16,11 @@ export class LootdropResolver {
   async claimLootdrop(
     @Args('creatorId') creatorId: number,
     @Args('contact') contact: string,
+    @Args('lootdropId') lootdropId: number,
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
-    return await this.rewardService.claimLootdrop(creatorId, userAddress, contact);
+    return await this.rewardService.claimLootdrop(creatorId, userAddress, contact, lootdropId);
   }
 
   @ResolveField()
