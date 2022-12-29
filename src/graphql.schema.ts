@@ -40,7 +40,7 @@ export enum Requirements {
     REPUTATION = "REPUTATION",
     SEASONXP = "SEASONXP",
     ALLXP = "ALLXP",
-    STREAK = "STREAK",
+    STREAK = "STREAK"
 }
 
 export interface Ranking {
