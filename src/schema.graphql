@@ -7,7 +7,7 @@ type Query {
   getBattlePass(creatorId: Int!): BattlePass
   getInventory: Inventory
   getLootboxOptions(creatorId: Int!, lootboxId: Int!): [LootboxOption]
-  
+
   getAllRecipes: [Recipe]
   getRecipes(creatorId: Int!): [Recipe]
   getRecipe(creatorId: Int!, recipeId: Int!): Recipe
@@ -142,10 +142,10 @@ type Recipe {
 }
 
 type Owner {
-  creatorId: Int!,
-  name: String!,
-  pfp: String,
-  slug: String,
+  creatorId: Int!
+  name: String!
+  pfp: String
+  slug: String
 }
 
 # |========================| CLAIM |========================|

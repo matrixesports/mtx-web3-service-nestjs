@@ -446,18 +446,10 @@
     "absolutePath": "src/BattlePassFactory.sol",
     "id": 24072,
     "exportedSymbols": {
-      "BattlePass": [
-        23925
-      ],
-      "BattlePassFactory": [
-        24071
-      ],
-      "Bytes32AddressLib": [
-        23054
-      ],
-      "ERC20": [
-        23015
-      ]
+      "BattlePass": [23925],
+      "BattlePassFactory": [24071],
+      "Bytes32AddressLib": [23054],
+      "ERC20": [23015]
     },
     "nodeType": "SourceUnit",
     "src": "32:4016:16",
@@ -466,15 +458,7 @@
         "id": 23927,
         "nodeType": "PragmaDirective",
         "src": "32:31:16",
-        "literals": [
-          "solidity",
-          ">=",
-          "0.6",
-          ".0",
-          "<",
-          "0.9",
-          ".0"
-        ]
+        "literals": ["solidity", ">=", "0.6", ".0", "<", "0.9", ".0"]
       },
       {
         "id": 23929,
@@ -564,9 +548,7 @@
             "libraryName": {
               "id": 23935,
               "name": "Bytes32AddressLib",
-              "nameLocations": [
-                "467:17:16"
-              ],
+              "nameLocations": ["467:17:16"],
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 23054,
               "src": "467:17:16"
@@ -855,9 +837,7 @@
                     "pathNode": {
                       "id": 23960,
                       "name": "BattlePass",
-                      "nameLocations": [
-                        "1455:10:16"
-                      ],
+                      "nameLocations": ["1455:10:16"],
                       "nodeType": "IdentifierPath",
                       "referencedDeclaration": 23925,
                       "src": "1455:10:16"
@@ -1003,10 +983,7 @@
                       "id": 23975,
                       "name": "require",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        -18,
-                        -18
-                      ],
+                      "overloadedDeclarations": [-18, -18],
                       "referencedDeclaration": -18,
                       "src": "1920:7:16",
                       "typeDescriptions": {
@@ -1141,9 +1118,7 @@
                             "pathNode": {
                               "id": 23984,
                               "name": "BattlePass",
-                              "nameLocations": [
-                                "1983:10:16"
-                              ],
+                              "nameLocations": ["1983:10:16"],
                               "nodeType": "IdentifierPath",
                               "referencedDeclaration": 23925,
                               "src": "1983:10:16"
@@ -1161,9 +1136,7 @@
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
-                        "names": [
-                          "salt"
-                        ],
+                        "names": ["salt"],
                         "nodeType": "FunctionCallOptions",
                         "options": [
                           {
@@ -1399,9 +1372,7 @@
                     "pathNode": {
                       "id": 23971,
                       "name": "BattlePass",
-                      "nameLocations": [
-                        "1895:10:16"
-                      ],
+                      "nameLocations": ["1895:10:16"],
                       "nodeType": "IdentifierPath",
                       "referencedDeclaration": 23925,
                       "src": "1895:10:16"
@@ -2113,9 +2084,7 @@
                     "pathNode": {
                       "id": 24009,
                       "name": "BattlePass",
-                      "nameLocations": [
-                        "2730:10:16"
-                      ],
+                      "nameLocations": ["2730:10:16"],
                       "nodeType": "IdentifierPath",
                       "referencedDeclaration": 23925,
                       "src": "2730:10:16"
@@ -2312,9 +2281,7 @@
                     "pathNode": {
                       "id": 24053,
                       "name": "BattlePass",
-                      "nameLocations": [
-                        "3950:10:16"
-                      ],
+                      "nameLocations": ["3950:10:16"],
                       "nodeType": "IdentifierPath",
                       "referencedDeclaration": 23925,
                       "src": "3950:10:16"
@@ -2374,9 +2341,7 @@
         "abstract": false,
         "baseContracts": [],
         "canonicalName": "BattlePassFactory",
-        "contractDependencies": [
-          23925
-        ],
+        "contractDependencies": [23925],
         "contractKind": "contract",
         "documentation": {
           "id": 23934,
@@ -2385,9 +2350,7 @@
           "text": "@title BattlePass Factory\n @dev  adapted from https://github.com/Rari-Capital/vaults/blob/main/src/VaultFactory.sol\n @notice Factory which enables deploying a BattlePass for any creatorId"
         },
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          24071
-        ],
+        "linearizedBaseContracts": [24071],
         "name": "BattlePassFactory",
         "nameLocation": "437:17:16",
         "scope": 24072,

@@ -64,9 +64,7 @@ async function giveXp(address: string, xps: userXp[]) {
   contract = contract.connect(signer);
   for (let i = 71; i < xps.length; i++) {
     const fee = await getMaticFeeData();
-    await (
-      await contract.giveXp(seasonId, xps[i].xp, xps[i].userAddress, fee)
-    ).wait(1);
+    await (await contract.giveXp(seasonId, xps[i].xp, xps[i].userAddress, fee)).wait(1);
     console.log(i + ' is done!'); // restart from i if error
   }
 }
@@ -81,10 +79,7 @@ async function getMaticFeeData(): Promise<{
       method: 'get',
       url: 'https://gasstation-mainnet.matic.network/v2',
     });
-    const maxFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.maxFee) + '',
-      'gwei',
-    );
+    const maxFeePerGas = ethers.utils.parseUnits(Math.ceil(data.fast.maxFee) + '', 'gwei');
     const maxPriorityFeePerGas = ethers.utils.parseUnits(
       Math.ceil(data.fast.maxPriorityFee) + '',
       'gwei',

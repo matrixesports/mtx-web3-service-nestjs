@@ -338,69 +338,27 @@
     "absolutePath": "src/Crafting.sol",
     "id": 24207,
     "exportedSymbols": {
-      "Bytes32AddressLib": [
-        23054
-      ],
-      "Crafting": [
-        24206
-      ],
-      "CraftingStorage": [
-        24242
-      ],
-      "DSTest": [
-        21888
-      ],
-      "ERC1967Upgrade": [
-        25004
-      ],
-      "IERC1822Proxiable": [
-        19774
-      ],
-      "IRewards": [
-        23886
-      ],
-      "IncorrectRecipeDetails": [
-        23892
-      ],
-      "Ingredients": [
-        24218
-      ],
-      "RecipeNotActive": [
-        23889
-      ],
-      "Script": [
-        235
-      ],
-      "StdStorage": [
-        1766
-      ],
-      "Test": [
-        1668
-      ],
-      "UUPSUpgradeable": [
-        25072
-      ],
-      "Vm": [
-        3636
-      ],
-      "_IMPLEMENTATION_SLOT": [
-        24952
-      ],
-      "console": [
-        11700
-      ],
-      "console2": [
-        19764
-      ],
-      "stdError": [
-        1738
-      ],
-      "stdMath": [
-        3007
-      ],
-      "stdStorage": [
-        2868
-      ]
+      "Bytes32AddressLib": [23054],
+      "Crafting": [24206],
+      "CraftingStorage": [24242],
+      "DSTest": [21888],
+      "ERC1967Upgrade": [25004],
+      "IERC1822Proxiable": [19774],
+      "IRewards": [23886],
+      "IncorrectRecipeDetails": [23892],
+      "Ingredients": [24218],
+      "RecipeNotActive": [23889],
+      "Script": [235],
+      "StdStorage": [1766],
+      "Test": [1668],
+      "UUPSUpgradeable": [25072],
+      "Vm": [3636],
+      "_IMPLEMENTATION_SLOT": [24952],
+      "console": [11700],
+      "console2": [19764],
+      "stdError": [1738],
+      "stdMath": [3007],
+      "stdStorage": [2868]
     },
     "nodeType": "SourceUnit",
     "src": "32:4420:17",
@@ -409,15 +367,7 @@
         "id": 23865,
         "nodeType": "PragmaDirective",
         "src": "32:31:17",
-        "literals": [
-          "solidity",
-          ">=",
-          "0.6",
-          ".0",
-          "<",
-          "0.9",
-          ".0"
-        ]
+        "literals": ["solidity", ">=", "0.6", ".0", "<", "0.9", ".0"]
       },
       {
         "id": 23866,
@@ -675,9 +625,7 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "linearizedBaseContracts": [
-          23886
-        ],
+        "linearizedBaseContracts": [23886],
         "name": "IRewards",
         "nameLocation": "145:8:17",
         "scope": 24207,
@@ -877,10 +825,7 @@
                       "id": 23904,
                       "name": "require",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        -18,
-                        -18
-                      ],
+                      "overloadedDeclarations": [-18, -18],
                       "referencedDeclaration": -18,
                       "src": "1144:7:17",
                       "typeDescriptions": {
@@ -1118,10 +1063,7 @@
                       "id": 23921,
                       "name": "require",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        -18,
-                        -18
-                      ],
+                      "overloadedDeclarations": [-18, -18],
                       "referencedDeclaration": -18,
                       "src": "1274:7:17",
                       "typeDescriptions": {
@@ -2486,9 +2428,7 @@
                   }
                 },
                 {
-                  "assignments": [
-                    24051
-                  ],
+                  "assignments": [24051],
                   "declarations": [
                     {
                       "constant": false,
@@ -2554,9 +2494,7 @@
                   "src": "2859:27:17"
                 },
                 {
-                  "assignments": [
-                    24057
-                  ],
+                  "assignments": [24057],
                   "declarations": [
                     {
                       "constant": false,
@@ -2635,9 +2573,7 @@
                   "src": "2896:54:17"
                 },
                 {
-                  "assignments": [
-                    24064
-                  ],
+                  "assignments": [24064],
                   "declarations": [
                     {
                       "constant": false,
@@ -3052,9 +2988,7 @@
                   },
                   "id": 24099,
                   "initializationExpression": {
-                    "assignments": [
-                      24070
-                    ],
+                    "assignments": [24070],
                     "declarations": [
                       {
                         "constant": false,
@@ -3460,9 +3394,7 @@
                   },
                   "id": 24130,
                   "initializationExpression": {
-                    "assignments": [
-                      24101
-                    ],
+                    "assignments": [24101],
                     "declarations": [
                       {
                         "constant": false,
@@ -4456,19 +4388,11 @@
           "text": " @title Craft recipes, make new yummy items\n @author rayquaza7\n @notice\n Recipe is just a list of input and output tokens\n User who has all the required input tokens can 'craft' new items.\n Ingredients get burn and new items are minted\n @dev implements a modified/minimal version of\n https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.7.2/contracts/proxy/utils/UUPSUpgradeable.sol\n Removed inheritance in order to simplify storage layout"
         },
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          24206,
-          24242,
-          25072,
-          25004
-        ],
+        "linearizedBaseContracts": [24206, 24242, 25072, 25004],
         "name": "Crafting",
         "nameLocation": "958:8:17",
         "scope": 24207,
-        "usedErrors": [
-          23889,
-          23892
-        ]
+        "usedErrors": [23889, 23892]
       }
     ],
     "license": "MIT"

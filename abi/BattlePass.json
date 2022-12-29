@@ -3037,66 +3037,26 @@
     "absolutePath": "src/BattlePass.sol",
     "id": 23926,
     "exportedSymbols": {
-      "BattlePass": [
-        23925
-      ],
-      "Context": [
-        19875
-      ],
-      "ERC1155": [
-        22583
-      ],
-      "ERC1155TokenReceiver": [
-        22627
-      ],
-      "ERC2771Context": [
-        19853
-      ],
-      "IncorrectLootboxOptions": [
-        24481
-      ],
-      "IncorrectSeasonDetails": [
-        23184
-      ],
-      "InvalidId": [
-        24478
-      ],
-      "LOLHowDidYouGetHere": [
-        24486
-      ],
-      "LevelInfo": [
-        23170
-      ],
-      "LootboxOption": [
-        24473
-      ],
-      "NeedPremiumPassToClaimPremiumReward": [
-        23190
-      ],
-      "NoAccess": [
-        24489
-      ],
-      "NotAtLevelNeededToClaimReward": [
-        23187
-      ],
-      "Owned": [
-        21948
-      ],
-      "RewardAlreadyClaimed": [
-        23193
-      ],
-      "RewardType": [
-        24462
-      ],
-      "Rewards": [
-        25117
-      ],
-      "Strings": [
-        20101
-      ],
-      "User": [
-        23181
-      ]
+      "BattlePass": [23925],
+      "Context": [19875],
+      "ERC1155": [22583],
+      "ERC1155TokenReceiver": [22627],
+      "ERC2771Context": [19853],
+      "IncorrectLootboxOptions": [24481],
+      "IncorrectSeasonDetails": [23184],
+      "InvalidId": [24478],
+      "LOLHowDidYouGetHere": [24486],
+      "LevelInfo": [23170],
+      "LootboxOption": [24473],
+      "NeedPremiumPassToClaimPremiumReward": [23190],
+      "NoAccess": [24489],
+      "NotAtLevelNeededToClaimReward": [23187],
+      "Owned": [21948],
+      "RewardAlreadyClaimed": [23193],
+      "RewardType": [24462],
+      "Rewards": [25117],
+      "Strings": [20101],
+      "User": [23181]
     },
     "nodeType": "SourceUnit",
     "src": "32:12468:15",
@@ -3105,15 +3065,7 @@
         "id": 23158,
         "nodeType": "PragmaDirective",
         "src": "32:31:15",
-        "literals": [
-          "solidity",
-          ">=",
-          "0.6",
-          ".0",
-          "<",
-          "0.9",
-          ".0"
-        ]
+        "literals": ["solidity", ">=", "0.6", ".0", "<", "0.9", ".0"]
       },
       {
         "id": 23159,
@@ -3588,9 +3540,7 @@
                   "pathNode": {
                     "id": 23203,
                     "name": "LevelInfo",
-                    "nameLocations": [
-                      "2443:9:15"
-                    ],
+                    "nameLocations": ["2443:9:15"],
                     "nodeType": "IdentifierPath",
                     "referencedDeclaration": 23170,
                     "src": "2443:9:15"
@@ -3670,9 +3620,7 @@
                   "pathNode": {
                     "id": 23211,
                     "name": "User",
-                    "nameLocations": [
-                      "2551:4:15"
-                    ],
+                    "nameLocations": ["2551:4:15"],
                     "nodeType": "IdentifierPath",
                     "referencedDeclaration": 23181,
                     "src": "2551:4:15"
@@ -3751,9 +3699,7 @@
                 "modifierName": {
                   "id": 23224,
                   "name": "Rewards",
-                  "nameLocations": [
-                    "2712:7:15"
-                  ],
+                  "nameLocations": ["2712:7:15"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 25117,
                   "src": "2712:7:15"
@@ -4001,9 +3947,7 @@
                 "modifierName": {
                   "id": 23240,
                   "name": "onlyOwner",
-                  "nameLocations": [
-                    "3056:9:15"
-                  ],
+                  "nameLocations": ["3056:9:15"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 21911,
                   "src": "3056:9:15"
@@ -4250,9 +4194,7 @@
                 "modifierName": {
                   "id": 23262,
                   "name": "onlyOwner",
-                  "nameLocations": [
-                    "3390:9:15"
-                  ],
+                  "nameLocations": ["3390:9:15"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 21911,
                   "src": "3390:9:15"
@@ -4404,9 +4346,7 @@
                   "src": "3878:10:15"
                 },
                 {
-                  "assignments": [
-                    23291
-                  ],
+                  "assignments": [23291],
                   "declarations": [
                     {
                       "constant": false,
@@ -5444,9 +5384,7 @@
                   },
                   "id": 23374,
                   "initializationExpression": {
-                    "assignments": [
-                      23309
-                    ],
+                    "assignments": [23309],
                     "declarations": [
                       {
                         "constant": false,
@@ -5551,9 +5489,7 @@
                 "modifierName": {
                   "id": 23282,
                   "name": "onlyOwner",
-                  "nameLocations": [
-                    "3840:9:15"
-                  ],
+                  "nameLocations": ["3840:9:15"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 21911,
                   "src": "3840:9:15"
@@ -5590,9 +5526,7 @@
                       "pathNode": {
                         "id": 23277,
                         "name": "LevelInfo",
-                        "nameLocations": [
-                          "3799:9:15"
-                        ],
+                        "nameLocations": ["3799:9:15"],
                         "nodeType": "IdentifierPath",
                         "referencedDeclaration": 23170,
                         "src": "3799:9:15"
@@ -6150,9 +6084,7 @@
                 "modifierName": {
                   "id": 23391,
                   "name": "onlyOwner",
-                  "nameLocations": [
-                    "5021:9:15"
-                  ],
+                  "nameLocations": ["5021:9:15"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 21911,
                   "src": "5021:9:15"
@@ -6326,9 +6258,7 @@
               "src": "6199:1216:15",
               "statements": [
                 {
-                  "assignments": [
-                    23446
-                  ],
+                  "assignments": [23446],
                   "declarations": [
                     {
                       "constant": false,
@@ -6367,9 +6297,7 @@
                       "id": 23447,
                       "name": "_msgSender",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        19825
-                      ],
+                      "overloadedDeclarations": [19825],
                       "referencedDeclaration": 19825,
                       "src": "6224:10:15",
                       "typeDescriptions": {
@@ -6540,9 +6468,7 @@
                   }
                 },
                 {
-                  "assignments": [
-                    23463
-                  ],
+                  "assignments": [23463],
                   "declarations": [
                     {
                       "constant": false,
@@ -6565,9 +6491,7 @@
                         "pathNode": {
                           "id": 23461,
                           "name": "User",
-                          "nameLocations": [
-                            "6356:4:15"
-                          ],
+                          "nameLocations": ["6356:4:15"],
                           "nodeType": "IdentifierPath",
                           "referencedDeclaration": 23181,
                           "src": "6356:4:15"
@@ -8105,9 +8029,7 @@
               "src": "8324:1628:15",
               "statements": [
                 {
-                  "assignments": [
-                    23592
-                  ],
+                  "assignments": [23592],
                   "declarations": [
                     {
                       "constant": false,
@@ -8146,9 +8068,7 @@
                       "id": 23593,
                       "name": "_msgSender",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        19825
-                      ],
+                      "overloadedDeclarations": [19825],
                       "referencedDeclaration": 19825,
                       "src": "8349:10:15",
                       "typeDescriptions": {
@@ -8319,9 +8239,7 @@
                   }
                 },
                 {
-                  "assignments": [
-                    23609
-                  ],
+                  "assignments": [23609],
                   "declarations": [
                     {
                       "constant": false,
@@ -8344,9 +8262,7 @@
                         "pathNode": {
                           "id": 23607,
                           "name": "User",
-                          "nameLocations": [
-                            "8481:4:15"
-                          ],
+                          "nameLocations": ["8481:4:15"],
                           "nodeType": "IdentifierPath",
                           "referencedDeclaration": 23181,
                           "src": "8481:4:15"
@@ -8667,9 +8583,7 @@
                   "src": "8651:44:15"
                 },
                 {
-                  "assignments": [
-                    23638
-                  ],
+                  "assignments": [23638],
                   "declarations": [
                     {
                       "constant": false,
@@ -8704,9 +8618,7 @@
                   "src": "8705:16:15"
                 },
                 {
-                  "assignments": [
-                    23641
-                  ],
+                  "assignments": [23641],
                   "declarations": [
                     {
                       "constant": false,
@@ -10882,9 +10794,7 @@
               "src": "11122:389:15",
               "statements": [
                 {
-                  "assignments": [
-                    23816
-                  ],
+                  "assignments": [23816],
                   "declarations": [
                     {
                       "constant": false,
@@ -10968,9 +10878,7 @@
                   "src": "11132:49:15"
                 },
                 {
-                  "assignments": [
-                    23822
-                  ],
+                  "assignments": [23822],
                   "declarations": [
                     {
                       "constant": false,
@@ -11083,9 +10991,7 @@
                   "src": "11191:45:15"
                 },
                 {
-                  "assignments": [
-                    23831
-                  ],
+                  "assignments": [23831],
                   "declarations": [
                     {
                       "constant": false,
@@ -11371,9 +11277,7 @@
                   },
                   "id": 23861,
                   "initializationExpression": {
-                    "assignments": [
-                      23834
-                    ],
+                    "assignments": [23834],
                     "declarations": [
                       {
                         "constant": false,
@@ -11567,9 +11471,7 @@
               "src": "11708:252:15",
               "statements": [
                 {
-                  "assignments": [
-                    23872
-                  ],
+                  "assignments": [23872],
                   "declarations": [
                     {
                       "constant": false,
@@ -12286,9 +12188,7 @@
             "baseName": {
               "id": 23195,
               "name": "Rewards",
-              "nameLocations": [
-                "2284:7:15"
-              ],
+              "nameLocations": ["2284:7:15"],
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 25117,
               "src": "2284:7:15"
@@ -12308,27 +12208,11 @@
           "text": " @title A Battle Pass\n @author rayquaza7\n @notice\n Battle Pass is a system that rewards users for completing creator specific quests\n during established time periods known as seasons\n Each creator gets 1 unique Battle Pass and the contract allows multiple seasons\n Tracks user progress at each level and across seasons\n Allows for giving out rewards at specified levels\n Rewards can be { NFTs, Tokens, Lootboxes, Redeemables }"
         },
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          23925,
-          25117,
-          19853,
-          19875,
-          21948,
-          22583
-        ],
+        "linearizedBaseContracts": [23925, 25117, 19853, 19875, 21948, 22583],
         "name": "BattlePass",
         "nameLocation": "2270:10:15",
         "scope": 23926,
-        "usedErrors": [
-          23184,
-          23187,
-          23190,
-          23193,
-          24478,
-          24481,
-          24486,
-          24489
-        ]
+        "usedErrors": [23184, 23187, 23190, 23193, 24478, 24481, 24486, 24489]
       }
     ],
     "license": "MIT"
