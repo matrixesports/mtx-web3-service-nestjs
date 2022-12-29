@@ -57,6 +57,15 @@ export class RewardService {
             } more XP to claim this Lootdrop!`,
           );
         break;
+      case Requirements.STREAK:
+        userThreshold = await this.battlePassService.getStreak(creatorId, userAddress);
+        if (userThreshold < lootdrops.response[lootdropId].threshold)
+          throw new Error(
+            `You need ${
+              lootdrops.response[lootdropId].threshold - userThreshold
+            } more Streak days to claim this Lootdrop!`,
+          );
+        break;
       default:
         throw new Error('Invalid Lootdrop!');
     }
