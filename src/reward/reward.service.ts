@@ -1,7 +1,7 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { plainToInstance } from 'class-transformer';
-import { LootdropRS, Lootdrops } from './reward.dto';
+import { LootdropRS } from './reward.dto';
 import { Injectable } from '@nestjs/common';
 import { ChainService } from 'src/chain/chain.service';
 import { MicroserviceService } from 'src/microservice/microservice.service';
@@ -23,15 +23,15 @@ export class RewardService {
   async claimLootdrop(creatorId: number, userAddress: string, contact: string, lootdropId: number) {
     const lootdrops = await this.getlootdrops(creatorId);
     let userThreshold: number;
-    switch (lootdrops.response[lootdropId].requirements) {
+    switch (lootdrops[lootdropId].requirements) {
       case Requirements.ALLXP:
         // better leaderboard fn
         userThreshold = await this.battlePassService.getOneAllSeasonInfo(creatorId, userAddress);
         if (userThreshold == null) throw new Error('On-Chain Error!');
-        if (userThreshold < lootdrops.response[lootdropId].threshold)
+        if (userThreshold < lootdrops[lootdropId].threshold)
           throw new Error(
             `You need ${
-              lootdrops.response[lootdropId].threshold - userThreshold
+              lootdrops[lootdropId].threshold - userThreshold
             } more XP to claim this Lootdrop!`,
           );
         break;
@@ -39,46 +39,46 @@ export class RewardService {
         userThreshold = await this.battlePassService.getBalance(
           creatorId,
           userAddress,
-          lootdrops.response[lootdropId].rewardId,
+          lootdrops[lootdropId].rewardId,
         );
-        if (userThreshold < lootdrops.response[lootdropId].threshold)
+        if (userThreshold < lootdrops[lootdropId].threshold)
           throw new Error(
             `You need ${
-              lootdrops.response[lootdropId].threshold - userThreshold
+              lootdrops[lootdropId].threshold - userThreshold
             } more Reputation to claim this Lootdrop!`,
           );
         break;
       case Requirements.SEASONXP:
         userThreshold = await this.battlePassService.getXp(creatorId, userAddress);
-        if (userThreshold < lootdrops.response[lootdropId].threshold)
+        if (userThreshold < lootdrops[lootdropId].threshold)
           throw new Error(
             `You need ${
-              lootdrops.response[lootdropId].threshold - userThreshold
+              lootdrops[lootdropId].threshold - userThreshold
             } more XP to claim this Lootdrop!`,
           );
         break;
       case Requirements.STREAK:
         userThreshold = await this.battlePassService.getStreak(creatorId, userAddress);
-        if (userThreshold < lootdrops.response[lootdropId].threshold)
+        if (userThreshold < lootdrops[lootdropId].threshold)
           throw new Error(
             `You need ${
-              lootdrops.response[lootdropId].threshold - userThreshold
+              lootdrops[lootdropId].threshold - userThreshold
             } more Streak days to claim this Lootdrop!`,
           );
         break;
       default:
         throw new Error('Invalid Lootdrop!');
     }
-    if (userThreshold < lootdrops.response[lootdropId].threshold)
+    if (userThreshold < lootdrops[lootdropId].threshold)
       throw new Error('User Cannot Meet Requirements!');
     await this.setLootdropQty(creatorId, userAddress, lootdropId);
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(
       creatorId,
-      lootdrops.response[lootdropId].rewardId,
+      lootdrops[lootdropId].rewardId,
     );
     await this.microserviceService.sendRedeemAlert(
-      lootdrops.response[lootdropId].rewardId,
+      lootdrops[lootdropId].rewardId,
       userAddress,
       creatorId,
       bpAddress,
@@ -91,10 +91,10 @@ export class RewardService {
       userAddress,
       name: userInfo.name,
       pfp: userInfo.pfp,
-      lootdropId: lootdrops.response[lootdropId].rewardId,
-      start: lootdrops.response[lootdropId].start,
-      end: lootdrops.response[lootdropId].end,
-      url: lootdrops.response[lootdropId].url,
+      lootdropId: lootdrops[lootdropId].rewardId,
+      start: lootdrops[lootdropId].start,
+      end: lootdrops[lootdropId].end,
+      url: lootdrops[lootdropId].url,
     };
     this.microserviceService.sendClaimLootdropAlert(alert);
     return { success: true };
@@ -106,11 +106,11 @@ export class RewardService {
     return plainToInstance(LootdropRS, JSON.parse(cache as string));
   }
 
-  async getlootdrops(creatorId: number): Promise<Lootdrops> {
+  async getlootdrops(creatorId: number): Promise<Array<LootdropRS>> {
     const target = `lootdrop-${creatorId}`;
     const cache = await this.redis.get(target);
-    if (cache == null) return { response: [] };
-    return plainToInstance(Lootdrops, JSON.parse(cache as string));
+    if (cache == null) return [];
+    return plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
   }
 
   async setLootdropQty(creatorId: number, userAddress: string, lootdropId: number) {
@@ -121,7 +121,7 @@ export class RewardService {
     );
     if (claimed != null && claimed == 1) throw new Error('Already Claimed!');
     const lootdrops = await this.getlootdrops(creatorId);
-    if (lootdrops.response[lootdropId].qty == -1) {
+    if (lootdrops[lootdropId].qty == -1) {
       await this.redis.sadd(target + '-' + lootdropId.toString() + '-list', userAddress);
       return;
     } else {

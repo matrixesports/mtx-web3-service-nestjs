@@ -1,4 +1,3 @@
-
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -76,7 +75,7 @@ export abstract class IQuery {
 
     abstract getLootdrop(creatorId: number): Nullable<Lootdrop> | Promise<Nullable<Lootdrop>>;
 
-    abstract getLootdrops(creatorId: number): Nullable<Lootdrops> | Promise<Nullable<Lootdrops>>;
+    abstract getLootdrops(creatorId: number): Nullable<Nullable<Lootdrop>[]> | Promise<Nullable<Nullable<Lootdrop>[]>>;
 }
 
 export abstract class IMutation {
@@ -214,10 +213,6 @@ export class Lootdrop {
     start: Date;
     end: Date;
     url: string;
-}
-
-export class Lootdrops {
-    response?: Nullable<Nullable<Lootdrop>[]>;
 }
 
 export type BigInt = unknown;
