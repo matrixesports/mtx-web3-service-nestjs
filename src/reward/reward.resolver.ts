@@ -25,6 +25,7 @@ export class LootdropResolver {
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
+    console.log('UA', userAddress);
     return await this.rewardService.claimLootdrop(creatorId, userAddress, contact, lootdropId);
   }
 
