@@ -325,10 +325,10 @@ export class ApiController {
     const cache = await this.rewardService.getlootdrops(createLootdropDto.creatorId);
     const lootdrop: LootdropRS = { ...createLootdropDto, url: shortUrl };
     console.log('Lootdrops: ', cache);
-    cache.response.push(lootdrop);
+    cache.push(lootdrop);
     await this.redis.set(target, JSON.stringify(cache));
     await this.redis.set(
-      target + '-' + (cache.response.length - 1).toString() + '-qty',
+      target + '-' + (cache.length - 1).toString() + '-qty',
       createLootdropDto.qty,
       'EX',
       ttl,
