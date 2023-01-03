@@ -21,6 +21,7 @@ export class RewardService {
   ) {}
 
   async claimLootdrop(creatorId: number, userAddress: string, contact: string, lootdropId: number) {
+    console.log('Claim Lootdrop');
     const lootdrops = await this.getlootdrops(creatorId);
     let userThreshold: number;
     switch (lootdrops[lootdropId].requirements) {
@@ -58,6 +59,7 @@ export class RewardService {
           );
         break;
       case Requirements.STREAK:
+        console.log('Claim Lootdrop STREAK');
         userThreshold = await this.battlePassService.getStreak(creatorId, userAddress);
         if (userThreshold < lootdrops[lootdropId].threshold)
           throw new Error(
@@ -72,6 +74,7 @@ export class RewardService {
     if (userThreshold < lootdrops[lootdropId].threshold)
       throw new Error('User Cannot Meet Requirements!');
     await this.setLootdropQty(creatorId, userAddress, lootdropId);
+    console.log('Claimed');
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(
       creatorId,
