@@ -110,7 +110,7 @@ export class RewardService {
     const target = `lootdrop-${creatorId}`;
     const cache = await this.redis.get(target);
     if (cache == null) return [];
-    return plainToInstance(Array<LootdropRS>, JSON.parse(cache as string));
+    return plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
   }
 
   async setLootdropQty(creatorId: number, userAddress: string, lootdropId: number) {
