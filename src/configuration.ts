@@ -43,9 +43,8 @@ export default () => {
       },
       user: {
         host: process.env.USER_SERVICE_HOST,
-        port: parseInt(process.env.USER_SERVICE_PORT),
-        url:
-          'http://' + process.env.USER_SERVICE_HOST + ':' + parseInt(process.env.USER_SERVICE_PORT),
+        port: parseInt(process.env.USER_MICROSERVICE_PORT),
+        url: 'http://' + process.env.USER_SERVICE_HOST + ':3000',
         token: process.env.USER_SERVICE_API_TOKEN,
       },
       url: {

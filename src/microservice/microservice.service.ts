@@ -25,7 +25,7 @@ import {
 } from './microservice.dto';
 import { parse } from 'postgres-array';
 import { MetadataDB } from 'src/inventory/inventory.entity';
-import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { LootdropReward } from 'src/reward/reward.dto';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
@@ -40,16 +40,8 @@ export class MicroserviceService {
     private configService: ConfigService,
     @Inject('TWITCH_SERVICE') private twitchClient: ClientProxy,
     @Inject('DISCORD_SERVICE') private discordClient: ClientProxy,
-    private userClient: ClientProxy,
-  ) {
-    this.userClient = ClientProxyFactory.create({
-      transport: Transport.TCP,
-      options: {
-        host: process.env.USER_SERVICE_HOST,
-        port: parseInt(process.env.USER_MICROSERVICE_PORT),
-      },
-    });
-  }
+    @Inject('USER_SERVICE') private userClient: ClientProxy,
+  ) {}
 
   async getUserStreak(
     creatorId: number,
