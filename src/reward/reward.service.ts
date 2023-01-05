@@ -123,7 +123,7 @@ export class RewardService {
     if (claimed != null && claimed == 1) throw new Error('Already Claimed!');
     const lootdrops = await this.getlootdrops(creatorId);
     if (lootdrops[lootdropId].qty == -1) {
-      await this.redis.sadd(target + '-' + lootdropId + '-list', userAddress);
+      await this.redis.sadd(target + '-' + lootdropId + '-list', userAddress, 'KEEPTTL');
       return;
     } else {
       let retry = true;
@@ -137,7 +137,7 @@ export class RewardService {
         await this.redis
           .multi()
           .set(target + '-' + lootdropId + '-qty', qty - 1, 'KEEPTTL')
-          .sadd(target + '-' + lootdropId + '-list', userAddress)
+          .sadd(target + '-' + lootdropId + '-list', userAddress, 'KEEPTTL')
           .exec()
           .catch(() => {
             retry = true;
