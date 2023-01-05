@@ -29,6 +29,7 @@ export class Reward implements RewardGQL {
 }
 
 export abstract class LootdropBase {
+  lootdropId?: string;
   creatorId: number;
   rewardId?: number;
   reward?: Reward;
@@ -40,6 +41,7 @@ export abstract class LootdropBase {
 }
 
 export class LootdropRS implements LootdropBase {
+  lootdropId?: string;
   creatorId: number;
   rewardId: number;
   requirements: Requirements;
@@ -51,6 +53,8 @@ export class LootdropRS implements LootdropBase {
 }
 
 export class LootdropReward implements LootdropBase {
+  @ApiProperty({ type: String })
+  lootdropId?: string;
   @ApiProperty({ type: Number })
   creatorId: number;
   @ApiProperty({ type: Reward })
@@ -68,7 +72,7 @@ export class LootdropReward implements LootdropBase {
 }
 
 export class GetLootdropDto implements LootdropRS {
-  lootdropId: number;
+  lootdropId?: string;
   creatorId: number;
   rewardId: number;
   requirements: Requirements;

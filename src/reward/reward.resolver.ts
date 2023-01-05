@@ -8,8 +8,11 @@ export class LootdropResolver {
   constructor(private rewardService: RewardService, private inventoryService: InventoryService) {}
 
   @Query()
-  async getLootdrop(@Args('creatorId') creatorId: number): Promise<LootdropRS> {
-    return await this.rewardService.getlootdrop(creatorId);
+  async getLootdrop(
+    @Args('creatorId') creatorId: number,
+    @Args('lootdropId') lootdropId: string,
+  ): Promise<LootdropRS> {
+    return await this.rewardService.getlootdrop(creatorId, lootdropId);
   }
 
   @Query()
@@ -21,7 +24,7 @@ export class LootdropResolver {
   async claimLootdrop(
     @Args('creatorId') creatorId: number,
     @Args('contact') contact: string,
-    @Args('lootdropId') lootdropId: number,
+    @Args('lootdropId') lootdropId: string,
     @Context() context,
   ) {
     const userAddress: string = context.req.headers['user-address'];
