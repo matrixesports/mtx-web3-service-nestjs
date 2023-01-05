@@ -333,7 +333,7 @@ export class ApiController {
       'EX',
       ttl,
     );
-    // await this.redis.del(target + '-list');
+    await this.redis.del(target + '-' + (cache.length - 1).toString() + '-list');
     const reward = await this.inventoryService.createRewardObj(
       createLootdropDto.creatorId,
       createLootdropDto.rewardId,
