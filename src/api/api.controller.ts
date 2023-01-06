@@ -1,4 +1,13 @@
-import { Body, Controller, Get, HttpException, Param, Post, UseFilters } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Param,
+  Post,
+  Query,
+  UseFilters,
+} from '@nestjs/common';
 import { BattlePassFactory, Crafting__factory } from 'abi/typechain';
 import { BattlePass, LevelInfoStruct, LootboxOptionStruct } from 'abi/typechain/BattlePass';
 import { IngredientsStruct } from 'abi/typechain/Crafting';
@@ -26,6 +35,7 @@ import { InventoryService } from 'src/inventory/inventory.service';
 import { LootdropReward, LootdropRS } from 'src/reward/reward.dto';
 import { MicroserviceService } from 'src/microservice/microservice.service';
 import { LootdropAlert, PremPassAlert, SeasonAlert } from 'src/microservice/microservice.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Controller()
 @UseFilters(TypeORMFilter, EthersFilter)
@@ -87,10 +97,20 @@ export class ApiController {
 
   @ApiOkResponse({ type: LootdropReward })
   @Get('lootdrop/:creatorId')
-  async getLootdrop(@Param('creatorId') creatorId: number): Promise<LootdropReward> {
-    const cache = await this.rewardService.getlootdrop(creatorId);
+  async getLootdrop(
+    @Param('creatorId') creatorId: number,
+    @Query('lootdropId') lootdropId?: string,
+  ): Promise<LootdropReward> {
+    let cache: LootdropRS;
+    if (!lootdropId) {
+      cache = await this.rewardService.getlootdrop(creatorId);
+    } else {
+      // getting a specific lootdrop
+      cache = await this.rewardService.getlootdrop(creatorId, lootdropId);
+    }
     const reward = await this.inventoryService.createRewardObj(creatorId, cache.rewardId, 1);
     return {
+      lootdropId: lootdropId ?? '',
       creatorId,
       reward,
       requirements: cache.requirements,
@@ -323,7 +343,14 @@ export class ApiController {
         : Math.floor((end.getTime() - nw.getTime()) / 1000);
     const target = `lootdrop-${createLootdropDto.creatorId}`;
     const cache = await this.rewardService.getlootdrops(createLootdropDto.creatorId);
-    const lootdrop: LootdropRS = { ...createLootdropDto, url: shortUrl };
+    // introduce a lootdrop id that will be unique to every lootdrop.
+    // This will be useful when keeping track of the claimed lootdrops.
+    // the lootdropId will be the creatorId separated by the current timestamp in milliseconds
+    const lootdrop: LootdropRS = {
+      ...createLootdropDto,
+      url: shortUrl,
+      lootdropId: `${createLootdropDto.creatorId}-${nw.getTime()}`,
+    };
     console.log('Lootdrops: ', cache);
     cache.push(lootdrop);
     await this.redis.set(target, JSON.stringify(cache));
@@ -347,9 +374,29 @@ export class ApiController {
       start: start.toString(),
       end: end.toString(),
       url: shortUrl,
-      lootdropId: reward.id,
+      lootdropId: lootdrop.lootdropId,
     };
     this.microserviceService.sendLootdropAlert(alert);
     return { success: true };
+  }
+
+  @Get('claimed/lootdrops')
+  async getClaimedLootdrops(
+    @Query('userAddress') userAddress: string,
+    @Query('creatorId') creatorId: number,
+  ) {
+    // get a list of all lootdrops claimed by a user.
+    const target = `lootdrop-${creatorId}`;
+    // all lootdrops
+    const cache = await this.redis.get(target);
+    const lootdrops = plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
+    const claimedByUser = lootdrops.filter(async (lootdrop) => {
+      const claimed = await this.redis.sismember(
+        target + '-' + lootdrop.lootdropId + '-list',
+        userAddress,
+      );
+      return claimed != null && claimed == 1;
+    });
+    return claimedByUser;
   }
 }

@@ -20,7 +20,7 @@ export class RewardService {
     private battlePassService: BattlePassService,
   ) {}
 
-  async claimLootdrop(creatorId: number, userAddress: string, contact: string, lootdropId: number) {
+  async claimLootdrop(creatorId: number, userAddress: string, contact: string, lootdropId: string) {
     console.log('Claim Lootdrop');
     const lootdrops = await this.getlootdrops(creatorId);
     let userThreshold: number;
@@ -74,6 +74,7 @@ export class RewardService {
     if (userThreshold < lootdrops[lootdropId].threshold)
       throw new Error('User Cannot Meet Requirements!');
     await this.setLootdropQty(creatorId, userAddress, lootdropId);
+    // store the claimed lootdrop
     console.log('Claimed');
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(
@@ -102,7 +103,7 @@ export class RewardService {
     this.microserviceService.sendClaimLootdropAlert(alert);
     return { success: true };
   }
-  async getlootdrop(creatorId: number): Promise<LootdropRS> {
+  async getlootdrop(creatorId: number, lootdropId?: string): Promise<LootdropRS> {
     const target = `lootdrop-${creatorId}`;
     const cache = await this.redis.get(target);
     if (cache == null) throw new Error('Lootdrop Not Active!');
@@ -116,30 +117,27 @@ export class RewardService {
     return plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
   }
 
-  async setLootdropQty(creatorId: number, userAddress: string, lootdropId: number) {
+  async setLootdropQty(creatorId: number, userAddress: string, lootdropId: string) {
     const target = `lootdrop-${creatorId}`;
-    const claimed = await this.redis.sismember(
-      target + '-' + lootdropId.toString() + '-list',
-      userAddress,
-    );
+    const claimed = await this.redis.sismember(target + '-' + lootdropId + '-list', userAddress);
     if (claimed != null && claimed == 1) throw new Error('Already Claimed!');
     const lootdrops = await this.getlootdrops(creatorId);
     if (lootdrops[lootdropId].qty == -1) {
-      await this.redis.sadd(target + '-' + lootdropId.toString() + '-list', userAddress, 'KEEPTTL');
+      await this.redis.sadd(target + '-' + lootdropId + '-list', userAddress, 'KEEPTTL');
       return;
     } else {
       let retry = true;
       while (retry) {
         retry = false;
         await this.redis.watch(target);
-        const cache = await this.redis.get(target + '-' + lootdropId.toString() + '-qty');
+        const cache = await this.redis.get(target + '-' + lootdropId + '-qty');
         if (cache == null) throw new Error('Lootdrop Not Active!');
         const qty = parseInt(cache);
         if (qty == 0) throw new Error('Out of Rewards!');
         await this.redis
           .multi()
-          .set(target + '-' + lootdropId.toString() + '-qty', qty - 1, 'KEEPTTL')
-          .sadd(target + '-' + lootdropId.toString() + '-list', userAddress, 'KEEPTTL')
+          .set(target + '-' + lootdropId + '-qty', qty - 1, 'KEEPTTL')
+          .sadd(target + '-' + lootdropId + '-list', userAddress, 'KEEPTTL')
           .exec()
           .catch(() => {
             retry = true;

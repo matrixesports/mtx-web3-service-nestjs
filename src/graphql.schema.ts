@@ -85,7 +85,7 @@ export abstract class IMutation {
 
     abstract craft(recipeId: number): MutationResponse | Promise<MutationResponse>;
 
-    abstract claimLootdrop(creatorId: number, contact: string, lootdropId: number): MutationResponse | Promise<MutationResponse>;
+    abstract claimLootdrop(creatorId: number, contact: string, lootdropId: string): MutationResponse | Promise<MutationResponse>;
 }
 
 export class ClaimRewardResponse {
@@ -207,6 +207,7 @@ export class ReputationRanking implements Ranking {
 }
 
 export class Lootdrop {
+    lootdropId?: Nullable<string>;
     reward: Reward;
     requirements: Requirements;
     threshold: number;
