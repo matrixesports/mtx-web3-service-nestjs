@@ -109,19 +109,19 @@ export class RewardService {
     return lootdrop;
   }
 
-  async getlootdrops(creatorId: number): Promise<NewLootdrops> {
+  async getlootdrops(creatorId: number): Promise<LootdropRS[]> {
     const target = `lootdrop-${creatorId}`;
     const cache = await this.redis.get(target);
-    if (cache == null) return {};
-    return plainToInstance(NewLootdrops, JSON.parse(cache as string));
+    if (cache == null) return [];
+    return plainToInstance(Array<LootdropRS>, JSON.parse(cache as string));
   }
 
   async setLootdropQty(creatorId: number, userAddress: string, lootdropId: string) {
     const target = `lootdrop-${creatorId}`;
     const claimed = await this.redis.sismember(target + '-' + lootdropId + '-list', userAddress);
     if (claimed != null && claimed == 1) throw new Error('Already Claimed!');
-    const lootdrops = await this.getlootdrops(creatorId);
-    if (lootdrops[lootdropId].qty == -1) {
+    const lootdrop = await this.getlootdrop(creatorId, lootdropId);
+    if (lootdrop.qty == -1) {
       await this.redis.sadd(target + '-' + lootdropId + '-list', userAddress, 'KEEPTTL');
       return;
     } else {
