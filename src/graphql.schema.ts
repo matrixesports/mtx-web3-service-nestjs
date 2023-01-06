@@ -73,7 +73,7 @@ export abstract class IQuery {
 
     abstract getReputationRankings(creatorId: number): Nullable<Nullable<ReputationRanking>[]> | Promise<Nullable<Nullable<ReputationRanking>[]>>;
 
-    abstract getLootdrop(creatorId: number): Nullable<Lootdrop> | Promise<Nullable<Lootdrop>>;
+    abstract getLootdrop(creatorId: number, lootdropId: string): Nullable<Lootdrop> | Promise<Nullable<Lootdrop>>;
 
     abstract getLootdrops(creatorId: number): Nullable<Nullable<Lootdrop>[]> | Promise<Nullable<Nullable<Lootdrop>[]>>;
 }

@@ -1,6 +1,6 @@
 import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { RewardService } from './reward.service';
-import { GetLootdropDto, LootdropRS } from './reward.dto';
+import { GetLootdropDto, LootdropRS, NewLootdrops } from './reward.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
 
 @Resolver('Lootdrop')
@@ -16,7 +16,7 @@ export class LootdropResolver {
   }
 
   @Query()
-  async getLootdrops(@Args('creatorId') creatorId: number): Promise<Array<LootdropRS>> {
+  async getLootdrops(@Args('creatorId') creatorId: number): Promise<NewLootdrops> {
     return await this.rewardService.getlootdrops(creatorId);
   }
 

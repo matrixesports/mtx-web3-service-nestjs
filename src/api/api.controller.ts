@@ -332,7 +332,7 @@ export class ApiController {
 
   @Post('create/lootdrop')
   async createLootdrop(@Body() createLootdropDto: CreateLootdropDto) {
-    const shortUrl = await this.microserviceService.createUrl(createLootdropDto.creatorId);
+    const shortUrl = ''; // await this.microserviceService.createUrl(createLootdropDto.creatorId);
     const start = moment.utc(createLootdropDto.start).utcOffset('-07:00').toDate();
     const end = moment.utc(createLootdropDto.end).utcOffset('-07:00').toDate();
     if (start > end) throw new HttpException('Start Must Be Before End!', 500);
@@ -352,15 +352,15 @@ export class ApiController {
       lootdropId: `${createLootdropDto.creatorId}-${nw.getTime()}`,
     };
     console.log('Lootdrops: ', cache);
-    cache.push(lootdrop);
+    cache[lootdrop.lootdropId] = lootdrop;
     await this.redis.set(target, JSON.stringify(cache));
     await this.redis.set(
-      target + '-' + (cache.length - 1).toString() + '-qty',
+      target + '-' + lootdrop.lootdropId + '-qty',
       createLootdropDto.qty,
       'EX',
       ttl,
     );
-    await this.redis.del(target + '-' + (cache.length - 1).toString() + '-list');
+    await this.redis.del(target + '-' + lootdrop.lootdropId + '-list');
     const reward = await this.inventoryService.createRewardObj(
       createLootdropDto.creatorId,
       createLootdropDto.rewardId,
@@ -376,7 +376,7 @@ export class ApiController {
       url: shortUrl,
       lootdropId: lootdrop.lootdropId,
     };
-    this.microserviceService.sendLootdropAlert(alert);
+    // this.microserviceService.sendLootdropAlert(alert);
     return { success: true };
   }
 

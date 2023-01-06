@@ -1,7 +1,7 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { plainToInstance } from 'class-transformer';
-import { LootdropRS } from './reward.dto';
+import { LootdropRS, NewLootdrops } from './reward.dto';
 import { Injectable } from '@nestjs/common';
 import { ChainService } from 'src/chain/chain.service';
 import { MicroserviceService } from 'src/microservice/microservice.service';
@@ -110,11 +110,11 @@ export class RewardService {
     return plainToInstance(LootdropRS, JSON.parse(cache as string));
   }
 
-  async getlootdrops(creatorId: number): Promise<Array<LootdropRS>> {
+  async getlootdrops(creatorId: number): Promise<NewLootdrops> {
     const target = `lootdrop-${creatorId}`;
     const cache = await this.redis.get(target);
-    if (cache == null) return [];
-    return plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
+    if (cache == null) return {};
+    return plainToInstance(NewLootdrops, JSON.parse(cache as string));
   }
 
   async setLootdropQty(creatorId: number, userAddress: string, lootdropId: string) {
