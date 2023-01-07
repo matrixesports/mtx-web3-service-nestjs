@@ -102,7 +102,7 @@ export class RewardService {
     const cache = await this.redis.get(target);
     if (cache == null)
       throw new Error(`Could not get any active lootdrop for creator ${creatorId}!`);
-    const lootdropsCache = plainToInstance(Array<LootdropRS>, JSON.parse(cache as string));
+    const lootdropsCache = plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
     const lootdrop = lootdropsCache.find((lootdrop) => lootdrop.lootdropId === lootdropId);
     if (!lootdrop)
       throw new Error(`Could not get lootdrop for creator ${creatorId} with id ${lootdropId}`);
@@ -113,7 +113,7 @@ export class RewardService {
     const target = `lootdrop-${creatorId}`;
     const cache = await this.redis.get(target);
     if (cache == null) return [];
-    return plainToInstance(Array<LootdropRS>, JSON.parse(cache as string));
+    return plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
   }
 
   async setLootdropQty(creatorId: number, userAddress: string, lootdropId: string) {
