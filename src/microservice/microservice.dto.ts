@@ -45,8 +45,8 @@ export class ClaimLootdropAlert implements BaseAlert {
   end: string;
   @ApiProperty({ type: String })
   url: string;
-  @ApiProperty({ type: Number })
-  lootdropId: number;
+  @ApiProperty({ type: String })
+  lootdropId: string;
 }
 
 export class LeaderboardAlert implements BaseAlert {

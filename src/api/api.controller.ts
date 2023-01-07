@@ -351,8 +351,8 @@ export class ApiController {
       url: shortUrl,
       lootdropId: `${createLootdropDto.creatorId}-${nw.getTime()}`,
     };
-    console.log('Lootdrops: ', cache);
-    cache[lootdrop.lootdropId] = lootdrop;
+    // push the lootdrop as it is to the cache
+    cache.push(lootdrop);
     await this.redis.set(target, JSON.stringify(cache));
     await this.redis.set(
       target + '-' + lootdrop.lootdropId + '-qty',

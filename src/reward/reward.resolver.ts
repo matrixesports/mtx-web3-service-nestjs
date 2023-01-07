@@ -16,7 +16,7 @@ export class LootdropResolver {
   }
 
   @Query()
-  async getLootdrops(@Args('creatorId') creatorId: number): Promise<NewLootdrops> {
+  async getLootdrops(@Args('creatorId') creatorId: number): Promise<LootdropRS[]> {
     return await this.rewardService.getlootdrops(creatorId);
   }
 
