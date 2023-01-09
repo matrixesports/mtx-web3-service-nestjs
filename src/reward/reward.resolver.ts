@@ -2,6 +2,7 @@ import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '
 import { RewardService } from './reward.service';
 import { GetLootdropDto, LootdropRS, NewLootdrops } from './reward.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
+import { plainToInstance } from 'class-transformer';
 
 @Resolver('Lootdrop')
 export class LootdropResolver {
@@ -29,6 +30,12 @@ export class LootdropResolver {
   ) {
     const userAddress: string = context.req.headers['user-address'];
     return await this.rewardService.claimLootdrop(creatorId, userAddress, contact, lootdropId);
+  }
+
+  @Query()
+  async getClaimedLootdrops(@Args('creatorId') creatorId: number, @Context() context) {
+    const userAddress: string = context.req.headers['user-address'];
+    return await this.rewardService.getClaimedLootdrops(creatorId, userAddress);
   }
 
   @ResolveField()
