@@ -379,24 +379,4 @@ export class ApiController {
     // this.microserviceService.sendLootdropAlert(alert);
     return { success: true };
   }
-
-  @Get('claimed/lootdrops')
-  async getClaimedLootdrops(
-    @Query('userAddress') userAddress: string,
-    @Query('creatorId') creatorId: number,
-  ) {
-    // get a list of all lootdrops claimed by a user.
-    const target = `lootdrop-${creatorId}`;
-    // all lootdrops
-    const cache = await this.redis.get(target);
-    const lootdrops = plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
-    const claimedByUser = lootdrops.filter(async (lootdrop) => {
-      const claimed = await this.redis.sismember(
-        target + '-' + lootdrop.lootdropId + '-list',
-        userAddress,
-      );
-      return claimed != null && claimed == 1;
-    });
-    return claimedByUser;
-  }
 }

@@ -144,4 +144,22 @@ export class RewardService {
       }
     }
   }
+
+  // use this to get a users claimed lootdrops
+  async getClaimedLootdrops(creatorId: number, userAddress: string) {
+    // get a list of all lootdrops claimed by a user.
+    const target = `lootdrop-${creatorId}`;
+    // all lootdrops
+    const cache = await this.redis.get(target);
+    const lootdrops = plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
+    if (!lootdrops || lootdrops.length < 1) return [];
+    const claimedByUser = lootdrops.filter(async (lootdrop) => {
+      const claimed = await this.redis.sismember(
+        target + '-' + lootdrop.lootdropId + '-list',
+        userAddress,
+      );
+      return claimed != null && claimed == 1;
+    });
+    return claimedByUser;
+  }
 }
