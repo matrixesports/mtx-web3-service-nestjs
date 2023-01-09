@@ -19,6 +19,7 @@ type Query {
 
   getLootdrop(creatorId: Int!, lootdropId: String!): Lootdrop
   getLootdrops(creatorId: Int!): [Lootdrop]
+  getClaimedLootdrops(creatorId: Int!): [Lootdrop]
 }
 
 # |========================| MUTATION |========================|

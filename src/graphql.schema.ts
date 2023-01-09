@@ -76,6 +76,8 @@ export abstract class IQuery {
     abstract getLootdrop(creatorId: number, lootdropId: string): Nullable<Lootdrop> | Promise<Nullable<Lootdrop>>;
 
     abstract getLootdrops(creatorId: number): Nullable<Nullable<Lootdrop>[]> | Promise<Nullable<Nullable<Lootdrop>[]>>;
+
+    abstract getClaimedLootdrops(creatorId: number): Nullable<Nullable<Lootdrop>[]> | Promise<Nullable<Nullable<Lootdrop>[]>>;
 }
 
 export abstract class IMutation {
