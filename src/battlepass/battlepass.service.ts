@@ -363,6 +363,9 @@ export class BattlePassService {
     const userAddress = this.chainService.getAddress(_userAddress);
     const results = await contract.balanceOfBatch(addresses, ids);
     const index = followers.findIndex((follower) => follower.userAddress === userAddress);
+    // if a user does not follow the creator
+    if (!index) return null;
+
     const dto: GetRankingDto = {
       id: followers[index].id,
       userAddress: followers[index].userAddress,
