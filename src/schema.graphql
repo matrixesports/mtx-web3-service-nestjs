@@ -224,6 +224,8 @@ enum Requirements {
 
 type Lootdrop {
   lootdropId: String
+  lootdropType: LootdropType!
+  active: Boolean!
   reward: Reward!
   requirements: Requirements!
   threshold: Int!
