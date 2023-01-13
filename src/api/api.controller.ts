@@ -111,6 +111,7 @@ export class ApiController {
     const reward = await this.inventoryService.createRewardObj(creatorId, cache.rewardId, 1);
     return {
       lootdropId: lootdropId ?? '',
+      lootdropType: cache.lootdropType,
       creatorId,
       reward,
       requirements: cache.requirements,
@@ -118,6 +119,7 @@ export class ApiController {
       start: cache.start,
       end: cache.end,
       url: cache.url,
+      active: true,
     };
   }
 
@@ -375,6 +377,8 @@ export class ApiController {
       end: end.toString(),
       url: shortUrl,
       lootdropId: lootdrop.lootdropId,
+      lootdropType: lootdrop.lootdropType,
+      active: true,
     };
     // this.microserviceService.sendLootdropAlert(alert);
     return { success: true };

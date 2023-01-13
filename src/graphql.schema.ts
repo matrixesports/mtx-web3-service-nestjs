@@ -16,6 +16,11 @@ export enum RewardType {
     GIVEAWAY = "GIVEAWAY"
 }
 
+export enum LootdropType {
+    DAILY = "DAILY",
+    STREAK = "STREAK"
+}
+
 export enum RedeemStatus {
     REDEEMED = "REDEEMED",
     PROCESSING = "PROCESSING",
@@ -210,6 +215,8 @@ export class ReputationRanking implements Ranking {
 
 export class Lootdrop {
     lootdropId?: Nullable<string>;
+    lootdropType: LootdropType;
+    active: boolean;
     reward: Reward;
     requirements: Requirements;
     threshold: number;
