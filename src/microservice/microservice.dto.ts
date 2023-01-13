@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Requirements } from 'src/graphql.schema';
+import { LootdropType, Requirements } from 'src/graphql.schema';
 import { LootdropReward, Reward } from 'src/reward/reward.dto';
 
 export const LEVELUP_ALERT = 'levelup';
@@ -106,6 +106,8 @@ export class SeasonAlert {
 export class LootdropAlert implements LootdropReward {
   @ApiProperty({ type: Number })
   creatorId: number;
+  @ApiProperty({ enum: LootdropType })
+  lootdropType: LootdropType;
   @ApiProperty({ type: Reward })
   reward: Reward;
   @ApiProperty({ enum: Requirements })

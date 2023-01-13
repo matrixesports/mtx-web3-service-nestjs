@@ -16,6 +16,11 @@ export enum RewardType {
     GIVEAWAY = "GIVEAWAY"
 }
 
+export enum LootdropType {
+    DAILY = "DAILY",
+    STREAK = "STREAK"
+}
+
 export enum RedeemStatus {
     REDEEMED = "REDEEMED",
     PROCESSING = "PROCESSING",

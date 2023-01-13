@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  LootdropType,
   Requirements,
   Reward as RewardGQL,
   RewardMetadata as RewardMetadataGQL,
@@ -30,6 +31,7 @@ export class Reward implements RewardGQL {
 
 export abstract class LootdropBase {
   lootdropId?: string;
+  lootdropType?: LootdropType;
   creatorId: number;
   rewardId?: number;
   reward?: Reward;
@@ -42,6 +44,7 @@ export abstract class LootdropBase {
 
 export class LootdropRS implements LootdropBase {
   lootdropId?: string;
+  lootdropType: LootdropType;
   creatorId: number;
   rewardId: number;
   requirements: Requirements;
@@ -59,6 +62,8 @@ export class NewLootdrops {
 export class LootdropReward implements LootdropBase {
   @ApiProperty({ type: String })
   lootdropId?: string;
+  @ApiProperty({ enum: LootdropType })
+  lootdropType: LootdropType;
   @ApiProperty({ type: Number })
   creatorId: number;
   @ApiProperty({ type: Reward })
@@ -77,6 +82,7 @@ export class LootdropReward implements LootdropBase {
 
 export class GetLootdropDto implements LootdropRS {
   lootdropId?: string;
+  lootdropType: LootdropType;
   creatorId: number;
   rewardId: number;
   requirements: Requirements;
