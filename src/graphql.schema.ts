@@ -215,6 +215,8 @@ export class ReputationRanking implements Ranking {
 
 export class Lootdrop {
     lootdropId?: Nullable<string>;
+    lootdropType: LootdropType;
+    active: boolean;
     reward: Reward;
     requirements: Requirements;
     threshold: number;
