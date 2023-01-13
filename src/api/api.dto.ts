@@ -91,4 +91,6 @@ export class CreateLootdropDto implements LootdropBase, IBattlePass {
   end: string;
   @ApiProperty({ type: Number })
   qty: number;
+  @ApiProperty({ type: Boolean })
+  active: boolean;
 }

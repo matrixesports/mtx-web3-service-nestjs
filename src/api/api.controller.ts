@@ -119,6 +119,7 @@ export class ApiController {
       start: cache.start,
       end: cache.end,
       url: cache.url,
+      active: true,
     };
   }
 
@@ -377,6 +378,7 @@ export class ApiController {
       url: shortUrl,
       lootdropId: lootdrop.lootdropId,
       lootdropType: lootdrop.lootdropType,
+      active: true,
     };
     // this.microserviceService.sendLootdropAlert(alert);
     return { success: true };

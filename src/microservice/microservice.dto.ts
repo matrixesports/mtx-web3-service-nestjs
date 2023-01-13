@@ -122,6 +122,8 @@ export class LootdropAlert implements LootdropReward {
   url: string;
   @ApiProperty({ type: String, nullable: true })
   lootdropId?: string;
+  @ApiProperty({ type: Boolean })
+  active: boolean;
 }
 
 export class ShortUrl {

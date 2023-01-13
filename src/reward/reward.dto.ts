@@ -40,6 +40,7 @@ export abstract class LootdropBase {
   start: string;
   end: string;
   qty?: number;
+  active: boolean;
 }
 
 export class LootdropRS implements LootdropBase {
@@ -53,6 +54,7 @@ export class LootdropRS implements LootdropBase {
   end: string;
   qty: number;
   url: string;
+  active: boolean;
 }
 
 export class NewLootdrops {
@@ -78,6 +80,8 @@ export class LootdropReward implements LootdropBase {
   end: string;
   @ApiProperty({ type: String })
   url: string;
+  @ApiProperty({ type: Boolean })
+  active: boolean;
 }
 
 export class GetLootdropDto implements LootdropRS {
@@ -91,4 +95,5 @@ export class GetLootdropDto implements LootdropRS {
   end: string;
   qty: number;
   url: string;
+  active: boolean;
 }
