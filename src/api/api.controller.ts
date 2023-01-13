@@ -334,7 +334,7 @@ export class ApiController {
 
   @Post('create/lootdrop')
   async createLootdrop(@Body() createLootdropDto: CreateLootdropDto) {
-    const shortUrl = ''; // await this.microserviceService.createUrl(createLootdropDto.creatorId);
+    const shortUrl = await this.microserviceService.createUrl(createLootdropDto.creatorId);
     const start = moment.utc(createLootdropDto.start).utcOffset('-07:00').toDate();
     const end = moment.utc(createLootdropDto.end).utcOffset('-07:00').toDate();
     if (start > end) throw new HttpException('Start Must Be Before End!', 500);
