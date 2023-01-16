@@ -380,7 +380,7 @@ export class ApiController {
       lootdropType: lootdrop.lootdropType,
       active: true,
     };
-    // this.microserviceService.sendLootdropAlert(alert);
+    this.microserviceService.sendLootdropAlert(alert);
     return { success: true };
   }
 }
