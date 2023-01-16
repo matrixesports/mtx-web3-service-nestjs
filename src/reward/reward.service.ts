@@ -153,13 +153,19 @@ export class RewardService {
     const cache = await this.redis.get(target);
     const lootdrops = plainToInstance(LootdropRS, <LootdropRS[]>JSON.parse(cache as string));
     if (!lootdrops || lootdrops.length < 1) return [];
-    const claimedByUser = lootdrops.filter(async (lootdrop) => {
+    const claimedByUser: LootdropRS[] = [];
+    for (let i = 0; i < lootdrops.length; i++) {
+      // check if the user address exists on the given key
+      // the key holds the addresses of the users who have claimed the lootdrop
       const claimed = await this.redis.sismember(
-        target + '-' + lootdrop.lootdropId + '-list',
+        target + '-' + lootdrops[i].lootdropId + '-list',
         userAddress,
       );
-      return claimed != null && claimed == 1;
-    });
+      // add the lootdrop to the claimed lootdrops list
+      if (claimed != null && claimed == 1) {
+        claimedByUser.push(lootdrops[i]);
+      }
+    }
     return claimedByUser;
   }
 }

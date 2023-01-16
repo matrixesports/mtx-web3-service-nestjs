@@ -101,6 +101,7 @@ enum RewardType {
 enum LootdropType {
   DAILY
   STREAK
+  NORMAL
 }
 
 type RewardMetadata {
