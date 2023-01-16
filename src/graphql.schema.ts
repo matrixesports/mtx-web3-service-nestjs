@@ -18,7 +18,8 @@ export enum RewardType {
 
 export enum LootdropType {
     DAILY = "DAILY",
-    STREAK = "STREAK"
+    STREAK = "STREAK",
+    NORMAL = "NORMAL"
 }
 
 export enum RedeemStatus {
