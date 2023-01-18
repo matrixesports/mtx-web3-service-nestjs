@@ -53,6 +53,10 @@ export default () => {
         url:
           'http://' + process.env.URL_SERVICE_HOST + ':' + parseInt(process.env.URL_SERVICE_PORT),
       },
+      manacube: {
+        baseUrl: process.env.MANACUBE_BASE_URL,
+        apiKey: process.env.MANACUBE_API_KEY,
+      },
     },
   };
   return config;
