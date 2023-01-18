@@ -199,6 +199,7 @@ export class BattlePassService {
         const alert: LevelUpAlert = {
           creatorId,
           userAddress,
+          discordId: userInfo.discordId,
           oldlvl,
           newlvl,
           name: userInfo.name,
