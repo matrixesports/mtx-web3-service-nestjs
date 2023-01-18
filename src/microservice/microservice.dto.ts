@@ -19,6 +19,8 @@ export class LevelUpAlert implements BaseAlert {
   @ApiProperty({ type: Number })
   creatorId: number;
   @ApiProperty({ type: String })
+  discordId?: string;
+  @ApiProperty({ type: String })
   userAddress: string;
   @ApiProperty({ type: Number })
   oldlvl: number;
@@ -160,6 +162,7 @@ export class RequiredFields {
 export class UserInfo {
   pfp: string;
   name: string;
+  discordId?: string;
 }
 export class Follower implements UserInfo {
   id: string;
