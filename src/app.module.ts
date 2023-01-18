@@ -23,6 +23,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 import { ApiModule } from './api/api.module';
 import { MicroserviceModule } from './microservice/microservice.module';
+import { ManacubeModule } from './manacube/manacube.module';
 
 @Module({
   imports: [
@@ -146,6 +147,7 @@ import { MicroserviceModule } from './microservice/microservice.module';
     CraftingModule,
     ApiModule,
     MicroserviceModule,
+    ManacubeModule,
   ],
   providers: [GraphQLPlugin],
 })
