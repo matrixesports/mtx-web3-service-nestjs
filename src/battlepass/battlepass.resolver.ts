@@ -6,11 +6,13 @@ import {
   GetBattlePassChildDto,
   GetBattlePassUserInfoChildDto,
   GetRankingDto,
+  MINECRAFT_TOKENS,
 } from './battlepass.dto';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { MetadataDB } from 'src/inventory/inventory.entity';
 import { ContractCall } from 'pilum';
 import { MicroserviceService } from 'src/microservice/microservice.service';
+import { ManacubeService } from 'src/manacube/manacube.service';
 
 @Resolver('BattlePass')
 export class BattlePassResolver {
@@ -19,6 +21,7 @@ export class BattlePassResolver {
     private battlePassService: BattlePassService,
     private inventoryService: InventoryService,
     private microserviceService: MicroserviceService,
+    private manaService: ManacubeService,
   ) {}
 
   /*
@@ -94,6 +97,25 @@ export class BattlePassResolver {
         );
     } else
       claimInfo = await this.battlePassService.claimReward(creatorId, userAddress, level, premium);
+
+    // if the reward was a minecraft item, then call the manaapi to either increase the level or cubit balances
+    if (MINECRAFT_TOKENS.includes(claimInfo.reward[0].metadata.name)) {
+      // get the minecraft player from the db
+      const player = await this.microserviceService.getUserDetails(userAddress);
+      // check if player has minecraft linked
+      if (!player.minecraft) {
+        console.log('=> The player has not linked their minecraft account', userAddress);
+        return;
+      }
+      const playerId = player.minecraft.uuid;
+      // check for the specific title of the reward
+      if (claimInfo.reward[0].metadata.name.includes('level')) {
+        // this can be termed as a reward which includes incrementing the level
+        await this.manaService.incrementPlayerLevel(playerId, 'manaapi:matrix', 10);
+      } else if (claimInfo.reward[0].metadata.name.includes('cuibt')) {
+        await this.manaService.incrementPlayerCubits(playerId, 2.3);
+      }
+    }
     return { success: true, reward: claimInfo.reward };
   }
 

@@ -14,6 +14,7 @@ import { BattlePassDB } from './battlepass.entity';
 import { InventoryModule } from 'src/inventory/inventory.module';
 import { ChainModule } from 'src/chain/chain.module';
 import { MicroserviceModule } from 'src/microservice/microservice.module';
+import { ManacubeModule } from 'src/manacube/manacube.module';
 
 @Module({
   providers: [
@@ -31,6 +32,7 @@ import { MicroserviceModule } from 'src/microservice/microservice.module';
     MicroserviceModule,
     TypeOrmModule.forFeature([BattlePassDB]),
     InventoryModule,
+    ManacubeModule,
   ],
   controllers: [],
   exports: [BattlePassService],
