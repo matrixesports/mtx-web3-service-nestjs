@@ -5,5 +5,6 @@ import { ManacubeService } from './manacube.service';
 @Module({
   controllers: [ManacubeController],
   providers: [ManacubeService],
+  exports: [ManacubeService],
 })
 export class ManacubeModule {}
