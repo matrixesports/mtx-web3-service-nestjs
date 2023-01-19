@@ -33,6 +33,7 @@ import {
   RequiredUserSocialOptions,
   UserMissingFields,
 } from 'src/graphql.schema';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class MicroserviceService {
@@ -115,6 +116,11 @@ export class MicroserviceService {
     return res.data;
   }
 
+  /**
+   * @deprecated uses REST API but the new prefred implementation uses TCP calls
+   * @param userAddress
+   * @returns the user info
+   */
   async getUserInfo(userAddress: string) {
     const res = await axios.get<UserInfo>(
       `${this.configService.get<string>('microservice.user.url')}/api/user/${userAddress}`,
@@ -125,6 +131,11 @@ export class MicroserviceService {
       },
     );
     return res.data;
+  }
+
+  async getUserDetails(userAddress: string) {
+    const user = await firstValueFrom(this.userClient.send({ cmd: 'get_user' }, userAddress));
+    return user;
   }
 
   async checkRequiredFields(

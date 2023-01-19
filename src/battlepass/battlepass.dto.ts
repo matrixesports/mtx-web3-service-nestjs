@@ -26,3 +26,5 @@ export type Ranking = {
   userAddress: string;
   total: number;
 };
+
+export const MINECRAFT_TOKENS = ['minecraft', 'cubits', 'cubit', 'levels', 'level', 'manacube'];
