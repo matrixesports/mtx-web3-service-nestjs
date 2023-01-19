@@ -9,6 +9,8 @@ import { InventoryService } from 'src/inventory/inventory.service';
 import { Requirements } from 'src/graphql.schema';
 import { BattlePassService } from 'src/battlepass/battlepass.service';
 import { ClaimLootdropAlert } from 'src/microservice/microservice.dto';
+import { MINECRAFT_TOKENS } from 'src/battlepass/battlepass.dto';
+import { ManacubeService } from 'src/manacube/manacube.service';
 
 @Injectable()
 export class RewardService {
@@ -18,6 +20,7 @@ export class RewardService {
     private microserviceService: MicroserviceService,
     private inventoryService: InventoryService,
     private battlePassService: BattlePassService,
+    private manaService: ManacubeService,
   ) {}
 
   async claimLootdrop(creatorId: number, userAddress: string, contact: string, lootdropId: string) {
@@ -72,6 +75,30 @@ export class RewardService {
     await this.setLootdropQty(creatorId, userAddress, lootdropId);
     // store the claimed lootdrop
     console.log('Claimed');
+    const reward = await this.inventoryService.createRewardObj(creatorId, lootdrop.rewardId, 1);
+    // once claimed, reward the user for minecraft rewards
+    // keywords check
+    const keywords = [];
+    MINECRAFT_TOKENS.forEach((word) => {
+      if (reward.metadata.name.toLowerCase().includes(word)) keywords.push(word);
+    });
+    if (keywords.length > 0) {
+      // get the minecraft player from the db
+      const player = await this.microserviceService.getUserDetails(userAddress);
+      // check if player has minecraft linked
+      if (!player.minecraft) {
+        console.log('=> The player has not linked their minecraft account', userAddress);
+        return;
+      }
+      const playerId = player.minecraft.uuid;
+      // check for the specific title of the reward
+      if (reward.metadata.name.toLowerCase().includes('level')) {
+        // this can be termed as a reward which includes incrementing the level
+        await this.manaService.incrementPlayerLevel(playerId, 'manaapi:matrix', 10);
+      } else if (reward.metadata.name.toLowerCase().includes('cubit')) {
+        await this.manaService.incrementPlayerCubits(playerId, 2.3);
+      }
+    }
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(creatorId, lootdrop.rewardId);
     await this.microserviceService.sendRedeemAlert(
