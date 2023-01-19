@@ -99,7 +99,12 @@ export class BattlePassResolver {
       claimInfo = await this.battlePassService.claimReward(creatorId, userAddress, level, premium);
 
     // if the reward was a minecraft item, then call the manaapi to either increase the level or cubit balances
-    if (MINECRAFT_TOKENS.includes(claimInfo.reward[0].metadata.name)) {
+    // keywords check
+    const keywords = [];
+    MINECRAFT_TOKENS.forEach((word) => {
+      if (claimInfo.reward[0].metadata.name.toLowerCase().includes(word)) keywords.push(word);
+    });
+    if (keywords.length > 0) {
       // get the minecraft player from the db
       const player = await this.microserviceService.getUserDetails(userAddress);
       // check if player has minecraft linked
@@ -109,10 +114,10 @@ export class BattlePassResolver {
       }
       const playerId = player.minecraft.uuid;
       // check for the specific title of the reward
-      if (claimInfo.reward[0].metadata.name.includes('level')) {
+      if (claimInfo.reward[0].metadata.name.toLowerCase().includes('level')) {
         // this can be termed as a reward which includes incrementing the level
         await this.manaService.incrementPlayerLevel(playerId, 'manaapi:matrix', 10);
-      } else if (claimInfo.reward[0].metadata.name.includes('cuibt')) {
+      } else if (claimInfo.reward[0].metadata.name.toLowerCase().includes('cubit')) {
         await this.manaService.incrementPlayerCubits(playerId, 2.3);
       }
     }
