@@ -84,6 +84,12 @@ export abstract class IQuery {
     abstract getLootdrops(creatorId: number): Nullable<Nullable<Lootdrop>[]> | Promise<Nullable<Nullable<Lootdrop>[]>>;
 
     abstract getClaimedLootdrops(creatorId: number): Nullable<Nullable<Lootdrop>[]> | Promise<Nullable<Nullable<Lootdrop>[]>>;
+
+    abstract getPlayerCubits(): Nullable<PlayerCubits> | Promise<Nullable<PlayerCubits>>;
+
+    abstract getPlayerLevel(): Nullable<PlayerLevel> | Promise<Nullable<PlayerLevel>>;
+
+    abstract getPatronPlayers(): Nullable<Nullable<PlayerDetails>[]> | Promise<Nullable<Nullable<PlayerDetails>[]>>;
 }
 
 export abstract class IMutation {
@@ -224,6 +230,28 @@ export class Lootdrop {
     start: Date;
     end: Date;
     url: string;
+}
+
+export class PlayerDetails {
+    uuid: string;
+    name: string;
+}
+
+export class PlayerCubits {
+    uuid: string;
+    balance: number;
+}
+
+export class LevelStat {
+    key: string;
+    value: number;
+    progression: number;
+}
+
+export class PlayerLevel {
+    uuid: string;
+    totalExp: number;
+    stats?: Nullable<Nullable<LevelStat>[]>;
 }
 
 export type BigInt = unknown;

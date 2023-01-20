@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import { PlayerCubits } from 'src/graphql.schema';
 import { ManacubeLevelResponse, PlayerDetail } from './manacube.dto';
 
 @Injectable()
@@ -19,7 +20,7 @@ export class ManacubeService {
     try {
       const { data, status } = await axios.get(`${this.baseUrl}/api/cubits/${playerId}`);
       if (status == HttpStatus.OK) {
-        return { balance: data };
+        return { uuid: playerId, balance: data } as PlayerCubits;
       } else {
         throw new Error(data.message);
       }

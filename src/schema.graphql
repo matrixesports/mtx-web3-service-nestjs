@@ -20,6 +20,9 @@ type Query {
   getLootdrop(creatorId: Int!, lootdropId: String!): Lootdrop
   getLootdrops(creatorId: Int!): [Lootdrop]
   getClaimedLootdrops(creatorId: Int!): [Lootdrop]
+  getPlayerCubits: PlayerCubits
+  getPlayerLevel: PlayerLevel
+  getPatronPlayers: [PlayerDetails]
 }
 
 # |========================| MUTATION |========================|
@@ -233,4 +236,27 @@ type Lootdrop {
   start: Date!
   end: Date!
   url: String!
+}
+
+# Minecraft and Manacube related types
+type PlayerDetails {
+  uuid: String!
+  name: String!
+}
+
+type PlayerCubits {
+  uuid: String!
+  balance: Float!
+}
+
+type LevelStat {
+  key: String!
+  value: Int!
+  progression: Float!
+}
+
+type PlayerLevel {
+  uuid: String!
+  totalExp: Float!
+  stats: [LevelStat]
 }
