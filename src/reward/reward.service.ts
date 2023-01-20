@@ -94,9 +94,9 @@ export class RewardService {
       // check for the specific title of the reward
       if (reward.metadata.name.toLowerCase().includes('level')) {
         // this can be termed as a reward which includes incrementing the level
-        await this.manaService.incrementPlayerLevel(playerId, 'manaapi:matrix', 10);
+        await this.manaService.incrementPlayerLevel(playerId, 'manaapi:matrix', lootdrop.qty);
       } else if (reward.metadata.name.toLowerCase().includes('cubit')) {
-        await this.manaService.incrementPlayerCubits(playerId, 2.3);
+        await this.manaService.incrementPlayerCubits(playerId, lootdrop.qty);
       }
     }
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
