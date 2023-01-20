@@ -116,9 +116,16 @@ export class BattlePassResolver {
       // check for the specific title of the reward
       if (claimInfo.reward[0].metadata.name.toLowerCase().includes('level')) {
         // this can be termed as a reward which includes incrementing the level
-        await this.manaService.incrementPlayerLevel(playerId, 'manaapi:matrix', 10);
+        await this.manaService.incrementPlayerLevel(
+          playerId,
+          'manaapi:matrix',
+          parseFloat(claimInfo.reward[0].qty.toString()),
+        );
       } else if (claimInfo.reward[0].metadata.name.toLowerCase().includes('cubit')) {
-        await this.manaService.incrementPlayerCubits(playerId, 2.3);
+        await this.manaService.incrementPlayerCubits(
+          playerId,
+          parseFloat(claimInfo.reward[0].qty.toString()),
+        );
       }
     }
     return { success: true, reward: claimInfo.reward };
@@ -134,6 +141,29 @@ export class BattlePassResolver {
     const bpAddress = await this.chainService.getBattlePassAddress(creatorId);
     const metadata = await this.inventoryService.getMetadata(creatorId, itemId);
     await this.battlePassService.burn(creatorId, userAddress, itemId, 1);
+    const reward = await this.inventoryService.createRewardObj(creatorId, itemId, 1);
+    // if the reward was a minecraft item, then call the manaapi to either increase the level or cubit balances
+    const keywords = [];
+    MINECRAFT_TOKENS.forEach((word) => {
+      if (reward.metadata.name.toLowerCase().includes(word)) keywords.push(word);
+    });
+    if (keywords.length > 0) {
+      // get the minecraft player from the db
+      const player = await this.microserviceService.getUserDetails(userAddress);
+      // check if player has minecraft linked
+      if (!player.minecraft) {
+        console.log('=> The player has not linked their minecraft account', userAddress);
+        return;
+      }
+      const playerId = player.minecraft.uuid;
+      // check for the specific title of the reward
+      if (reward.metadata.name.toLowerCase().includes('level')) {
+        // this can be termed as a reward which includes incrementing the level
+        await this.manaService.incrementPlayerLevel(playerId, 'manaapi:matrix', reward.qty);
+      } else if (reward.metadata.name.toLowerCase().includes('cubit')) {
+        await this.manaService.incrementPlayerCubits(playerId, reward.qty);
+      }
+    }
     await this.microserviceService.sendRedeemAlert(
       itemId,
       userAddress,
